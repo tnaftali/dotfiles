@@ -3,7 +3,6 @@ call plug#begin('~/.vim/plugged')
 
 " Declare the list of plugins.
 Plug 'kien/ctrlp.vim' " fuzzy find files
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree' " file drawer, open with :NERDTreeToggle
 Plug 'benmills/vimux'
 Plug 'tpope/vim-fugitive' " the ultimate git helper
@@ -18,19 +17,30 @@ Plug 'Yggdroot/indentLine'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jacoborus/tender.vim'
 Plug 'airblade/vim-gitgutter'
-Plug 'elzr/vim-json'
+Plug 'patstockwell/vim-monokai-tasty'
+Plug 'crusoexia/vim-monokai'
+Plug 'slashmili/alchemist.vim'
+Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'vim-test/vim-test'
+Plug 'stefandtw/quickfix-reflector.vim'
+Plug 'mhinz/vim-mix-format'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
-colo tender
+" If you have vim >=8.0 or Neovim >= 0.1.5
+if (has("termguicolors"))
+ set termguicolors
+endif
+
+colorscheme monokai
 
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
-set expandtab       " tabs are spaces
+set expandtab " Tabs are spaces
 set re=1 " Use older version of RegEx for not lagging due to syntax highlight
-set number              " show line numbers
+set number " Show line numbers
 " set relativenumber
 set cursorline          " highlight current line
 set lazyredraw          " redraw only when we need to.
@@ -49,6 +59,10 @@ set nolazyredraw " don't redraw while executing macros
 set clipboard+=unnamedplus
 set ttyfast " faster redrawing
 set foldmethod=indent
+set path=.,,**
+set splitbelow
+set splitright
+set foldlevel=99
 
 highlight Normal ctermbg=none
 highlight NonText ctermbg=none
@@ -70,14 +84,34 @@ let mapleader = "\<Space>"
 nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 let g:coc_disable_startup_warning = 1
 
+let g:test#preserve_screen = 1
+let test#strategy = "neovim"
+let test#elixir#exunit#executable = 'source .env && mix test'
+
 nmap <leader>pf :CtrlP<CR>
+
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gr <Plug>(coc-references)
+
+" bind K to grep word under cursor
+nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 nnoremap <leader>nt :NERDTreeToggle<Enter>
 nnoremap <silent> <leader>pv :NERDTreeFind<CR>
 
+nnoremap <leader>tn :TestNearest<Enter>
+nnoremap <leader>tf :TestFile<Enter>
+
 nnoremap <leader><space> :nohlsearch<CR>
 
-command! W  write
+command! W write
+command! Q quit
+
+if has('nvim')
+  tmap <C-o> <C-\><C-n>
+endif
 
 " " keep selection after indent
 " :vnoremap < <gv
@@ -112,7 +146,7 @@ endif
 let g:airline_powerline_fonts = 1
 
 " set airline theme
-let g:airline_theme = 'tender'
+let g:airline_theme='monokai_tasty'
 
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
@@ -148,6 +182,9 @@ let g:gitgutter_sign_removed = '-'
 let g:gitgutter_sign_removed_first_line = '^'
 let g:gitgutter_sign_modified_removed = '<'
 
+" Maintain tmux zoom mode when navigating between vim panes
+let g:tmux_navigator_disable_when_zoomed = 1
+
 " edit config files
 map <leader>ev :e! ~/dotfiles/.vimrc<cr> " edit ~/.vimrc
 map <leader>en :e! ~/.config/nvim/init.vim<cr> " edit ~/.config/nvim/init.vim
@@ -160,9 +197,6 @@ map <leader>ee :e! ~/projects/betafolio/.env<cr> "
 " resize pane
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
 nnoremap <silent> <leader>r- :vertical resize -10<CR>
-
-" bind K to grep word under cursor
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " highlight last inserted text
 nnoremap gV `[v`]
@@ -215,3 +249,42 @@ augroup highlight_yank
 augroup END
 
 autocmd BufWritePre * :call TrimWhitespace()
+
+" Differentiate active pane
+augroup BgHighlight
+  autocmd!
+  autocmd WinEnter * set number
+  autocmd WinLeave * set nonumber
+augroup END
+
+" Dim inactive windows using 'colorcolumn' setting
+" This tends to slow down redrawing, but is very useful.
+" Based on https://groups.google.com/d/msg/vim_use/IJU-Vk-QLJE/xz4hjPjCRBUJ
+" XXX: this will only work with lines containing text (i.e. not '~')
+" from
+if exists('+colorcolumn')
+  function! s:DimInactiveWindows()
+    for i in range(1, tabpagewinnr(tabpagenr(), '$'))
+      let l:range = ""
+      if i != winnr()
+        if &wrap
+         " HACK: when wrapping lines is enabled, we use the maximum number
+         " of columns getting highlighted. This might get calculated by
+         " looking for the longest visible line and using a multiple of
+         " winwidth().
+         let l:width=256 " max
+        else
+         let l:width=winwidth(i)
+        endif
+        let l:range = join(range(1, l:width), ',')
+      endif
+      call setwinvar(i, '&colorcolumn', l:range)
+    endfor
+  endfunction
+  augroup DimInactiveWindows
+    au!
+    au WinEnter * call s:DimInactiveWindows()
+    au WinEnter * set cursorline
+    au WinLeave * set nocursorline
+  augroup END
+endif

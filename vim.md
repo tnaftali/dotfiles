@@ -19,8 +19,8 @@
 - I: insert beginning of line
 - A: insert end of line
 - /: search, n, N
-- ****: search word in cursor, * or n, # or N
-- #: seach word in cursor backwards, */n, #N
+- \*: search word in cursor, * or n, # or N
+- #: seach word in cursor backwards, \*/n, #N
 
 ## Phase 3 - Horizontal Navigation
 
@@ -72,3 +72,16 @@
 - zc: close current fold
 
 - h <query>: get help on <query>
+
+## Tabs
+- tabnew: new tab
+- tabedit <path_to_file>: edit file
+- tab <path_to_file>: edit file
+- tabfind file: find file
+- :tabclose or q
+- tabnext or gt: move to next tab
+- tabprevious or gT: move to previous tab
+- tabmove +-<index>: move tab
+- tabs: see tabs
+- ctrl p + ctrl t: open in new tab
+- tabonly: close all except current
