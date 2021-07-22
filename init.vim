@@ -24,6 +24,8 @@ Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'vim-test/vim-test'
 Plug 'stefandtw/quickfix-reflector.vim'
 Plug 'mhinz/vim-mix-format'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'psliwka/vim-smoothie'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -64,8 +66,11 @@ set splitbelow
 set splitright
 set foldlevel=99
 
+" Transparent Neovim
 highlight Normal ctermbg=none
 highlight NonText ctermbg=none
+highlight Normal guibg=none
+highlight NonText guibg=none
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " delays and poor user experience.
@@ -149,7 +154,7 @@ let g:airline_powerline_fonts = 1
 let g:airline_theme='monokai_tasty'
 
 if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
+  let g:airline_symbols = {}
 endif
 
 " unicode symbols
@@ -192,6 +197,8 @@ map <leader>ez :e! ~/dotfiles/.zshrc<cr> " edit ~/.zshrc
 map <leader>et :e! ~/dotfiles/.tmux.conf<cr> " edit ~/.tmux.conf
 map <leader>ec :e! ~/dotfiles/vim.md<cr> "
 map <leader>ek :e! ~/.config/kitty/kitty.conf<cr> "
+map <leader>ei :e! ~/.config/i3/config<cr> "
+map <leader>eo :e! ~/.config/i3blocks/i3blocks.conf<cr> "
 map <leader>ee :e! ~/projects/betafolio/.env<cr> "
 
 " resize pane
@@ -262,29 +269,29 @@ augroup END
 " Based on https://groups.google.com/d/msg/vim_use/IJU-Vk-QLJE/xz4hjPjCRBUJ
 " XXX: this will only work with lines containing text (i.e. not '~')
 " from
-if exists('+colorcolumn')
-  function! s:DimInactiveWindows()
-    for i in range(1, tabpagewinnr(tabpagenr(), '$'))
-      let l:range = ""
-      if i != winnr()
-        if &wrap
-         " HACK: when wrapping lines is enabled, we use the maximum number
-         " of columns getting highlighted. This might get calculated by
-         " looking for the longest visible line and using a multiple of
-         " winwidth().
-         let l:width=256 " max
-        else
-         let l:width=winwidth(i)
-        endif
-        let l:range = join(range(1, l:width), ',')
-      endif
-      call setwinvar(i, '&colorcolumn', l:range)
-    endfor
-  endfunction
-  augroup DimInactiveWindows
-    au!
-    au WinEnter * call s:DimInactiveWindows()
-    au WinEnter * set cursorline
-    au WinLeave * set nocursorline
-  augroup END
-endif
+" if exists('+colorcolumn')
+"   function! s:DimInactiveWindows()
+"     for i in range(1, tabpagewinnr(tabpagenr(), '$'))
+"       let l:range = ""
+"       if i != winnr()
+"         if &wrap
+"          " HACK: when wrapping lines is enabled, we use the maximum number
+"          " of columns getting highlighted. This might get calculated by
+"          " looking for the longest visible line and using a multiple of
+"          " winwidth().
+"          let l:width=256 " max
+"         else
+"          let l:width=winwidth(i)
+"         endif
+"         let l:range = join(range(1, l:width), ',')
+"       endif
+"       call setwinvar(i, '&colorcolumn', l:range)
+"     endfor
+"   endfunction
+"   augroup DimInactiveWindows
+"     au!
+"     au WinEnter * call s:DimInactiveWindows()
+"     au WinEnter * set cursorline
+"     au WinLeave * set nocursorline
+"   augroup END
+" endif
