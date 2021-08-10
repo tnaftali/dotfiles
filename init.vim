@@ -25,7 +25,7 @@ Plug 'vim-test/vim-test'
 Plug 'stefandtw/quickfix-reflector.vim'
 Plug 'mhinz/vim-mix-format'
 Plug 'ntpeters/vim-better-whitespace'
-Plug 'psliwka/vim-smoothie'
+" Plug 'psliwka/vim-smoothie'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -210,6 +210,37 @@ nnoremap gV `[v`]
 
 " remove all trailing whitespace by pressing F5
 nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+
+" Make Y behave like D & C
+nnoremap Y y$
+
+" Keep cursor centered while moving through file
+nnoremap n nzzzv
+nnoremap N Nzzzv
+nnoremap J mzJ`z
+nnoremap <c-d> <c-d>zz
+nnoremap <c-u> <c-u>zz
+nnoremap { {zz
+nnoremap } }zz
+
+" Undo break points
+inoremap , ,<c-g>u
+inoremap . .<c-g>u
+inoremap [ [<c-g>u
+inoremap ! !<c-g>u
+inoremap ? ?<c-g>u
+
+" Jumplist mutations
+nnoremap <expr> k (v:count > 5 ? "m'" . v:count : "") . 'k'
+nnoremap <expr> j (v:count > 5 ? "m'" . v:count : "") . 'j'
+
+" Moving text
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+inoremap <C-j> <esc>:m .+1<CR>==
+inoremap <C-k> <esc>:m .-2<CR>==
+nnoremap <leader>k :m .-2<CR>==
+nnoremap <leader>j :m .+1<CR>==
 
 " python
 autocmd Filetype python setlocal ts=2 sw=2 sts=2
