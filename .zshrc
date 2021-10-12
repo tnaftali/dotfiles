@@ -1,4 +1,4 @@
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cache/rebar3/bin:$HOME/.config/rofi/bin:$HOME/gems/bin:$PATH
 export ZSH="/home/tobi/.oh-my-zsh"
 
 ZSH_THEME="avit"
@@ -25,12 +25,11 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 export MANPATH="/usr/local/man:$MANPATH"
 export LANG=en_US.UTF-8
-export EDITOR='/opt/nvim.appimage'
+export EDITOR='nvim'
 export ARCHFLAGS="-arch x86_64"
 export SSH_KEY_PATH="~/.ssh/id_rsa"
 # Install Ruby Gems to ~/gems
 export GEM_HOME="$HOME/gems"
-export PATH="$HOME/gems/bin:$HOME/.cache/rebar3/bin:$HOME/projects/diff-so-fancy/diff-so-fancy:/bin/identify:/usr/bin/identify:/bin/identify:/usr/bin/identify:$PATH"
 export MASTER_PASSWORD_REQUIRED="False"
 export PGPASSWORD="postgres"
 export TERM="xterm-256color"
@@ -42,11 +41,12 @@ alias srcz="source ~/dotfiles/.zshrc"
 alias srct="tmux source-file ~/dotfiles/.tmux.conf"
 alias update-upgrade="sudo apt update && sudo apt upgrade"
 alias clean-packages="sudo apt update && sudo apt autoremove && sudo apt autoclean"
-alias nvim="/opt/nvim.appimage"
 alias diff="git diff --staged --color-words"
 
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+export BROWSER="brave"
 
 neofetch
 

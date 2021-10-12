@@ -15,7 +15,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'Yggdroot/indentLine'
 Plug 'christoomey/vim-tmux-navigator'
-Plug 'jacoborus/tender.vim'
+" Plug 'jacoborus/tender.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'patstockwell/vim-monokai-tasty'
 Plug 'crusoexia/vim-monokai'
@@ -25,7 +25,7 @@ Plug 'vim-test/vim-test'
 Plug 'stefandtw/quickfix-reflector.vim'
 Plug 'mhinz/vim-mix-format'
 Plug 'ntpeters/vim-better-whitespace'
-" Plug 'psliwka/vim-smoothie'
+Plug 'psliwka/vim-smoothie'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -199,7 +199,7 @@ map <leader>ec :e! ~/dotfiles/vim.md<cr> "
 map <leader>ek :e! ~/.config/kitty/kitty.conf<cr> "
 map <leader>ei :e! ~/.config/i3/config<cr> "
 map <leader>eo :e! ~/.config/i3blocks/i3blocks.conf<cr> "
-map <leader>ee :e! ~/projects/betafolio/.env<cr> "
+map <leader>ee :e! ~/Projects/betafolio/.env<cr> "
 
 " resize pane
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
@@ -217,7 +217,7 @@ nnoremap Y y$
 " Keep cursor centered while moving through file
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nnoremap J mzJ`z
+" nnoremap J mzJ`z
 nnoremap <c-d> <c-d>zz
 nnoremap <c-u> <c-u>zz
 nnoremap { {zz
@@ -295,7 +295,9 @@ augroup BgHighlight
   autocmd WinLeave * set nonumber
 augroup END
 
-" Dim inactive windows using 'colorcolumn' setting
+highlight StatusLineNC cterm=bold ctermfg=white ctermbg=darkgray
+
+  " Dim inactive windows using 'colorcolumn' setting
 " This tends to slow down redrawing, but is very useful.
 " Based on https://groups.google.com/d/msg/vim_use/IJU-Vk-QLJE/xz4hjPjCRBUJ
 " XXX: this will only work with lines containing text (i.e. not '~')

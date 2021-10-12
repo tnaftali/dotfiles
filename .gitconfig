@@ -10,7 +10,7 @@
 [difftool "meld"]
     cmd = meld "$LOCAL" "$REMOTE"
 [core]
-	pager = ~/projects/diff-so-fancy/diff-so-fancy | less --tabs=2 -RFX
+	pager = /opt/diff-so-fancy/diff-so-fancy | less --tabs=2 -RFX
 [color]
 	ui = true
 [color "diff-highlight"]
