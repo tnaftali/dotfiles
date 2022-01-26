@@ -1,4 +1,4 @@
-export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cache/rebar3/bin:$HOME/.config/rofi/bin:$HOME/gems/bin:$PATH
+export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cache/rebar3/bin:$HOME/gems/bin:$PATH
 export ZSH="/home/tobi/.oh-my-zsh"
 
 ZSH_THEME="avit"
@@ -46,10 +46,11 @@ alias diff="git diff --staged --color-words"
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-export BROWSER="brave"
+export BROWSER="/usr/bin/firefox"
 
 neofetch
 
 eval "$(cased-init -)"
 
 fpath=(~/.zsh/completion $fpath)
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

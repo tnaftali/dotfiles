@@ -129,6 +129,9 @@ inoremap <S-Tab> <C-D>
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
 
+" map <Leader>y "*y
+" map <Leader>p "*p
+
 let g:NERDTreeQuitOnOpen=0 " close NERDTree after a file is opened
 let NERDTreeShowHidden=1 " show hidden files in NERDTree
 
