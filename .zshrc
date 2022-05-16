@@ -1,5 +1,5 @@
-export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cache/rebar3/bin:$HOME/gems/bin:$PATH
-export ZSH="/home/tobi/.oh-my-zsh"
+# export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cache/rebar3/bin:$HOME/gems/bin:$PATH
+export ZSH="/Users/tobi/.oh-my-zsh"
 
 ZSH_THEME="avit"
 HYPHEN_INSENSITIVE="true"
@@ -34,8 +34,9 @@ export MASTER_PASSWORD_REQUIRED="False"
 export PGPASSWORD="postgres"
 export TERM="xterm-256color"
 
-alias srcsrv="source .env && iex -S mix phx.server"
-alias srctst="source .env && mix test"
+alias srcsrv="source .env && nvm use 10.15.3 && redis-server & iex -S mix phx.server"
+alias srctst="source .env && MIX_ENV=test mix test --color"
+alias srctstbf="source .env && MIX_ENV=test mix test apps/betafolio/test --color"
 alias gas="git add . && git status"
 alias srcz="source ~/dotfiles/.zshrc"
 alias srct="tmux source-file ~/dotfiles/.tmux.conf"
@@ -43,14 +44,20 @@ alias update-upgrade="sudo apt update && sudo apt upgrade"
 alias clean-packages="sudo apt update && sudo apt autoremove && sudo apt autoclean"
 alias diff="git diff --staged --color-words"
 
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-
-export BROWSER="/usr/bin/firefox"
 
 neofetch
 
 eval "$(cased-init -)"
 
-fpath=(~/.zsh/completion $fpath)
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NVM_DIR=~/.nvm
+source $(brew --prefix nvm)/nvm.sh
+
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+export PUPPETEER_EXECUTABLE_PATH=`which chromium`
+# export NODE_OPTIONS=--openssl-legacy-provider
+source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+chruby ruby-3.1.2

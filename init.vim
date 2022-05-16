@@ -91,9 +91,11 @@ let g:coc_disable_startup_warning = 1
 
 let g:test#preserve_screen = 1
 let test#strategy = "neovim"
-let test#elixir#exunit#executable = 'source .env && mix test'
+let test#elixir#exunit#executable = 'source .env && MIX_ENV=test mix test --color'
 
-nmap <leader>pf :CtrlP<CR>
+let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v17.4.0/bin/node'
+
+" nmap <leader>pf :CtrlP<CR>
 
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gr <Plug>(coc-references)
@@ -106,7 +108,7 @@ nnoremap <silent> K :call <SID>show_documentation()<CR>
 nnoremap <leader>nt :NERDTreeToggle<Enter>
 nnoremap <silent> <leader>pv :NERDTreeFind<CR>
 
-nnoremap <leader>tn :TestNearest<Enter>
+nnoremap <leader>tt :TestNearest<Enter>
 nnoremap <leader>tf :TestFile<Enter>
 
 nnoremap <leader><space> :nohlsearch<CR>
@@ -149,6 +151,17 @@ if executable('ag')
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
 endif
+
+" Sane Ignore For ctrlp
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|timeline\|_build\|deps\|node_modules\|static\',
+  \ 'file': '\.exe$\|\.so$\|\.dat$'
+  \ }
+
+if exists("g:ctrlp_user_command")
+  unlet g:ctrlp_user_command
+endif
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/timeline/*,*/_build/*,*/node_modules/*,*/static/*
 
 " air-line
 let g:airline_powerline_fonts = 1
@@ -202,7 +215,7 @@ map <leader>ec :e! ~/dotfiles/vim.md<cr> "
 map <leader>ek :e! ~/.config/kitty/kitty.conf<cr> "
 map <leader>ei :e! ~/.config/i3/config<cr> "
 map <leader>eo :e! ~/.config/i3blocks/i3blocks.conf<cr> "
-map <leader>ee :e! ~/Projects/betafolio/.env<cr> "
+map <leader>ee :e! ~/Projects/core/.env<cr> "
 
 " resize pane
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
@@ -244,6 +257,19 @@ inoremap <C-j> <esc>:m .+1<CR>==
 inoremap <C-k> <esc>:m .-2<CR>==
 nnoremap <leader>k :m .-2<CR>==
 nnoremap <leader>j :m .+1<CR>==
+
+" Better tab experience
+map <leader>tn :tabnew<cr>
+map <leader>t<Tab> :tabnext<cr>
+map <leader>t<S-Tab> :tabprevious<cr>
+map <leader>tm :tabmove
+map <leader>tc :tabclose<cr>
+map <leader>to :tabonly<cr>
+
+" Add keyboard shortcuts
+
+nnoremap H gT
+nnoremap L gt
 
 " python
 autocmd Filetype python setlocal ts=2 sw=2 sts=2
