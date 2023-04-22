@@ -3,29 +3,21 @@ call plug#begin('~/.vim/plugged')
 
 " Declare the list of plugins.
 Plug 'kien/ctrlp.vim' " fuzzy find files
-Plug 'scrooloose/nerdtree' " file drawer, open with :NERDTreeToggle
 Plug 'benmills/vimux'
 Plug 'tpope/vim-fugitive' " the ultimate git helper
 Plug 'tpope/vim-commentary' " comment/uncomment lines with gcc or gc in visual mode
 Plug 'elixir-editors/vim-elixir'
 Plug 'rking/ag.vim'
-Plug 'pangloss/vim-javascript'
-Plug 'jelera/vim-javascript-syntax'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'Yggdroot/indentLine'
 Plug 'christoomey/vim-tmux-navigator'
-" Plug 'jacoborus/tender.vim'
 Plug 'airblade/vim-gitgutter'
-Plug 'patstockwell/vim-monokai-tasty'
-Plug 'crusoexia/vim-monokai'
-Plug 'slashmili/alchemist.vim'
-Plug 'neoclide/coc.nvim', { 'branch': 'release' }
-Plug 'vim-test/vim-test'
-Plug 'stefandtw/quickfix-reflector.vim'
 Plug 'mhinz/vim-mix-format'
 Plug 'ntpeters/vim-better-whitespace'
-Plug 'psliwka/vim-smoothie'
+Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'vim-test/vim-test'
+Plug 'jacoborus/tender.vim'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -35,15 +27,16 @@ if (has("termguicolors"))
  set termguicolors
 endif
 
-colorscheme monokai
+syntax on
+colorscheme tender
 
+set encoding=UTF-8
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
 set expandtab " Tabs are spaces
 set re=1 " Use older version of RegEx for not lagging due to syntax highlight
 set number " Show line numbers
-" set relativenumber
 set cursorline          " highlight current line
 set lazyredraw          " redraw only when we need to.
 set showmatch           " highlight matching [{()}]
@@ -85,44 +78,101 @@ let mapleader = "\<Space>"
 
 " Plugins
 
-" project replace word
-nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
-let g:coc_disable_startup_warning = 1
+let g:closetag_filenames = '*.html,*.html.*'
+let g:closetag_xhtml_filenames = '*.html,*.html.*'
+
+" let g:coc_disable_startup_warning = 1
 
 let g:test#preserve_screen = 1
 let test#strategy = "neovim"
 let test#elixir#exunit#executable = 'source .env && MIX_ENV=test mix test --color'
 
-let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v17.4.0/bin/node'
-
-" nmap <leader>pf :CtrlP<CR>
+let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v16.16.0/bin/node'
 
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gr <Plug>(coc-references)
+" inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
-" bind K to grep word under cursor
+nmap <space>ex <Cmd>CocCommand explorer<CR>
+nmap <Leader>er <Cmd>call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
+
+let g:coc_explorer_global_presets = {
+\   '.vim': {
+\     'root-uri': '~/.vim',
+\   },
+\   'cocConfig': {
+\      'root-uri': '~/.config/coc',
+\   },
+\   'tab': {
+\     'position': 'tab',
+\     'quit-on-open': v:true,
+\   },
+\   'tab:$': {
+\     'position': 'tab:$',
+\     'quit-on-open': v:true,
+\   },
+\   'floating': {
+\     'position': 'floating',
+\     'open-action-strategy': 'sourceWindow',
+\   },
+\   'floatingTop': {
+\     'position': 'floating',
+\     'floating-position': 'center-top',
+\     'open-action-strategy': 'sourceWindow',
+\   },
+\   'floatingLeftside': {
+\     'position': 'floating',
+\     'floating-position': 'left-center',
+\     'floating-width': 50,
+\     'open-action-strategy': 'sourceWindow',
+\   },
+\   'floatingRightside': {
+\     'position': 'floating',
+\     'floating-position': 'right-center',
+\     'floating-width': 50,
+\     'open-action-strategy': 'sourceWindow',
+\   },
+\   'simplify': {
+\     'file-child-template': '[selection | clip | 1] [indent][icon | 1] [filename omitCenter 1]'
+\   },
+\   'buffer': {
+\     'sources': [{'name': 'buffer', 'expand': v:true}]
+\   },
+\ }
+
+" Use preset argument to open it
+nmap <space>ed <Cmd>CocCommand explorer --preset .vim<CR>
+nmap <space>ef <Cmd>CocCommand explorer --preset floating<CR>
+nmap <space>ec <Cmd>CocCommand explorer --preset cocConfig<CR>
+nmap <space>eb <Cmd>CocCommand explorer --preset buffer<CR>
+
+" List all presets
+nmap <space>el <Cmd>CocList explPresets<CR>
+
+" bind M to grep word under cursor
 nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-nnoremap <leader>nt :NERDTreeToggle<Enter>
-nnoremap <silent> <leader>pv :NERDTreeFind<CR>
 
 nnoremap <leader>tt :TestNearest<Enter>
 nnoremap <leader>tf :TestFile<Enter>
 
 nnoremap <leader><space> :nohlsearch<CR>
 
-command! W write
-command! Q quit
+cabbrev W w
+cabbrev Q q
+cabbrev Wa wa
+cabbrev WA wa
+cabbrev Qa qa
+cabbrev QA qa
+cabbrev diffv DiffviewOpen
+cabbrev mf MixFormat
+
+command Format :%!js-beautify -s 2
 
 if has('nvim')
   tmap <C-o> <C-\><C-n>
 endif
-
-" " keep selection after indent
-" :vnoremap < <gv
-" :vnoremap > >gv
 
 " indent with tab and shift tab and keep selection after indent
 nnoremap <Tab> >>_
@@ -130,12 +180,6 @@ nnoremap <S-Tab> <<_
 inoremap <S-Tab> <C-D>
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
-
-" map <Leader>y "*y
-" map <Leader>p "*p
-
-let g:NERDTreeQuitOnOpen=0 " close NERDTree after a file is opened
-let NERDTreeShowHidden=1 " show hidden files in NERDTree
 
 " CtrlP settings
 let g:ctrlp_match_window = 'bottom,order:ttb'
@@ -154,20 +198,20 @@ endif
 
 " Sane Ignore For ctrlp
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|timeline\|_build\|deps\|node_modules\|static\',
+  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|_build\|deps\|node_modules\|static\|cover\',
   \ 'file': '\.exe$\|\.so$\|\.dat$'
   \ }
 
 if exists("g:ctrlp_user_command")
   unlet g:ctrlp_user_command
 endif
-set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/timeline/*,*/_build/*,*/node_modules/*,*/static/*
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/_build/*,*/node_modules/*,*/static/*,*/cover/*
 
 " air-line
 let g:airline_powerline_fonts = 1
 
 " set airline theme
-let g:airline_theme='monokai_tasty'
+let g:airline_theme='tender'
 
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
@@ -215,7 +259,7 @@ map <leader>ec :e! ~/dotfiles/vim.md<cr> "
 map <leader>ek :e! ~/.config/kitty/kitty.conf<cr> "
 map <leader>ei :e! ~/.config/i3/config<cr> "
 map <leader>eo :e! ~/.config/i3blocks/i3blocks.conf<cr> "
-map <leader>ee :e! ~/Projects/core/.env<cr> "
+map <leader>ee :e! ~/Projects/core/.local.env<cr> "
 
 " resize pane
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
@@ -265,21 +309,52 @@ map <leader>t<S-Tab> :tabprevious<cr>
 map <leader>tm :tabmove
 map <leader>tc :tabclose<cr>
 map <leader>to :tabonly<cr>
+map <leader>H :tabmove -<CR>
+map <leader>L :tabmove +<CR>
+
+" Move current tab into the specified direction.
+"
+" @param direction -1 for left, 1 for right.
+function! TabMove(direction)
+    " get number of tab pages.
+    let ntp=tabpagenr("$")
+    " move tab, if necessary.
+    if ntp > 1
+        " get number of current tab page.
+        let ctpn=tabpagenr()
+        " move left.
+        if a:direction < 0
+            let index=((ctpn-1+ntp-1)%ntp)
+        else
+            let index=(ctpn%ntp)
+        endif
+
+        " move tab page.
+        execute "tabmove ".index
+    endif
+endfunction
 
 " Add keyboard shortcuts
 
 nnoremap H gT
 nnoremap L gt
 
-" python
+map q: <Nop>
+nnoremap Q <nop>
+
+" Python
 autocmd Filetype python setlocal ts=2 sw=2 sts=2
 
-" elixir syntax highlight
+" Elixir syntax highlight
 autocmd BufNewFile,BufRead *.ex,*.exs set filetype=elixir syntax=elixir
-autocmd BufNewFile,BufRead *.eex,*.leex set syntax=eelixir
+autocmd BufNewFile,BufRead *.eex,*.leex,*.heex set syntax=eelixir
 autocmd FileType elixir setlocal commentstring=#\ %s
 
-" keep all folds open when a file is opened
+" Javascript
+autocmd BufNewFile,BufRead *.json set ft=javascript
+autocmd FileType javascript setlocal equalprg=js-beautify\ --stdin
+
+" Keep all folds open when a file is opened
 augroup OpenAllFoldsOnFileOpen
   autocmd!
   autocmd BufRead * normal zR
@@ -316,44 +391,3 @@ augroup highlight_yank
 augroup END
 
 autocmd BufWritePre * :call TrimWhitespace()
-
-" Differentiate active pane
-augroup BgHighlight
-  autocmd!
-  autocmd WinEnter * set number
-  autocmd WinLeave * set nonumber
-augroup END
-
-highlight StatusLineNC cterm=bold ctermfg=white ctermbg=darkgray
-
-  " Dim inactive windows using 'colorcolumn' setting
-" This tends to slow down redrawing, but is very useful.
-" Based on https://groups.google.com/d/msg/vim_use/IJU-Vk-QLJE/xz4hjPjCRBUJ
-" XXX: this will only work with lines containing text (i.e. not '~')
-" from
-" if exists('+colorcolumn')
-"   function! s:DimInactiveWindows()
-"     for i in range(1, tabpagewinnr(tabpagenr(), '$'))
-"       let l:range = ""
-"       if i != winnr()
-"         if &wrap
-"          " HACK: when wrapping lines is enabled, we use the maximum number
-"          " of columns getting highlighted. This might get calculated by
-"          " looking for the longest visible line and using a multiple of
-"          " winwidth().
-"          let l:width=256 " max
-"         else
-"          let l:width=winwidth(i)
-"         endif
-"         let l:range = join(range(1, l:width), ',')
-"       endif
-"       call setwinvar(i, '&colorcolumn', l:range)
-"     endfor
-"   endfunction
-"   augroup DimInactiveWindows
-"     au!
-"     au WinEnter * call s:DimInactiveWindows()
-"     au WinEnter * set cursorline
-"     au WinLeave * set nocursorline
-"   augroup END
-" endif
