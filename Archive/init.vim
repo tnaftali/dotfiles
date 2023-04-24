@@ -37,22 +37,23 @@ set tabstop=2
 set expandtab " Tabs are spaces
 set re=1 " Use older version of RegEx for not lagging due to syntax highlight
 set number " Show line numbers
-set cursorline          " highlight current line
-set lazyredraw          " redraw only when we need to.
-set showmatch           " highlight matching [{()}]
+set cursorline " Highlight current line
+set lazyredraw " Redraw only when we need to
+set showmatch " Highlight matching [{()}]
 set smartcase
 set noswapfile
 set nobackup
 set nowrap
 set listchars=tab:•\ ,trail:•,extends:»,precedes:« " Unprintable chars mapping
-set list          " Display unprintable characters f12 - switches
+set list " Display unprintable characters f12 - switches
 set smartindent
 " Searching
-set ignorecase " case insensitive searching
-set smartcase " case-sensitive if expresson contains a capital letter
-set nolazyredraw " don't redraw while executing macros
+set ignorecase " Case insensitive searching
+set smartcase " Case-sensitive if expresson contains a capital letter
+set nolazyredraw " Don't redraw while executing macros
 set clipboard+=unnamedplus
-set ttyfast " faster redrawing
+" Faster redrawing
+set ttyfast
 set foldmethod=indent
 set path=.,,**
 set splitbelow
@@ -73,7 +74,7 @@ set updatetime=50
 " Automatically rebalance windows on vim resize
 autocmd VimResized * :wincmd =
 
-" Leader key to space
+" Set space as Leader key
 let mapleader = "\<Space>"
 
 " Plugins
@@ -91,7 +92,9 @@ let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v16.16.0/bin/node'
 
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gr <Plug>(coc-references)
-" inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+" Insert autocomplete selection instead of enter
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
 nmap <space>ex <Cmd>CocCommand explorer<CR>
 nmap <Leader>er <Cmd>call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
@@ -149,7 +152,7 @@ nmap <space>eb <Cmd>CocCommand explorer --preset buffer<CR>
 " List all presets
 nmap <space>el <Cmd>CocList explPresets<CR>
 
-" bind M to grep word under cursor
+" Bind M to grep word under cursor
 nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 nnoremap <silent> K :call <SID>show_documentation()<CR>
@@ -167,14 +170,13 @@ cabbrev Qa qa
 cabbrev QA qa
 cabbrev diffv DiffviewOpen
 cabbrev mf MixFormat
-
 command Format :%!js-beautify -s 2
 
 if has('nvim')
   tmap <C-o> <C-\><C-n>
 endif
 
-" indent with tab and shift tab and keep selection after indent
+" Indent with tab and shift tab and keep selection after indent
 nnoremap <Tab> >>_
 nnoremap <S-Tab> <<_
 inoremap <S-Tab> <C-D>
@@ -207,17 +209,17 @@ if exists("g:ctrlp_user_command")
 endif
 set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/_build/*,*/node_modules/*,*/static/*,*/cover/*
 
-" air-line
+" Airline
 let g:airline_powerline_fonts = 1
 
-" set airline theme
+" Set airline theme
 let g:airline_theme='tender'
 
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif
 
-" unicode symbols
+" Unicode symbols
 let g:airline_left_sep = '»'
 let g:airline_left_sep = '▶'
 let g:airline_right_sep = '«'
@@ -231,7 +233,7 @@ let g:airline_symbols.paste = 'Þ'
 let g:airline_symbols.paste = '∥'
 let g:airline_symbols.whitespace = 'Ξ'
 
-" airline symbols
+" Airline symbols
 let g:airline_left_sep = ''
 let g:airline_left_alt_sep = ''
 let g:airline_right_sep = ''
@@ -240,7 +242,7 @@ let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
-" Use fontawesome icons as signs
+" Use FontAwesome icons as signs
 let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '>'
 let g:gitgutter_sign_removed = '-'
@@ -250,25 +252,19 @@ let g:gitgutter_sign_modified_removed = '<'
 " Maintain tmux zoom mode when navigating between vim panes
 let g:tmux_navigator_disable_when_zoomed = 1
 
-" edit config files
-map <leader>ev :e! ~/dotfiles/.vimrc<cr> " edit ~/.vimrc
+" Edit config files
 map <leader>en :e! ~/.config/nvim/init.vim<cr> " edit ~/.config/nvim/init.vim
 map <leader>ez :e! ~/dotfiles/.zshrc<cr> " edit ~/.zshrc
 map <leader>et :e! ~/dotfiles/.tmux.conf<cr> " edit ~/.tmux.conf
-map <leader>ec :e! ~/dotfiles/vim.md<cr> "
-map <leader>ek :e! ~/.config/kitty/kitty.conf<cr> "
-map <leader>ei :e! ~/.config/i3/config<cr> "
-map <leader>eo :e! ~/.config/i3blocks/i3blocks.conf<cr> "
-map <leader>ee :e! ~/Projects/core/.local.env<cr> "
 
-" resize pane
+" Resize pane
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
 nnoremap <silent> <leader>r- :vertical resize -10<CR>
 
-" highlight last inserted text
+" Highlight last inserted text
 nnoremap gV `[v`]
 
-" remove all trailing whitespace by pressing F5
+" Remove all trailing whitespace by pressing F5
 nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
 
 " Make Y behave like D & C
@@ -335,8 +331,9 @@ function! TabMove(direction)
 endfunction
 
 " Add keyboard shortcuts
-
+" Focus on the tab on the left
 nnoremap H gT
+" Focus on the tab on the right
 nnoremap L gt
 
 map q: <Nop>
@@ -360,6 +357,7 @@ augroup OpenAllFoldsOnFileOpen
   autocmd BufRead * normal zR
 augroup END
 
+" JSON
 augroup jsonshow
   au!
   au FileType json set conceallevel=0
