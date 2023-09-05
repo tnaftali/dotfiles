@@ -18,6 +18,9 @@ Plug 'ntpeters/vim-better-whitespace'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'vim-test/vim-test'
 Plug 'jacoborus/tender.vim'
+" Diff view
+Plug 'nvim-lua/plenary.nvim'
+Plug 'sindrets/diffview.nvim'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -200,14 +203,14 @@ endif
 
 " Sane Ignore For ctrlp
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|_build\|deps\|node_modules\|static\|cover\',
+  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|_build\|deps\|node_modules\|static\|cover\|elm-stuff\|doc\|_build',
   \ 'file': '\.exe$\|\.so$\|\.dat$'
   \ }
 
 if exists("g:ctrlp_user_command")
   unlet g:ctrlp_user_command
 endif
-set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/_build/*,*/node_modules/*,*/static/*,*/cover/*
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/_build/*,*/node_modules/*,*/static/*,*/cover/,*/elm-stuff/*,*/doc/*,*/_build/*
 
 " Airline
 let g:airline_powerline_fonts = 1
