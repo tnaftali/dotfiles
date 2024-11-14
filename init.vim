@@ -2,36 +2,68 @@
 call plug#begin('~/.vim/plugged')
 
 " Declare the list of plugins.
-Plug 'kien/ctrlp.vim' " fuzzy find files
-Plug 'benmills/vimux'
-Plug 'tpope/vim-fugitive' " the ultimate git helper
+" tmux
+Plug 'christoomey/vim-tmux-navigator' " tmux integration
+Plug 'preservim/vimux'
+
+" vim utils
 Plug 'tpope/vim-commentary' " comment/uncomment lines with gcc or gc in visual mode
-Plug 'elixir-editors/vim-elixir'
-Plug 'rking/ag.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'Yggdroot/indentLine'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'airblade/vim-gitgutter'
-Plug 'mhinz/vim-mix-format'
 Plug 'ntpeters/vim-better-whitespace'
-Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'vim-test/vim-test'
-Plug 'jacoborus/tender.vim'
-" Diff view
+Plug 'MunifTanjim/nui.nvim'
+Plug 'VonHeikemen/fine-cmdline.nvim'
+Plug 'mbbill/undotree'
+Plug 'rhysd/conflict-marker.vim'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'sindrets/diffview.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'branch': '0.1.x' }
+Plug 'nvim-telescope/telescope-live-grep-args.nvim'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'rking/ag.vim'
+
+" Copilot
+Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
+
+" LSP
+Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+" mix format for elixir files
+Plug 'mhinz/vim-mix-format'
+
+" git
+Plug 'tpope/vim-fugitive' " the ultimate git helper
+Plug 'airblade/vim-gitgutter'
+Plug 'kdheepak/lazygit.nvim'
+
+" Themes
+Plug 'nvim-tree/nvim-web-devicons'
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+
+" Splash screen
+Plug 'eoh-bse/minintro.nvim'
+
+" Tab bar icons
+Plug 'sangdol/mintabline.vim'
+Plug 'nvim-tree/nvim-web-devicons'
+
+Plug 'elixir-editors/vim-elixir'
+
+" Old plugins
+" Plug 'kien/ctrlp.vim' " fuzzy find files
+" Plug 'vim-airline/vim-airline'
+" Plug 'vim-airline/vim-airline-themes'
+" Plug 'sindrets/diffview.nvim'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
 " If you have vim >=8.0 or Neovim >= 0.1.5
 if (has("termguicolors"))
- set termguicolors
+  set termguicolors
 endif
 
 syntax on
-colorscheme tender
 
 set encoding=UTF-8
 set shiftwidth=2
@@ -63,6 +95,9 @@ set splitbelow
 set splitright
 set foldlevel=99
 
+let &t_ZH="\e[3m"
+let &t_ZR="\e[23m"
+
 " Transparent Neovim
 highlight Normal ctermbg=none
 highlight NonText ctermbg=none
@@ -89,7 +124,12 @@ let g:closetag_xhtml_filenames = '*.html,*.html.*'
 
 let g:test#preserve_screen = 1
 let test#strategy = "neovim"
+" let test#strategy = "vimux"
 let test#elixir#exunit#executable = 'source .env && MIX_ENV=test mix test --color'
+let g:test#neovim#start_normal = 1 " If using neovim strategy
+let g:test#neovim_sticky#kill_previous = 1  " Try to abort previous run
+let g:test#preserve_screen = 0  " Clear screen from previous run
+let test#neovim_sticky#reopen_window = 1 " Reopen terminal split if not visible
 
 let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v16.16.0/bin/node'
 
@@ -100,51 +140,65 @@ nmap <silent> gr <Plug>(coc-references)
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
 nmap <space>ex <Cmd>CocCommand explorer<CR>
+nmap <C-_> <Cmd>CocCommand explorer<CR>
 nmap <Leader>er <Cmd>call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
 
 let g:coc_explorer_global_presets = {
-\   '.vim': {
-\     'root-uri': '~/.vim',
-\   },
-\   'cocConfig': {
-\      'root-uri': '~/.config/coc',
-\   },
-\   'tab': {
-\     'position': 'tab',
-\     'quit-on-open': v:true,
-\   },
-\   'tab:$': {
-\     'position': 'tab:$',
-\     'quit-on-open': v:true,
-\   },
-\   'floating': {
-\     'position': 'floating',
-\     'open-action-strategy': 'sourceWindow',
-\   },
-\   'floatingTop': {
-\     'position': 'floating',
-\     'floating-position': 'center-top',
-\     'open-action-strategy': 'sourceWindow',
-\   },
-\   'floatingLeftside': {
-\     'position': 'floating',
-\     'floating-position': 'left-center',
-\     'floating-width': 50,
-\     'open-action-strategy': 'sourceWindow',
-\   },
-\   'floatingRightside': {
-\     'position': 'floating',
-\     'floating-position': 'right-center',
-\     'floating-width': 50,
-\     'open-action-strategy': 'sourceWindow',
-\   },
-\   'simplify': {
-\     'file-child-template': '[selection | clip | 1] [indent][icon | 1] [filename omitCenter 1]'
-\   },
-\   'buffer': {
-\     'sources': [{'name': 'buffer', 'expand': v:true}]
-\   },
-\ }
+      \   '.vim': {
+      \     'root-uri': '~/.vim',
+      \   },
+      \   'cocConfig': {
+      \      'root-uri': '~/.config/coc',
+      \   },
+      \   'tab': {
+      \     'position': 'tab',
+      \     'quit-on-open': v:true,
+      \   },
+      \   'tab:$': {
+      \     'position': 'tab:$',
+      \     'quit-on-open': v:true,
+      \   },
+      \   'floating': {
+      \     'position': 'floating',
+      \     'open-action-strategy': 'sourceWindow',
+      \   },
+      \   'floatingTop': {
+      \     'position': 'floating',
+      \     'floating-position': 'center-top',
+      \     'open-action-strategy': 'sourceWindow',
+      \   },
+      \   'floatingLeftside': {
+      \     'position': 'floating',
+      \     'floating-position': 'left-center',
+      \     'floating-width': 50,
+      \     'open-action-strategy': 'sourceWindow',
+      \   },
+      \   'floatingRightside': {
+      \     'position': 'floating',
+      \     'floating-position': 'right-center',
+      \     'floating-width': 50,
+      \     'open-action-strategy': 'sourceWindow',
+      \   },
+      \   'simplify': {
+      \     'file-child-template': '[selection | clip | 1] [indent][icon | 1] [filename omitCenter 1]'
+      \   },
+      \   'buffer': {
+      \     'sources': [{'name': 'buffer', 'expand': v:true}]
+      \   },
+      \ }
+
+" Disable the default highlight group
+let g:conflict_marker_highlight_group = ''
+
+" Include text after begin and end markers
+let g:conflict_marker_begin = '^<<<<<<< .*$'
+let g:conflict_marker_end   = '^>>>>>>> .*$'
+
+highlight ConflictMarkerBegin guifg=#e06c75
+highlight ConflictMarkerOurs guibg=#2e5049
+highlight ConflictMarkerSeparator guifg=#e06c75
+highlight ConflictMarkerTheirs guibg=#344f69
+highlight ConflictMarkerEnd guifg=#e06c75
 
 " Use preset argument to open it
 nmap <space>ed <Cmd>CocCommand explorer --preset .vim<CR>
@@ -155,15 +209,48 @@ nmap <space>eb <Cmd>CocCommand explorer --preset buffer<CR>
 " List all presets
 nmap <space>el <Cmd>CocList explPresets<CR>
 
+" Find files using Telescope command-line sugar.
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+" Set keymap for opening Telescope find_files with <C-p>
+nnoremap <silent> <C-p> :lua require('telescope.builtin').find_files()<CR>
+" nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fg :lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>
+
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
+" Set keymap for resuming Telescope
+nnoremap <silent> <leader>fr :lua require('telescope.builtin').resume()<CR>
+
+" fine-cmdline
+nnoremap <CR> <cmd>FineCmdline<CR>
+nnoremap : <cmd>FineCmdline<CR>
+
 " Bind M to grep word under cursor
-nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
+" Run unit tests
 nnoremap <leader>tt :TestNearest<Enter>
 nnoremap <leader>tf :TestFile<Enter>
 
 nnoremap <leader><space> :nohlsearch<CR>
+
+" setup mapping to call :LazyGit
+nnoremap <leader>gg :LazyGit<CR>
+
+" setup mapping to Copilot panel
+nnoremap <leader>cp :Copilot panel<CR>
+nnoremap <leader>cc :CopilotChat <CR>
+
+" Replace 'cce' with 'CopilotChatExplain'
+iabbrev cce CopilotChatExplain
+iabbrev cco CopilotChatOptimize
+
+" Replace 'cce' with 'CopilotChatExplain' in command mode
+cabbrev cce CopilotChatExplain
+cabbrev cco CopilotChatOptimize
+cabbrev ccd CopilotChatDocs
 
 cabbrev W w
 cabbrev Q q
@@ -173,6 +260,7 @@ cabbrev Qa qa
 cabbrev QA qa
 cabbrev diffv DiffviewOpen
 cabbrev mf MixFormat
+
 command Format :%!js-beautify -s 2
 
 if has('nvim')
@@ -186,64 +274,8 @@ inoremap <S-Tab> <C-D>
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
 
-" CtrlP settings
-let g:ctrlp_match_window = 'bottom,order:ttb'
-let g:ctrlp_switch_buffer = 0
-let g:ctrlp_working_path_mode = 0
-
-" The Silver Searcher
-if executable('ag')
-  " Use ag over grep
-  set grepprg=ag\ --nogroup\ --nocolor
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-  " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
-endif
-
-" Sane Ignore For ctrlp
-let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\.git$|vendor\|\.hg$\|\.svn$\|\.yardoc\|public\/images\|public\/system\|data\|log\|tmp$|_build\|deps\|node_modules\|static\|cover\|elm-stuff\|doc\|_build',
-  \ 'file': '\.exe$\|\.so$\|\.dat$'
-  \ }
-
-if exists("g:ctrlp_user_command")
-  unlet g:ctrlp_user_command
-endif
-set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.idea/*,*/.DS_Store,*/vendor,*/deps/*,*/_build/*,*/node_modules/*,*/static/*,*/cover/,*/elm-stuff/*,*/doc/*,*/_build/*
-
-" Airline
-let g:airline_powerline_fonts = 1
-
-" Set airline theme
-let g:airline_theme='tender'
-
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-
-" Unicode symbols
-let g:airline_left_sep = '»'
-let g:airline_left_sep = '▶'
-let g:airline_right_sep = '«'
-let g:airline_right_sep = '◀'
-let g:airline_symbols.linenr = '␊'
-let g:airline_symbols.linenr = '␤'
-let g:airline_symbols.linenr = '¶'
-let g:airline_symbols.branch = '⎇'
-let g:airline_symbols.paste = 'ρ'
-let g:airline_symbols.paste = 'Þ'
-let g:airline_symbols.paste = '∥'
-let g:airline_symbols.whitespace = 'Ξ'
-
-" Airline symbols
-let g:airline_left_sep = ''
-let g:airline_left_alt_sep = ''
-let g:airline_right_sep = ''
-let g:airline_right_alt_sep = ''
-let g:airline_symbols.branch = ''
-let g:airline_symbols.readonly = ''
-let g:airline_symbols.linenr = ''
+vnoremap >> >gv
+vnoremap << <gv
 
 " Use FontAwesome icons as signs
 let g:gitgutter_sign_added = '+'
@@ -269,6 +301,8 @@ nnoremap gV `[v`]
 
 " Remove all trailing whitespace by pressing F5
 nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+
+let @o=""
 
 " Make Y behave like D & C
 nnoremap Y y$
@@ -315,22 +349,22 @@ map <leader>L :tabmove +<CR>
 "
 " @param direction -1 for left, 1 for right.
 function! TabMove(direction)
-    " get number of tab pages.
-    let ntp=tabpagenr("$")
-    " move tab, if necessary.
-    if ntp > 1
-        " get number of current tab page.
-        let ctpn=tabpagenr()
-        " move left.
-        if a:direction < 0
-            let index=((ctpn-1+ntp-1)%ntp)
-        else
-            let index=(ctpn%ntp)
-        endif
-
-        " move tab page.
-        execute "tabmove ".index
+  " get number of tab pages.
+  let ntp=tabpagenr("$")
+  " move tab, if necessary.
+  if ntp > 1
+    " get number of current tab page.
+    let ctpn=tabpagenr()
+    " move left.
+    if a:direction < 0
+      let index=((ctpn-1+ntp-1)%ntp)
+    else
+      let index=(ctpn%ntp)
     endif
+
+    " move tab page.
+    execute "tabmove ".index
+  endif
 endfunction
 
 " Add keyboard shortcuts
@@ -349,6 +383,7 @@ autocmd Filetype python setlocal ts=2 sw=2 sts=2
 autocmd BufNewFile,BufRead *.ex,*.exs set filetype=elixir syntax=elixir
 autocmd BufNewFile,BufRead *.eex,*.leex,*.heex set syntax=eelixir
 autocmd FileType elixir setlocal commentstring=#\ %s
+autocmd BufRead,BufNewFile *test.exs set filetype=elixir
 
 " Javascript
 autocmd BufNewFile,BufRead *.json set ft=javascript
@@ -392,3 +427,166 @@ augroup highlight_yank
 augroup END
 
 autocmd BufWritePre * :call TrimWhitespace()
+
+" treesiter config
+lua << EOF
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the five listed parsers should always be installed)
+  ensure_installed = { "elixir", "lua", "vim", "vimdoc", "query", "javascript", "elm" },
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+
+  highlight = {
+    enable = true,
+    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+    -- the name of the parser)
+    -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
+    disable = function(lang, buf)
+      local max_filesize = 100 * 1024 -- 100 KB
+      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+      if ok and stats and stats.size > max_filesize then
+        return true
+      end
+    end,
+
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+}
+EOF
+
+" Copilot chat config
+lua << EOF
+require("CopilotChat").setup {
+  debug = true, -- Enable debugging
+  -- See Configuration section for rest
+}
+EOF
+
+lua << EOF
+  vim.keymap.set("n", "<leader>ccq", function()
+    local input = vim.fn.input("Quick Chat: ")
+    if input ~= "" then
+      require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
+    end
+  end, { desc = "CopilotChat - Quick chat" })
+EOF
+
+" catpuccin theme
+lua << EOF
+require("catppuccin").setup({
+  flavour = "auto", -- latte, frappe, macchiato, mocha
+  background = { -- :h background
+    light = "latte",
+    dark = "mocha",
+  },
+  transparent_background = false, -- disables setting the background color.
+  show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
+  term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+  dim_inactive = {
+    enabled = false, -- dims the background color of inactive window
+    shade = "dark",
+    percentage = 0.15, -- percentage of the shade to apply to the inactive window
+  },
+  coc_nvim = true,
+  no_italic = false, -- Force no italic
+  no_bold = false, -- Force no bold
+  no_underline = false, -- Force no underline
+  styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
+    comments = { "italic" }, -- Change the style of comments
+    conditionals = { "italic" },
+    loops = {},
+    functions = {},
+    keywords = {},
+    strings = {},
+    variables = {},
+    numbers = {},
+    booleans = {},
+    properties = {},
+    types = {},
+    operators = {},
+    -- miscs = {}, -- Uncomment to turn off hard-coded styles
+  },
+  color_overrides = {},
+  custom_highlights = {},
+  default_integrations = true,
+  integrations = {
+    cmp = true,
+    gitsigns = true,
+    nvimtree = true,
+    treesitter = true,
+    notify = false,
+    mini = {
+        enabled = true,
+        indentscope_color = "",
+    },
+    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
+  },
+})
+
+-- Setup must be called before loading
+vim.cmd.colorscheme "catppuccin"
+EOF
+
+" lualine config
+lua << END
+require('lualine').setup {
+  options = {
+    icons_enabled = true,
+    theme = 'auto',
+    component_separators = { left = '', right = ''},
+    section_separators = { left = '', right = ''},
+    disabled_filetypes = {
+      statusline = {},
+      winbar = {},
+    },
+    ignore_focus = {},
+    always_divide_middle = true,
+    globalstatus = false,
+    refresh = {
+      statusline = 1000,
+      tabline = 1000,
+      winbar = 1000,
+    }
+  },
+  sections = {
+    lualine_a = {'mode'},
+    lualine_b = {'branch', 'diff', 'diagnostics'},
+    lualine_c = {{'filename', path = 1 }},
+    lualine_x = {'encoding', 'fileformat', 'filetype'},
+    lualine_y = {'progress'},
+    lualine_z = {'location'}
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = {{'filename', path = 1 }},
+    lualine_x = {'location'},
+    lualine_y = {},
+    lualine_z = {}
+  },
+  tabline = {},
+  winbar = {},
+  inactive_winbar = {},
+  extensions = {}
+}
+END
+
+lua << EOF
+
+-- Require and setup minintro.nvim
+require('minintro').setup()
+
+EOF
