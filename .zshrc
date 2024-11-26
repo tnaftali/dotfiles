@@ -30,7 +30,7 @@ export EDITOR='nvim'
 export ARCHFLAGS="-arch x86_64"
 export SSH_KEY_PATH="~/.ssh/id_rsa"
 # Install Ruby Gems to ~/gems
-export GEM_HOME="$HOME/gems"
+# export GEM_HOME="$HOME/gems"
 export MASTER_PASSWORD_REQUIRED="False"
 export PGPASSWORD="postgres"
 export TERM="xterm-256color"
@@ -76,12 +76,13 @@ export ADBLOCK=1
 # # Add the .mix directory for the current GLOBAL asdf version to the PATH (for rebar/rebar3)
 export PATH="${HOME}/.asdf/installs/elixir/`asdf current elixir | awk '{print $1}'`/.mix:${PATH}"
 # export TERM=screen-256color
-source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-chruby ruby-3.1.2
+# source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+# source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+# chruby ruby-3.1.2
 
 export PATH="/opt/homebrew/bin:/Users/tobi/.asdf/shims/elixir/:/Users/tobi/.asdf/shims/mix:/Users/tobi/.nvm/versions/node/v20.2.0/bin/yarn:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/opt/openssl@1.1/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
 . "$HOME/.atuin/bin/env"
 
 eval "$(atuin init zsh)"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

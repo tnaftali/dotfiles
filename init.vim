@@ -20,6 +20,7 @@ Plug 'nvim-telescope/telescope.nvim', { 'branch': '0.1.x' }
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'rking/ag.vim'
+Plug 'karb94/neoscroll.nvim'
 
 " Copilot
 Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
@@ -585,8 +586,12 @@ require('lualine').setup {
 END
 
 lua << EOF
-
 -- Require and setup minintro.nvim
 require('minintro').setup()
+EOF
 
+lua << EOF
+require('neoscroll').setup({
+  mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
+})
 EOF
