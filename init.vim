@@ -38,7 +38,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'kdheepak/lazygit.nvim'
 
 " Themes
-Plug 'nvim-tree/nvim-web-devicons'
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 
 " Splash screen
@@ -49,6 +48,17 @@ Plug 'sangdol/mintabline.vim'
 Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'elixir-editors/vim-elixir'
+
+" Avante plugin using Claude
+" Deps
+Plug 'stevearc/dressing.nvim'
+
+" Optional deps
+Plug 'hrsh7th/nvim-cmp'
+Plug 'HakonHarnes/img-clip.nvim'
+Plug 'zbirenbaum/copilot.lua'
+
+Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
 
 " Old plugins
 " Plug 'kien/ctrlp.vim' " fuzzy find files
@@ -224,7 +234,8 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <silent> <leader>fr :lua require('telescope.builtin').resume()<CR>
 
 " fine-cmdline
-nnoremap <CR> <cmd>FineCmdline<CR>
+" nnoremap <CR> <cmd>FineCmdline<CR>
+" nnoremap <S-CR> <cmd>FineCmdline<CR>
 nnoremap : <cmd>FineCmdline<CR>
 
 " Bind M to grep word under cursor
@@ -595,3 +606,9 @@ require('neoscroll').setup({
   mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
 })
 EOF
+
+lua << EOF
+require('avante_lib').load()
+require('avante').setup()
+EOF
+
