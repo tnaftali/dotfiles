@@ -25,7 +25,6 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.autofetch": true,
-  "git.ignoreLegacyWarnings": true,
   "terminal.integrated.fontSize": 15,
   "terminal.integrated.fontFamily": "FiraCode Nerd Font, Monaco, 'Courier New', monospace",
   "window.zoomLevel": 0,
@@ -167,7 +166,40 @@
   "editor.cursorSmoothCaretAnimation": "on",
   "workbench.list.smoothScrolling": true,
   "terminal.integrated.smoothScrolling": true,
+  "vim.foldfix": true,
+  "[phoenix-heex]": {
+    "editor.defaultFormatter": "JakeBecker.elixir-ls",
+    "editor.foldingStrategy": "indentation"
+  },
+  "files.associations": {
+    "*.leex": "phoenix-heex",
+    "*.heex": "phoenix-heex"
+  },
   "emmet.includeLanguages": {
-    "HTML (Eex)": "html"
-  }
+    "HTML (Eex)": "html, heex",
+    "elixir": "html",
+    "phoenix-heex": "html",
+    "html-eex": "html",
+    "javascript": "javascriptreact",
+    "vue-html": "html",
+    "razor": "html",
+    "plaintext": "pug"
+  },
+  "diffEditor.maxComputationTime": 0,
+  "editor.multiCursorLimit": 100000,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.textSizeScale": 1.15,
+  "terminal.integrated.gpuAcceleration": "off",
+  "vim.normalModeKeyBindings": [
+    {
+      "before": [
+        ":"
+      ],
+      "commands": [
+        "vim.showQuickpickCmdLine",
+      ],
+      "silent": true
+    }
+  ],
 }

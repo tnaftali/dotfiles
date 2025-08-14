@@ -1,7 +1,14 @@
+"============================================================================
+" NEOVIM CONFIGURATION
+" ============================================================================
+
+" ============================================================================
+" PLUGINS
+" ============================================================================
+
 " Plugins will be downloaded under the specified directory.
 call plug#begin('~/.vim/plugged')
 
-" Declare the list of plugins.
 " tmux
 Plug 'christoomey/vim-tmux-navigator' " tmux integration
 Plug 'preservim/vimux'
@@ -12,7 +19,7 @@ Plug 'Yggdroot/indentLine'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'vim-test/vim-test'
 Plug 'MunifTanjim/nui.nvim'
-Plug 'VonHeikemen/fine-cmdline.nvim'
+" Plug 'VonHeikemen/fine-cmdline.nvim'
 Plug 'mbbill/undotree'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'nvim-lua/plenary.nvim'
@@ -21,9 +28,6 @@ Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'rking/ag.vim'
 Plug 'karb94/neoscroll.nvim'
-
-" Copilot
-Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
 
 " LSP
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
@@ -49,33 +53,25 @@ Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'elixir-editors/vim-elixir'
 
-" Avante plugin using Claude
-" Deps
-Plug 'stevearc/dressing.nvim'
-
 " Optional deps
 Plug 'hrsh7th/nvim-cmp'
 Plug 'HakonHarnes/img-clip.nvim'
-Plug 'zbirenbaum/copilot.lua'
-
-Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
-
-" Old plugins
-" Plug 'kien/ctrlp.vim' " fuzzy find files
-" Plug 'vim-airline/vim-airline'
-" Plug 'vim-airline/vim-airline-themes'
-" Plug 'sindrets/diffview.nvim'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
-" If you have vim >=8.0 or Neovim >= 0.1.5
+" ============================================================================
+" BASIC VIM SETTINGS
+" ============================================================================
+
+" Enable true colors and syntax
 if (has("termguicolors"))
   set termguicolors
 endif
 
 syntax on
 
+" Core settings
 set encoding=UTF-8
 set shiftwidth=2
 set softtabstop=2
@@ -93,19 +89,29 @@ set nowrap
 set listchars=tab:•\ ,trail:•,extends:»,precedes:« " Unprintable chars mapping
 set list " Display unprintable characters f12 - switches
 set smartindent
+
 " Searching
 set ignorecase " Case insensitive searching
 set smartcase " Case-sensitive if expresson contains a capital letter
 set nolazyredraw " Don't redraw while executing macros
+
+" System integration
 set clipboard+=unnamedplus
-" Faster redrawing
+
+" Performance
 set ttyfast
+set updatetime=50
+
+" Folding
 set foldmethod=indent
+set foldlevel=99
+
+" Paths and splits
 set path=.,,**
 set splitbelow
 set splitright
-set foldlevel=99
 
+" Terminal and display
 let &t_ZH="\e[3m"
 let &t_ZR="\e[23m"
 
@@ -115,45 +121,30 @@ highlight NonText ctermbg=none
 highlight Normal guibg=none
 highlight NonText guibg=none
 
-" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
-" delays and poor user experience.
-set updatetime=50
-" set iskeyword-=_
-
-" Automatically rebalance windows on vim resize
-autocmd VimResized * :wincmd =
+" ============================================================================
+" PLUGIN CONFIGURATIONS
+" ============================================================================
 
 " Set space as Leader key
 let mapleader = "\<Space>"
 
-" Plugins
-
+" Close tag configuration
 let g:closetag_filenames = '*.html,*.html.*'
 let g:closetag_xhtml_filenames = '*.html,*.html.*'
 
-" let g:coc_disable_startup_warning = 1
+" COC Node path
+let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v20.18.1/bin/node'
 
+" vim-test configuration
 let g:test#preserve_screen = 1
 let test#strategy = "neovim"
-" let test#strategy = "vimux"
 let test#elixir#exunit#executable = 'source .env && MIX_ENV=test mix test --color'
 let g:test#neovim#start_normal = 1 " If using neovim strategy
 let g:test#neovim_sticky#kill_previous = 1  " Try to abort previous run
 let g:test#preserve_screen = 0  " Clear screen from previous run
 let test#neovim_sticky#reopen_window = 1 " Reopen terminal split if not visible
 
-let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v16.16.0/bin/node'
-
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gr <Plug>(coc-references)
-
-" Insert autocomplete selection instead of enter
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-
-nmap <space>ex <Cmd>CocCommand explorer<CR>
-nmap <C-_> <Cmd>CocCommand explorer<CR>
-nmap <Leader>er <Cmd>call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
-
+" COC Explorer presets
 let g:coc_explorer_global_presets = {
       \   '.vim': {
       \     'root-uri': '~/.vim',
@@ -198,10 +189,8 @@ let g:coc_explorer_global_presets = {
       \   },
       \ }
 
-" Disable the default highlight group
+" Conflict marker configuration
 let g:conflict_marker_highlight_group = ''
-
-" Include text after begin and end markers
 let g:conflict_marker_begin = '^<<<<<<< .*$'
 let g:conflict_marker_end   = '^>>>>>>> .*$'
 
@@ -211,118 +200,79 @@ highlight ConflictMarkerSeparator guifg=#e06c75
 highlight ConflictMarkerTheirs guibg=#344f69
 highlight ConflictMarkerEnd guifg=#e06c75
 
-" Use preset argument to open it
-nmap <space>ed <Cmd>CocCommand explorer --preset .vim<CR>
-nmap <space>ef <Cmd>CocCommand explorer --preset floating<CR>
-nmap <space>ec <Cmd>CocCommand explorer --preset cocConfig<CR>
-nmap <space>eb <Cmd>CocCommand explorer --preset buffer<CR>
-
-" List all presets
-nmap <space>el <Cmd>CocList explPresets<CR>
-
-" Find files using Telescope command-line sugar.
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-" Set keymap for opening Telescope find_files with <C-p>
-nnoremap <silent> <C-p> :lua require('telescope.builtin').find_files()<CR>
-" nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fg :lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>
-
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-
-" Set keymap for resuming Telescope
-nnoremap <silent> <leader>fr :lua require('telescope.builtin').resume()<CR>
-
-" fine-cmdline
-" nnoremap <CR> <cmd>FineCmdline<CR>
-" nnoremap <S-CR> <cmd>FineCmdline<CR>
-nnoremap : <cmd>FineCmdline<CR>
-
-" Bind M to grep word under cursor
-" nnoremap M :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
-" nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-" Run unit tests
-nnoremap <leader>tt :TestNearest<Enter>
-nnoremap <leader>tf :TestFile<Enter>
-
-nnoremap <leader><space> :nohlsearch<CR>
-
-" setup mapping to call :LazyGit
-nnoremap <leader>gg :LazyGit<CR>
-
-" setup mapping to Copilot panel
-nnoremap <leader>cp :Copilot panel<CR>
-nnoremap <leader>cc :CopilotChat <CR>
-
-" Replace 'cce' with 'CopilotChatExplain'
-iabbrev cce CopilotChatExplain
-iabbrev cco CopilotChatOptimize
-
-" Replace 'cce' with 'CopilotChatExplain' in command mode
-cabbrev cce CopilotChatExplain
-cabbrev cco CopilotChatOptimize
-cabbrev ccd CopilotChatDocs
-
-cabbrev W w
-cabbrev Q q
-cabbrev Wa wa
-cabbrev WA wa
-cabbrev Qa qa
-cabbrev QA qa
-cabbrev diffv DiffviewOpen
-cabbrev mf MixFormat
-
-command Format :%!js-beautify -s 2
-
-if has('nvim')
-  tmap <C-o> <C-\><C-n>
-endif
-
-" Indent with tab and shift tab and keep selection after indent
-nnoremap <Tab> >>_
-nnoremap <S-Tab> <<_
-inoremap <S-Tab> <C-D>
-vnoremap <Tab> >gv
-vnoremap <S-Tab> <gv
-
-vnoremap >> >gv
-vnoremap << <gv
-
-" Use FontAwesome icons as signs
+" GitGutter signs
 let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '>'
 let g:gitgutter_sign_removed = '-'
 let g:gitgutter_sign_removed_first_line = '^'
 let g:gitgutter_sign_modified_removed = '<'
 
-" Maintain tmux zoom mode when navigating between vim panes
+" Tmux navigator
 let g:tmux_navigator_disable_when_zoomed = 1
 
-" Edit config files
-map <leader>en :e! ~/.config/nvim/init.vim<cr> " edit ~/.config/nvim/init.vim
-map <leader>ez :e! ~/dotfiles/.zshrc<cr> " edit ~/.zshrc
-map <leader>et :e! ~/dotfiles/.tmux.conf<cr> " edit ~/.tmux.conf
+" ============================================================================
+" KEY MAPPINGS
+" ============================================================================
 
-" Resize pane
+" COC mappings
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gr <Plug>(coc-references)
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+" COC Explorer mappings
+nmap <space>ex <Cmd>CocCommand explorer<CR>
+nmap <C-_> <Cmd>CocCommand explorer<CR>
+nmap <Leader>er <Cmd>call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
+nmap <space>ed <Cmd>CocCommand explorer --preset .vim<CR>
+nmap <space>ef <Cmd>CocCommand explorer --preset floating<CR>
+nmap <space>ec <Cmd>CocCommand explorer --preset cocConfig<CR>
+nmap <space>eb <Cmd>CocCommand explorer --preset buffer<CR>
+nmap <space>el <Cmd>CocList explPresets<CR>
+
+" Telescope mappings
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <silent> <C-p> :lua require('telescope.builtin').find_files()<CR>
+nnoremap <leader>fg :lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+nnoremap <silent> <leader>fr :lua require('telescope.builtin').resume()<CR>
+
+" Fine cmdline
+" nnoremap <leader>: <cmd>FineCmdline<CR>
+
+" Test mappings
+nnoremap <leader>tt :TestNearest<Enter>
+nnoremap <leader>tf :TestFile<Enter>
+
+" General mappings
+nnoremap <leader><space> :nohlsearch<CR>
+nnoremap <leader>gg :LazyGit<CR>
+
+" Edit config files
+map <leader>en <cmd>edit ~/.config/nvim/init.vim<cr> " edit ~/.config/nvim/init.vim
+map <leader>ez <cmd>e! ~/dotfiles/.zshrc<cr> " edit ~/.zshrc
+map <leader>et <cmd>e! ~/dotfiles/.tmux.conf<cr> " edit ~/.tmux.conf
+map <leader>eg <cmd>e! ~/.config/ghostty/config<cr> " edit ~/.config/ghostty/config
+
+" Resize panes
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
 nnoremap <silent> <leader>r- :vertical resize -10<CR>
 
-" Highlight last inserted text
-nnoremap gV `[v`]
+nnoremap <leader>oa :Ollama
 
-" Remove all trailing whitespace by pressing F5
-nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+" Indent with tab and keep selection
+nnoremap <Tab> >>_
+nnoremap <S-Tab> <<_
+inoremap <S-Tab> <C-D>
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+vnoremap >> >gv
+vnoremap << <gv
 
-let @o=""
-
-" Make Y behave like D & C
+" Better navigation
 nnoremap Y y$
-
-" Keep cursor centered while moving through file
 nnoremap n nzzzv
 nnoremap N Nzzzv
-" nnoremap J mzJ`z
 nnoremap <c-d> <c-d>zz
 nnoremap <c-u> <c-u>zz
 nnoremap { {zz
@@ -347,48 +297,40 @@ inoremap <C-k> <esc>:m .-2<CR>==
 nnoremap <leader>k :m .-2<CR>==
 nnoremap <leader>j :m .+1<CR>==
 
-" Better tab experience
-map <leader>tn :tabnew<cr>
-map <leader>t<Tab> :tabnext<cr>
-map <leader>t<S-Tab> :tabprevious<cr>
-map <leader>tm :tabmove
-map <leader>tc :tabclose<cr>
-map <leader>to :tabonly<cr>
-map <leader>H :tabmove -<CR>
-map <leader>L :tabmove +<CR>
+" Terminal mappings
+if has('nvim')
+  tmap <C-o> <C-\><C-n>
+endif
 
-" Move current tab into the specified direction.
-"
-" @param direction -1 for left, 1 for right.
-function! TabMove(direction)
-  " get number of tab pages.
-  let ntp=tabpagenr("$")
-  " move tab, if necessary.
-  if ntp > 1
-    " get number of current tab page.
-    let ctpn=tabpagenr()
-    " move left.
-    if a:direction < 0
-      let index=((ctpn-1+ntp-1)%ntp)
-    else
-      let index=(ctpn%ntp)
-    endif
-
-    " move tab page.
-    execute "tabmove ".index
-  endif
-endfunction
-
-" Add keyboard shortcuts
-" Focus on the tab on the left
+" Tab management
+nnoremap <leader>tn :tabnew<cr>
+nnoremap <leader>t<Tab> :tabnext<cr>
+nnoremap <leader>t<S-Tab> :tabprevious<cr>
+nnoremap <leader>tm :tabmove
+nnoremap <leader>tc :tabclose<cr>
+nnoremap <leader>to :tabonly<cr>
+nnoremap <leader>H :tabmove -<CR>
+nnoremap <leader>L :tabmove +<CR>
 nnoremap H gT
-" Focus on the tab on the right
 nnoremap L gt
 
+" Utility mappings
+nnoremap gV `[v`]
+nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+let @o=""
+
+" Disable problematic mappings
 map q: <Nop>
 nnoremap Q <nop>
 
-" Python
+" ============================================================================
+" AUTOCOMMANDS
+" ============================================================================
+
+" Automatically rebalance windows on vim resize
+autocmd VimResized * :wincmd =
+
+" Python settings
 autocmd Filetype python setlocal ts=2 sw=2 sts=2
 
 " Elixir syntax highlight
@@ -397,7 +339,7 @@ autocmd BufNewFile,BufRead *.eex,*.leex,*.heex set syntax=eelixir
 autocmd FileType elixir setlocal commentstring=#\ %s
 autocmd BufRead,BufNewFile *test.exs set filetype=elixir
 
-" Javascript
+" Javascript settings
 autocmd BufNewFile,BufRead *.json set ft=javascript
 autocmd FileType javascript setlocal equalprg=js-beautify\ --stdin
 
@@ -407,7 +349,7 @@ augroup OpenAllFoldsOnFileOpen
   autocmd BufRead * normal zR
 augroup END
 
-" JSON
+" JSON settings
 augroup jsonshow
   au!
   au FileType json set conceallevel=0
@@ -427,41 +369,75 @@ augroup json_autocmd
   autocmd FileType json set foldmethod=syntax
 augroup END
 
+" Highlight yanked text
+augroup highlight_yank
+  autocmd!
+  autocmd TextYankPost * silent! lua require'vim.highlight'.on_yank()
+augroup END
+
+" Auto trim whitespace
+autocmd BufWritePre * :call TrimWhitespace()
+
+" ============================================================================
+" FUNCTIONS
+" ============================================================================
+
+" Move current tab into the specified direction
+function! TabMove(direction)
+  " get number of tab pages.
+  let ntp=tabpagenr("$")
+  " move tab, if necessary.
+  if ntp > 1
+    " get number of current tab page.
+    let ctpn=tabpagenr()
+    " move left.
+    if a:direction < 0
+      let index=((ctpn-1+ntp-1)%ntp)
+    else
+      let index=(ctpn%ntp)
+    endif
+
+    " move tab page.
+    execute "tabmove ".index
+  endif
+endfunction
+
+" Trim whitespace function
 fun! TrimWhitespace()
   let l:save = winsaveview()
   keeppatterns %s/\s\+$//e
   call winrestview(l:save)
 endfun
 
-augroup highlight_yank
-  autocmd!
-  autocmd TextYankPost * silent! lua require'vim.highlight'.on_yank()
-augroup END
+" ============================================================================
+" COMMANDS
+" ============================================================================
 
-autocmd BufWritePre * :call TrimWhitespace()
+" Command abbreviations
+cabbrev W w
+cabbrev Q q
+cabbrev Wa wa
+cabbrev WA wa
+cabbrev Qa qa
+cabbrev QA qa
+cabbrev diffv DiffviewOpen
+cabbrev mf MixFormat
 
-" treesiter config
+" Custom commands
+command Format :%!js-beautify -s 2
+
+" ============================================================================
+" LUA CONFIGURATIONS
+" ============================================================================
+
 lua << EOF
+-- Treesitter configuration
 require'nvim-treesitter.configs'.setup {
-  -- A list of parser names, or "all" (the five listed parsers should always be installed)
   ensure_installed = { "elixir", "lua", "vim", "vimdoc", "query", "javascript", "elm" },
-
-  -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
-
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
   auto_install = true,
-
-  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
-
   highlight = {
     enable = true,
-    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-    -- the name of the parser)
-    -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
     disable = function(lang, buf)
       local max_filesize = 100 * 1024 -- 100 KB
       local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
@@ -469,55 +445,31 @@ require'nvim-treesitter.configs'.setup {
         return true
       end
     end,
-
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
     additional_vim_regex_highlighting = false,
   },
 }
-EOF
 
-" Copilot chat config
-lua << EOF
-require("CopilotChat").setup {
-  debug = true, -- Enable debugging
-  -- See Configuration section for rest
-}
-EOF
-
-lua << EOF
-  vim.keymap.set("n", "<leader>ccq", function()
-    local input = vim.fn.input("Quick Chat: ")
-    if input ~= "" then
-      require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
-    end
-  end, { desc = "CopilotChat - Quick chat" })
-EOF
-
-" catpuccin theme
-lua << EOF
+-- Catppuccin theme configuration
 require("catppuccin").setup({
-  flavour = "auto", -- latte, frappe, macchiato, mocha
-  background = { -- :h background
+  flavour = "auto",
+  transparent_background = true, -- disables setting the background color.
+  background = {
     light = "latte",
     dark = "mocha",
   },
-  transparent_background = false, -- disables setting the background color.
-  show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
-  term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+  show_end_of_buffer = false,
+  term_colors = false,
   dim_inactive = {
-    enabled = false, -- dims the background color of inactive window
+    enabled = false,
     shade = "dark",
-    percentage = 0.15, -- percentage of the shade to apply to the inactive window
+    percentage = 0.15,
   },
   coc_nvim = true,
-  no_italic = false, -- Force no italic
-  no_bold = false, -- Force no bold
-  no_underline = false, -- Force no underline
-  styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
-    comments = { "italic" }, -- Change the style of comments
+  no_italic = false,
+  no_bold = false,
+  no_underline = false,
+  styles = {
+    comments = { "italic" },
     conditionals = { "italic" },
     loops = {},
     functions = {},
@@ -529,7 +481,6 @@ require("catppuccin").setup({
     properties = {},
     types = {},
     operators = {},
-    -- miscs = {}, -- Uncomment to turn off hard-coded styles
   },
   color_overrides = {},
   custom_highlights = {},
@@ -544,22 +495,19 @@ require("catppuccin").setup({
         enabled = true,
         indentscope_color = "",
     },
-    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
   },
 })
 
 -- Setup must be called before loading
 vim.cmd.colorscheme "catppuccin"
-EOF
 
-" lualine config
-lua << END
+-- Lualine configuration
 require('lualine').setup {
   options = {
     icons_enabled = true,
     theme = 'auto',
-    component_separators = { left = '', right = ''},
-    section_separators = { left = '', right = ''},
+    component_separators = { left = '', right = ''},
+    section_separators = { left = '', right = ''},
     disabled_filetypes = {
       statusline = {},
       winbar = {},
@@ -594,21 +542,12 @@ require('lualine').setup {
   inactive_winbar = {},
   extensions = {}
 }
-END
 
-lua << EOF
--- Require and setup minintro.nvim
+-- Minintro setup
 require('minintro').setup()
-EOF
 
-lua << EOF
+-- Neoscroll setup
 require('neoscroll').setup({
   mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
 })
 EOF
-
-lua << EOF
-require('avante_lib').load()
-require('avante').setup()
-EOF
-

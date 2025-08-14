@@ -36,10 +36,10 @@ export PGPASSWORD="postgres"
 export TERM="xterm-256color"
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
 
-alias srcsrv="source .env && nvm use 20 && iex -S mix phx.server"
-alias srctst="source .env && MIX_ENV=test mix test --color"
-alias srctstbf="source .env && MIX_ENV=test mix test apps/betafolio/test --color"
-alias srctstcr="source .env && MIX_ENV=test mix test apps/core/test --color"
+alias srcsrv="source .local.env && nvm use 20 && iex -S mix phx.server"
+alias srctst="source .local.env && MIX_ENV=test mix test --color"
+alias srctstbf="source .local.env && MIX_ENV=test mix test apps/betafolio/test --color"
+alias srctstcr="source .local.env && MIX_ENV=test mix test apps/core/test --color"
 
 alias gas="git add . && git status"
 alias gs="git status"
@@ -56,8 +56,6 @@ neofetch
 
 export NVM_DIR=~/.nvm
 source $(brew --prefix nvm)/nvm.sh
-
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
 
 # export DEFAULT_USER=""
 
@@ -86,3 +84,6 @@ export PATH="/opt/homebrew/bin:/Users/tobi/.asdf/shims/elixir/:/Users/tobi/.asdf
 
 eval "$(atuin init zsh)"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Created by `pipx` on 2025-07-08 13:14:22
+export PATH="$PATH:/Users/tobi/.local/bin"

@@ -22,7 +22,7 @@
     "command": "workbench.action.toggleSidebarVisibility"
   },
   {
-    "key": "ctrl+;", // or whatever shortcut you prefer
+    "key": "ctrl+;",
     "command": "workbench.action.toggleAuxiliaryBar"
   },
   {
@@ -37,16 +37,16 @@
     "args": "mix test current file",
     "when": "editorLangId == elixir"
   },
-  {
-    "key": "tab",
-    "command": "editor.action.indentLines",
-    "when": "editorTextFocus && !editorReadonly"
-  },
-  {
-    "key": "shift+tab",
-    "command": "editor.action.outdentLines",
-    "when": "editorTextFocus && !editorReadonly"
-  },
+  // {
+  //   "key": "tab",
+  //   "command": "editor.action.indentLines",
+  //   "when": "editorTextFocus && !editorReadonly"
+  // },
+  // {
+  //   "key": "shift+tab",
+  //   "command": "editor.action.outdentLines",
+  //   "when": "editorTextFocus && !editorReadonly"
+  // },
   {
     "key": "ctrl+h",
     "command": "workbench.action.focusLeftGroup"
@@ -91,5 +91,13 @@
   {
     "key": "alt+shift+l",
     "command": "workbench.action.moveEditorRightInGroup"
+  },
+  {
+    "key": "cmd+i",
+    "command": "composerMode.agent"
+  },
+  {
+    "key": "cmd+e",
+    "command": "composerMode.background"
   },
 ]
