@@ -1,88 +1,104 @@
 // Place your key bindings in this file to override the defaults
 [
-  {
-    "key": "Ctrl+Tab",
-    "command": "workbench.action.nextEditor",
-  },
-  {
-    "key": "Ctrl+Shift+Tab",
-    "command": "workbench.action.previousEditor",
-  },
+  // ===================================
+  // I. COMMAND PALETTE & QUICK ACCESS
+  // ===================================
   {
     "key": "ctrl+p",
-    "command": "workbench.action.quickOpen"
+    "command": "workbench.action.quickOpen" // Quick Open files
   },
   {
     "key": "ctrl+shift+p",
-    "command": "workbench.action.showCommands",
+    "command": "workbench.action.showCommands", // Command Palette
     "when": "editorTextFocus"
   },
+  // ===================================
+  // II. TERMINAL TOGGLE (THE GHOSTTY FLOW)
+  // ===================================
+  // 1. If in Editor -> Open Terminal & Focus it
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
+  },
+  // 2. If in Terminal -> Hide Terminal & Focus Editor
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.closePanel",
+    "when": "terminalFocus"
+  },
+  // 3. Quick Terminal Workflow Commands
+  {
+    "key": "cmd+k",
+    "command": "workbench.action.terminal.clear",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "workbench.action.terminal.split"
+  },
+  {
+    "key": "cmd+up",
+    "command": "workbench.action.toggleMaximizedPanel"
+  },
+  // 4. Escape key to always jump from Terminal -> Editor
+  {
+    "key": "escape",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "terminalFocus"
+  },
+  // ===================================
+  // III. PANEL & SIDEBAR TOGGLES
+  // ===================================
   {
     "key": "ctrl+b",
     "command": "workbench.action.toggleSidebarVisibility"
   },
   {
     "key": "ctrl+;",
-    "command": "workbench.action.toggleAuxiliaryBar"
+    "command": "workbench.action.toggleAuxiliaryBar" // Auxiliary Bar (AI Chat, Debug)
   },
   {
-    "key": "cmd+shift+t",
-    "command": "workbench.action.tasks.runTask",
-    "args": "mix test at cursor",
-    "when": "editorLangId == elixir"
+    "key": "ctrl+e",
+    "command": "workbench.view.explorer" // Focus File Explorer
   },
   {
-    "key": "cmd+shift+r",
-    "command": "workbench.action.tasks.runTask",
-    "args": "mix test current file",
-    "when": "editorLangId == elixir"
+    "key": "ctrl+g",
+    "command": "workbench.view.scm" // Focus Source Control (Git)
   },
-  // {
-  //   "key": "tab",
-  //   "command": "editor.action.indentLines",
-  //   "when": "editorTextFocus && !editorReadonly"
-  // },
-  // {
-  //   "key": "shift+tab",
-  //   "command": "editor.action.outdentLines",
-  //   "when": "editorTextFocus && !editorReadonly"
-  // },
+  {
+    "key": "cmd+1",
+    "command": "workbench.action.focusFirstEditorGroup", // Universal Escape Hatch to Code
+    "detail": "Universal Editor Focus"
+  },
+  // ===================================
+  // IV. EDITOR & GROUP NAVIGATION
+  // ===================================
+  // --- Editor Tab Navigation ---
+  {
+    "key": "ctrl+tab",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "ctrl+shift+tab",
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "alt+h", // Standardized to Alt/Option for previous tab
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "alt+l", // Standardized to Alt/Option for next tab
+    "command": "workbench.action.nextEditor"
+  },
+  // --- Editor Group Focus & Movement ---
   {
     "key": "ctrl+h",
     "command": "workbench.action.focusLeftGroup"
   },
   {
     "key": "ctrl+l",
-    "command": "workbench.action.focusRightGroup"
-  },
-  {
-    "key": "ctrl+l",
-    "command": "workbench.action.focusActiveEditorGroup",
-    "when": "!editorFocus"
-  },
-  {
-    "key": "ctrl+e",
-    "command": "workbench.view.explorer",
-  },
-  {
-    "key": "ctrl+g",
-    "command": "workbench.view.scm",
-  },
-  {
-    "key": "option+h",
-    "command": "workbench.action.previousEditor",
-  },
-  {
-    "key": "option+l",
-    "command": "workbench.action.nextEditor",
-  },
-  {
-    "key": "alt+h",
-    "command": "workbench.action.previousEditor",
-  },
-  {
-    "key": "alt+l",
-    "command": "workbench.action.nextEditor",
+    "command": "workbench.action.focusRightGroup" // Only for Group Navigation (Conflict resolved)
   },
   {
     "key": "alt+shift+h",
@@ -92,12 +108,26 @@
     "key": "alt+shift+l",
     "command": "workbench.action.moveEditorRightInGroup"
   },
+  // ===================================
+  // V. CURSOR AI & COMPOSER MODE
+  // ===================================
   {
     "key": "cmd+i",
     "command": "composerMode.agent"
   },
+  // ===================================
+  // VI. LANGUAGE/TASK SPECIFIC (Elixir)
+  // ===================================
   {
-    "key": "cmd+e",
-    "command": "composerMode.background"
+    "key": "cmd+shift+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mix: Run test at cursor",
+    "when": "editorLangId == elixir"
   },
+  {
+    "key": "cmd+shift+r",
+    "command": "workbench.action.tasks.runTask",
+    "args": "mix test current file",
+    "when": "editorLangId == elixir"
+  }
 ]

@@ -1,0 +1,141 @@
+# ==============================================================================
+# 0. CORE AEROSPACE CONFIGURATION
+# ==============================================================================
+
+# Reference: https://github.com/i3/i3/blob/next/etc/config
+
+# Config version for compatibility
+config-version = 2
+
+# Start AeroSpace at login
+start-at-login = true
+
+# Workspaces Model (i3-like: Workspaces are "phantom" and created/destroyed on demand)
+persistent-workspaces = []
+
+# Normalizations (AeroSpace's Auto-Tidying Feature)
+# Original setting: These are disabled for i3 compatibility.
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+# ==============================================================================
+# 1. AESTHETICS & BEHAVIOR
+# ==============================================================================
+
+# Mouse follows focus when focused monitor changes
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Gaps between windows (inner-*) and between monitor edges (outer-*).
+# All values are preserved from your config.
+[gaps]
+    inner.horizontal = 10
+    inner.vertical =   10
+    outer.left =       10
+    outer.bottom =     10
+    outer.top =        10
+    outer.right =      10
+
+
+# ==============================================================================
+# 2. APPLICATION RULES (ON-WINDOW-DETECTED CALLBACKS)
+#
+# These rules apply the 'layout floating' command when specific applications
+# are detected, ensuring they do not tile automatically.
+# ==============================================================================
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.systempreferences '
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'net.whatsapp.WhatsApp'
+    run = 'layout floating'
+
+
+# ==============================================================================
+# 3. KEYBINDING MODES
+# ==============================================================================
+
+[mode.main.binding]
+    # --------------------------------------------------------------------------
+    # 3.1. FOCUS AND MOVEMENT (HJKL/I3 STYLE)
+    # --------------------------------------------------------------------------
+
+    alt-h = 'focus left'
+    alt-j = 'focus down'
+    alt-k = 'focus up'
+    alt-l = 'focus right'
+
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    # --------------------------------------------------------------------------
+    # 3.2. RESIZE COMMANDS
+    # --------------------------------------------------------------------------
+
+    # See: https://nikitabobko.github.io/AeroSpace/commands#resize
+    alt-minus = 'resize smart -50'
+    alt-equal = 'resize smart +50'
+
+    # --------------------------------------------------------------------------
+    # 3.3. LAYOUT & SPLIT COMMANDS
+    # --------------------------------------------------------------------------
+
+    # Manual Split Orientation (Commented out, preserving original state)
+    # Consider using 'join-with' command as a 'split' replacement if you want to enable
+    # normalizations
+    # alt-c = 'split horizontal'
+    # alt-v = 'split vertical'
+
+    # Layout toggles
+    alt-shift-enter = 'fullscreen'
+    alt-2 = 'layout v_accordion' # 'layout stacking' in i3
+    alt-3 = 'layout h_accordion' # 'layout tabbed' in i3
+    alt-1 = 'layout tiles horizontal vertical' # 'layout toggle split' in i3
+
+    # Floating toggle
+    alt-shift-space = 'layout floating tiling' # 'floating toggle' in i3
+
+    # --------------------------------------------------------------------------
+    # 3.4. WORKSPACE SWITCHING
+    # --------------------------------------------------------------------------
+
+    # Switch to workspace 1-10
+    alt-a = 'workspace 1'
+    alt-s = 'workspace 2'
+    alt-d = 'workspace 3'
+    alt-f = 'workspace 4'
+    alt-g = 'workspace 5'
+    alt-y = 'workspace 6'
+    alt-u = 'workspace 7'
+    alt-i = 'workspace 8'
+    alt-o = 'workspace 9'
+    alt-p = 'workspace 10'
+
+    # Move focused window to workspace 1-10
+    alt-shift-a = 'move-node-to-workspace 1'
+    alt-shift-s = 'move-node-to-workspace 2'
+    alt-shift-d = 'move-node-to-workspace 3'
+    alt-shift-f = 'move-node-to-workspace 4'
+    alt-shift-g = 'move-node-to-workspace 5'
+    alt-shift-y = 'move-node-to-workspace 6'
+    alt-shift-u = 'move-node-to-workspace 7'
+    alt-shift-i = 'move-node-to-workspace 8'
+    alt-shift-o = 'move-node-to-workspace 9'
+    alt-shift-p = 'move-node-to-workspace 10'
+
+    # Sequential Workspace Navigation
+    alt-comma = 'workspace prev'
+    alt-period = 'workspace next'
+
+    # --------------------------------------------------------------------------
+    # 3.5. UTILITY COMMANDS
+    # --------------------------------------------------------------------------
+
+    alt-shift-semicolon = 'reload-config'
