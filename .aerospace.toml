@@ -25,6 +25,10 @@ enable-normalization-opposite-orientation-for-nested-containers = false
 # Mouse follows focus when focused monitor changes
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
+after-startup-command = [
+  'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0'
+]
+
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # All values are preserved from your config.
 [gaps]
@@ -43,9 +47,9 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # are detected, ensuring they do not tile automatically.
 # ==============================================================================
 
-[[on-window-detected]]
-    if.app-id = 'com.apple.finder'
-    run = 'layout floating'
+# [[on-window-detected]]
+#     if.app-id = 'com.apple.finder'
+#     run = 'layout floating'
 
 [[on-window-detected]]
     if.app-id = 'com.apple.systempreferences '
@@ -139,3 +143,6 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
     # --------------------------------------------------------------------------
 
     alt-shift-semicolon = 'reload-config'
+
+    cmd-h = [] # Disable "hide application"
+    cmd-alt-h = [] # Disable "hide others"

@@ -154,5 +154,7 @@
   "editor.autoSurround": "languageDefined", // Highlight text and surround it with quotes/brackets
   // --- 3. Debugging and Problems View (First Option) ---
   "problems.autoReveal": false,
-  "workbench.colorTheme": "Catppuccin Mocha" // Prevents Problems panel from stealing focus
+  "workbench.colorTheme": "Catppuccin Macchiato",
+  "diffEditor.renderSideBySide": true,
+  "claudeCode.preferredLocation": "panel" // Prevents Problems panel from stealing focus
 }

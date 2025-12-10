@@ -1,23 +1,39 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GIT CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── User Identity ───────────────────────────────────────────────────────────────
 [user]
   name = Tobias Naftali
   email = 8753873+tnaftali@users.noreply.github.com
+
 [github]
   user = tnaftali
-[diff]
-    tool = meld
-[difftool]
-    prompt = false
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
+
+# ── Core Settings ───────────────────────────────────────────────────────────────
 [core]
 	pager = /opt/diff-so-fancy/diff-so-fancy | less --tabs=2 -RFX
+
+# ── Diff & Merge Tools ──────────────────────────────────────────────────────────
+[diff]
+    tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+
+# ── Color Configuration ─────────────────────────────────────────────────────────
 [color]
 	ui = true
+
 [color "diff-highlight"]
 	oldNormal = red bold
 	oldHighlight = red bold 52
 	newNormal = green bold
 	newHighlight = green bold 22
+
 [color "diff"]
 	meta = 11
 	frag = magenta bold
@@ -25,5 +41,7 @@
 	old = red bold
 	new = green bold
 	whitespace = red reverse
+
+# ── Branch & Checkout Settings ──────────────────────────────────────────────────
 [checkout]
      defaultRemote = origin

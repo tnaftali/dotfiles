@@ -1,3 +1,8 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# ZSH CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Oh My Zsh Setup ─────────────────────────────────────────────────────────────
 export ZSH="/Users/tobi/.oh-my-zsh"
 
 # ZSH_THEME="avit"
@@ -23,38 +28,49 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+# ── Environment Variables ───────────────────────────────────────────────────────
 export MANPATH="/usr/local/man:$MANPATH"
 export LANG=en_US.UTF-8
 export EDITOR='nvim'
 export ARCHFLAGS="-arch x86_64"
 export SSH_KEY_PATH="~/.ssh/id_rsa"
-# Install Ruby Gems to ~/gems
-# export GEM_HOME="$HOME/gems"
+export TERM="xterm-256color"
+
+# Development Environment Variables
 export MASTER_PASSWORD_REQUIRED="False"
 export PGPASSWORD="postgres"
-export TERM="xterm-256color"
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
 
+# Node.js & NPM Configuration
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+export PUPPETEER_EXECUTABLE_PATH=`which chromium`
+export DISABLE_OPENCOLLECTIVE=1
+export ADBLOCK=1
+
+# ── Aliases ─────────────────────────────────────────────────────────────────────
+# Development Server Aliases
 alias srcsrv="source .local.env && nvm use 20 && iex -S mix phx.server"
 alias srctst="source .local.env && MIX_ENV=test bin/migrate && mix test --color; afplay /System/Library/Sounds/Ping.aiff"
 alias srctstbf="source .local.env && MIX_ENV=test bin/migrate && mix test apps/betafolio/test --color; afplay /System/Library/Sounds/Ping.aiff"
 alias srctstcr="source .local.env && MIX_ENV=test bin/migrate && mix test apps/core/test --color; afplay /System/Library/Sounds/Ping.aiff"
 
+# Git Aliases
 alias gas="git add . && git status"
 alias gs="git status"
 alias gc="git checkout $1"
 alias gp="git pull origin $1"
+alias gdiff="git diff --staged --color-words"
+
+# Configuration Reload Aliases
 alias srcz="source ~/dotfiles/.zshrc"
 alias srct="tmux source-file ~/dotfiles/.tmux.conf"
-# alias diff="git diff --staged --color-words"
+
+# Utility Aliases
 alias list="exa --long --header --git --icons --all"
 
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-
-neofetch
-
+# ── Node Version Manager (NVM) Setup ────────────────────────────────────────────
 export NVM_DIR=~/.nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 source $(brew --prefix nvm)/nvm.sh
 
 # export DEFAULT_USER=""
@@ -65,21 +81,23 @@ prompt_context() {
   fi
 }
 
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-export PUPPETEER_EXECUTABLE_PATH=`which chromium`
-# npm ad block
-export DISABLE_OPENCOLLECTIVE=1
-export ADBLOCK=1
-# export NODE_OPTIONS=--openssl-legacy-provider
+# ── System Configuration ────────────────────────────────────────────────────────
+defaults write -g NSWindowShouldDragOnGesture -bool true
+
+# Aerospace Window Manager
+aerospace workspace "$(aerospace list-workspaces --monitor mouse --visible)" && aerospace workspace next
+aerospace workspace "$(aerospace list-workspaces --monitor mouse --visible)" && aerospace workspace prev
+
+# ── Additional PATH Configuration ───────────────────────────────────────────────
 # # Add the .mix directory for the current GLOBAL asdf version to the PATH (for rebar/rebar3)
 export PATH="${HOME}/.asdf/installs/elixir/`asdf current elixir | awk '{print $1}'`/.mix:${PATH}"
-# export TERM=screen-256color
-# source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-# source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-# chruby ruby-3.1.2
 
+# ── System Greeting ─────────────────────────────────────────────────────────────
+neofetch
+
+# ── Custom Functions ────────────────────────────────────────────────────────────
 # Worktrees function START
-# # Git worktree helper function: wt <feature-name>
+# Git worktree helper function: wt <feature-name>
 wt() {
   emulate -L zsh             # localise options for zsh
   # Don't use set -e to avoid crashes on errors
@@ -181,12 +199,13 @@ wt() {
 
 # Worktrees END
 
+# ── PATH Configuration ──────────────────────────────────────────────────────────
 export PATH="/opt/homebrew/bin:/Users/tobi/.asdf/shims/elixir/:/Users/tobi/.asdf/shims/mix:/Users/tobi/.nvm/versions/node/v20.2.0/bin/yarn:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/opt/openssl@1.1/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
-
-. "$HOME/.atuin/bin/env"
-
-eval "$(atuin init zsh)"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Created by `pipx` on 2025-07-08 13:14:22
 export PATH="$PATH:/Users/tobi/.local/bin"
+
+# ── Shell History & Completion ──────────────────────────────────────────────────
+. "$HOME/.atuin/bin/env"
+eval "$(atuin init zsh)"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
