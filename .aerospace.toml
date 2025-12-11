@@ -94,8 +94,8 @@ after-startup-command = [
     # Manual Split Orientation (Commented out, preserving original state)
     # Consider using 'join-with' command as a 'split' replacement if you want to enable
     # normalizations
-    # alt-c = 'split horizontal'
-    # alt-v = 'split vertical'
+    alt-c = 'split horizontal'
+    alt-v = 'split vertical'
 
     # Layout toggles
     alt-shift-enter = 'fullscreen'
