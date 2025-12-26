@@ -117,7 +117,7 @@
     "detail": "Close all tabs in group except active one"
   },
   {
-    "key": "ctrl+shift+v",
+    "key": "ctrl+alt+v",
     "command": "markdown.showPreview", // CHANGED: Using the more universal 'showPreview' command
     "when": "editorLangId == 'markdown'",
     "detail": "Toggle Markdown Preview"

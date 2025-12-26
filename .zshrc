@@ -200,7 +200,7 @@ wt() {
 # Worktrees END
 
 # ── PATH Configuration ──────────────────────────────────────────────────────────
-export PATH="/opt/homebrew/bin:/Users/tobi/.asdf/shims/elixir/:/Users/tobi/.asdf/shims/mix:/Users/tobi/.nvm/versions/node/v20.2.0/bin/yarn:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/opt/openssl@1.1/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
+export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
 # Created by `pipx` on 2025-07-08 13:14:22
 export PATH="$PATH:/Users/tobi/.local/bin"

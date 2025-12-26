@@ -156,5 +156,13 @@
   "problems.autoReveal": false,
   "workbench.colorTheme": "Catppuccin Macchiato",
   "diffEditor.renderSideBySide": true,
-  "claudeCode.preferredLocation": "panel" // Prevents Problems panel from stealing focus
+  "claudeCode.preferredLocation": "sidebar",
+  "yaml.schemas": {
+    "/Users/tobi/.vscode/extensions/continue.continue-1.0.19-darwin-arm64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ]
+  },
+  "markdown-preview-enhanced.previewTheme": "none.css",
+  "markdown-preview-enhanced.codeBlockTheme": "github-dark.css",
+  "markdown-preview-enhanced.revealjsTheme": "none.css" // Prevents Problems panel from stealing focus
 }
