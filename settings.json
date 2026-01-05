@@ -164,5 +164,7 @@
   },
   "markdown-preview-enhanced.previewTheme": "none.css",
   "markdown-preview-enhanced.codeBlockTheme": "github-dark.css",
-  "markdown-preview-enhanced.revealjsTheme": "none.css" // Prevents Problems panel from stealing focus
+  "markdown-preview-enhanced.revealjsTheme": "none.css",
+  "claudeCode.selectedModel": "sonnet",
+  "notebook.stickyScroll.enabled": true // Prevents Problems panel from stealing focus
 }

@@ -85,8 +85,9 @@ prompt_context() {
 defaults write -g NSWindowShouldDragOnGesture -bool true
 
 # Aerospace Window Manager
-aerospace workspace "$(aerospace list-workspaces --monitor mouse --visible)" && aerospace workspace next
-aerospace workspace "$(aerospace list-workspaces --monitor mouse --visible)" && aerospace workspace prev
+# Move to the next/prev workspace on the current monitor silently
+aerospace workspace next --wrap-around > /dev/null 2>&1
+aerospace workspace prev --wrap-around > /dev/null 2>&1
 
 # ── Additional PATH Configuration ───────────────────────────────────────────────
 # # Add the .mix directory for the current GLOBAL asdf version to the PATH (for rebar/rebar3)
