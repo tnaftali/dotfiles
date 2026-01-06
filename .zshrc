@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════════
+#═══════════════════════════════════════════════════════════════════════════════
 # ZSH CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -12,6 +12,7 @@ HYPHEN_INSENSITIVE="true"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 LANG="en_US.UTF-8"
+DISABLE_AUTO_TITLE="true"
 
 plugins=(
   git
@@ -199,6 +200,37 @@ wt() {
 }
 
 # Worktrees END
+
+# 3. The Title Function: folder | command
+_update_ghostty_title() {
+  local folder="%1~"
+  local cmd="${1:-zsh}"
+  # Esc sequence to set title
+  print -Pn "\e]0;${folder} | ${cmd}\a"
+}
+
+# 4. Define the hooks
+_title_preexec() { _update_ghostty_title "${1%% *}" }
+_title_precmd()  { _update_ghostty_title "zsh" }
+
+# 5. Manual Title / Reset Function
+title() {
+  if [[ -z "$1" ]]; then
+    add-zsh-hook preexec _title_preexec
+    add-zsh-hook precmd _title_precmd
+    _update_ghostty_title "zsh"
+    echo "Default titles enabled."
+  else
+    add-zsh-hook -d preexec _title_preexec
+    add-zsh-hook -d precmd _title_precmd
+    print -Pn "\e]0;$1\a"
+    echo "Manual title set to: $1"
+  fi
+}
+
+# 6. Initialize hooks on startup
+add-zsh-hook preexec _title_preexec
+add-zsh-hook precmd _title_precmd
 
 # ── PATH Configuration ──────────────────────────────────────────────────────────
 export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
