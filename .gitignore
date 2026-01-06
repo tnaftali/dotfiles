@@ -64,5 +64,3 @@ npm-debug.log
 # ag search ignore
 .ignore
 
-# Claude local settings (may contain sensitive data)
-.claude/settings.local.json
