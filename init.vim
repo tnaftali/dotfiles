@@ -9,24 +9,26 @@
 " Plugins will be downloaded under the specified directory.
 call plug#begin('~/.vim/plugged')
 
-" tmux
-Plug 'christoomey/vim-tmux-navigator' " tmux integration
-Plug 'preservim/vimux'
+" Window navigation
+" Plug 'christoomey/vim-tmux-navigator' " disabled - using native vim mappings
+" Plug 'preservim/vimux' " tmux-only, disabled
 
 " vim utils
-Plug 'tpope/vim-commentary' " comment/uncomment lines with gcc or gc in visual mode
-Plug 'Yggdroot/indentLine'
+" Plug 'tpope/vim-commentary' " replaced by Comment.nvim
+" Plug 'Yggdroot/indentLine' " replaced by indent-blankline.nvim
+Plug 'numToStr/Comment.nvim'
+Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'vim-test/vim-test'
 Plug 'MunifTanjim/nui.nvim'
 " Plug 'VonHeikemen/fine-cmdline.nvim'
-Plug 'mbbill/undotree'
+" Plug 'mbbill/undotree'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim', { 'branch': '0.1.x' }
+Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'rking/ag.vim'
+" Plug 'rking/ag.vim' " redundant with telescope live_grep
 Plug 'karb94/neoscroll.nvim'
 
 " LSP
@@ -38,7 +40,8 @@ Plug 'mhinz/vim-mix-format'
 
 " git
 Plug 'tpope/vim-fugitive' " the ultimate git helper
-Plug 'airblade/vim-gitgutter'
+" Plug 'airblade/vim-gitgutter' " replaced by gitsigns.nvim
+Plug 'lewis6991/gitsigns.nvim'
 Plug 'kdheepak/lazygit.nvim'
 
 " Themes
@@ -53,9 +56,16 @@ Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'elixir-editors/vim-elixir'
 
+" AI autocomplete
+Plug 'supermaven-inc/supermaven-nvim'
+
+" UI enhancements
+Plug 'folke/which-key.nvim'
+Plug 'folke/noice.nvim'
+Plug 'windwp/nvim-autopairs'
+
 " Optional deps
-Plug 'hrsh7th/nvim-cmp'
-Plug 'HakonHarnes/img-clip.nvim'
+" Plug 'hrsh7th/nvim-cmp' " unused - using COC for completions
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -80,7 +90,6 @@ set expandtab " Tabs are spaces
 set re=1 " Use older version of RegEx for not lagging due to syntax highlight
 set number " Show line numbers
 set cursorline " Highlight current line
-set lazyredraw " Redraw only when we need to
 set showmatch " Highlight matching [{()}]
 set smartcase
 set noswapfile
@@ -93,7 +102,6 @@ set smartindent
 " Searching
 set ignorecase " Case insensitive searching
 set smartcase " Case-sensitive if expresson contains a capital letter
-set nolazyredraw " Don't redraw while executing macros
 
 " System integration
 set clipboard+=unnamedplus
@@ -128,15 +136,10 @@ highlight NonText guibg=none
 " Set space as Leader key
 let mapleader = "\<Space>"
 
-" Close tag configuration
-let g:closetag_filenames = '*.html,*.html.*'
-let g:closetag_xhtml_filenames = '*.html,*.html.*'
-
-" COC Node path
-let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v20.18.1/bin/node'
+" COC Node path (uses system node from PATH)
+" let g:coc_node_path = '/Users/tobi/.nvm/versions/node/v20.18.1/bin/node'
 
 " vim-test configuration
-let g:test#preserve_screen = 1
 let test#strategy = "neovim"
 let test#elixir#exunit#executable = 'source .env && MIX_ENV=test mix test --color'
 let g:test#neovim#start_normal = 1 " If using neovim strategy
@@ -200,15 +203,15 @@ highlight ConflictMarkerSeparator guifg=#e06c75
 highlight ConflictMarkerTheirs guibg=#344f69
 highlight ConflictMarkerEnd guifg=#e06c75
 
-" GitGutter signs
-let g:gitgutter_sign_added = '+'
-let g:gitgutter_sign_modified = '>'
-let g:gitgutter_sign_removed = '-'
-let g:gitgutter_sign_removed_first_line = '^'
-let g:gitgutter_sign_modified_removed = '<'
+" GitGutter signs (disabled - using gitsigns.nvim)
+" let g:gitgutter_sign_added = '+'
+" let g:gitgutter_sign_modified = '>'
+" let g:gitgutter_sign_removed = '-'
+" let g:gitgutter_sign_removed_first_line = '^'
+" let g:gitgutter_sign_modified_removed = '<'
 
-" Tmux navigator
-let g:tmux_navigator_disable_when_zoomed = 1
+" Tmux navigator (disabled - not using plugin)
+" let g:tmux_navigator_disable_when_zoomed = 1
 
 " ============================================================================
 " KEY MAPPINGS
@@ -244,6 +247,12 @@ nnoremap <silent> <leader>fr :lua require('telescope.builtin').resume()<CR>
 nnoremap <leader>tt :TestNearest<Enter>
 nnoremap <leader>tf :TestFile<Enter>
 
+" Window navigation (Ctrl+hjkl)
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
 " General mappings
 nnoremap <leader><space> :nohlsearch<CR>
 nnoremap <leader>gg :LazyGit<CR>
@@ -257,8 +266,6 @@ map <leader>eg <cmd>e! ~/.config/ghostty/config<cr> " edit ~/.config/ghostty/con
 " Resize panes
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
 nnoremap <silent> <leader>r- :vertical resize -10<CR>
-
-nnoremap <leader>oa :Ollama
 
 " Indent with tab and keep selection
 nnoremap <Tab> >>_
@@ -316,7 +323,6 @@ nnoremap L gt
 
 " Utility mappings
 nnoremap gV `[v`]
-nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
 let @o=""
 
 " Disable problematic mappings
@@ -432,122 +438,241 @@ command Format :%!js-beautify -s 2
 
 lua << EOF
 -- Treesitter configuration
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "elixir", "lua", "vim", "vimdoc", "query", "javascript", "elm" },
-  sync_install = false,
-  auto_install = true,
-  highlight = {
-    enable = true,
-    disable = function(lang, buf)
-      local max_filesize = 100 * 1024 -- 100 KB
-      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-      if ok and stats and stats.size > max_filesize then
-        return true
-      end
-    end,
-    additional_vim_regex_highlighting = false,
-  },
-}
+local ok, treesitter = pcall(require, 'nvim-treesitter.configs')
+if ok then
+  treesitter.setup {
+    ensure_installed = { "elixir", "lua", "vim", "vimdoc", "query", "javascript", "elm" },
+    sync_install = false,
+    auto_install = true,
+    highlight = {
+      enable = true,
+      disable = function(lang, buf)
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+          return true
+        end
+      end,
+      additional_vim_regex_highlighting = false,
+    },
+  }
+end
 
 -- Catppuccin theme configuration
-require("catppuccin").setup({
-  flavour = "auto",
-  transparent_background = true, -- disables setting the background color.
-  background = {
-    light = "latte",
-    dark = "mocha",
-  },
-  show_end_of_buffer = false,
-  term_colors = false,
-  dim_inactive = {
-    enabled = false,
-    shade = "dark",
-    percentage = 0.15,
-  },
-  coc_nvim = true,
-  no_italic = false,
-  no_bold = false,
-  no_underline = false,
-  styles = {
-    comments = { "italic" },
-    conditionals = { "italic" },
-    loops = {},
-    functions = {},
-    keywords = {},
-    strings = {},
-    variables = {},
-    numbers = {},
-    booleans = {},
-    properties = {},
-    types = {},
-    operators = {},
-  },
-  color_overrides = {},
-  custom_highlights = {},
-  default_integrations = true,
-  integrations = {
-    cmp = true,
-    gitsigns = true,
-    nvimtree = true,
-    treesitter = true,
-    notify = false,
-    mini = {
-        enabled = true,
-        indentscope_color = "",
+local ok, catppuccin = pcall(require, "catppuccin")
+if ok then
+  catppuccin.setup({
+    flavour = "auto",
+    transparent_background = true,
+    background = {
+      light = "latte",
+      dark = "mocha",
     },
-  },
-})
-
--- Setup must be called before loading
-vim.cmd.colorscheme "catppuccin"
+    show_end_of_buffer = false,
+    term_colors = false,
+    dim_inactive = {
+      enabled = false,
+      shade = "dark",
+      percentage = 0.15,
+    },
+    coc_nvim = true,
+    no_italic = false,
+    no_bold = false,
+    no_underline = false,
+    styles = {
+      comments = { "italic" },
+      conditionals = { "italic" },
+      loops = {},
+      functions = {},
+      keywords = {},
+      strings = {},
+      variables = {},
+      numbers = {},
+      booleans = {},
+      properties = {},
+      types = {},
+      operators = {},
+    },
+    color_overrides = {},
+    custom_highlights = {},
+    default_integrations = true,
+    integrations = {
+      cmp = true,
+      gitsigns = true,
+      nvimtree = true,
+      treesitter = true,
+      notify = false,
+      mini = {
+          enabled = true,
+          indentscope_color = "",
+      },
+    },
+  })
+  vim.cmd.colorscheme "catppuccin"
+end
 
 -- Lualine configuration
-require('lualine').setup {
-  options = {
-    icons_enabled = true,
-    theme = 'auto',
-    component_separators = { left = '', right = ''},
-    section_separators = { left = '', right = ''},
-    disabled_filetypes = {
-      statusline = {},
-      winbar = {},
+local ok, lualine = pcall(require, 'lualine')
+if ok then
+  lualine.setup {
+    options = {
+      icons_enabled = true,
+      theme = 'auto',
+      component_separators = { left = '', right = ''},
+      section_separators = { left = '', right = ''},
+      disabled_filetypes = {
+        statusline = {},
+        winbar = {},
+      },
+      ignore_focus = {},
+      always_divide_middle = true,
+      globalstatus = false,
+      refresh = {
+        statusline = 1000,
+        tabline = 1000,
+        winbar = 1000,
+      }
     },
-    ignore_focus = {},
-    always_divide_middle = true,
-    globalstatus = false,
-    refresh = {
-      statusline = 1000,
-      tabline = 1000,
-      winbar = 1000,
-    }
-  },
-  sections = {
-    lualine_a = {'mode'},
-    lualine_b = {'branch', 'diff', 'diagnostics'},
-    lualine_c = {{'filename', path = 1 }},
-    lualine_x = {'encoding', 'fileformat', 'filetype'},
-    lualine_y = {'progress'},
-    lualine_z = {'location'}
-  },
-  inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_c = {{'filename', path = 1 }},
-    lualine_x = {'location'},
-    lualine_y = {},
-    lualine_z = {}
-  },
-  tabline = {},
-  winbar = {},
-  inactive_winbar = {},
-  extensions = {}
-}
+    sections = {
+      lualine_a = {'mode'},
+      lualine_b = {'branch', 'diff', 'diagnostics'},
+      lualine_c = {{'filename', path = 1 }},
+      lualine_x = {'encoding', 'fileformat', 'filetype'},
+      lualine_y = {'progress'},
+      lualine_z = {'location'}
+    },
+    inactive_sections = {
+      lualine_a = {},
+      lualine_b = {},
+      lualine_c = {{'filename', path = 1 }},
+      lualine_x = {'location'},
+      lualine_y = {},
+      lualine_z = {}
+    },
+    tabline = {},
+    winbar = {},
+    inactive_winbar = {},
+    extensions = {}
+  }
+end
 
 -- Minintro setup
-require('minintro').setup()
+local ok, minintro = pcall(require, 'minintro')
+if ok then minintro.setup() end
 
 -- Neoscroll setup
-require('neoscroll').setup({
-  mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
-})
+local ok, neoscroll = pcall(require, 'neoscroll')
+if ok then
+  neoscroll.setup({
+    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
+  })
+end
+
+-- Supermaven AI autocomplete
+local ok, supermaven = pcall(require, "supermaven-nvim")
+if ok then
+  supermaven.setup({
+    keymaps = {
+      accept_suggestion = "<Tab>",
+      clear_suggestion = "<C-]>",
+      accept_word = "<C-j>",
+    },
+    color = {
+      suggestion_color = "#585858",
+    },
+    log_level = "off",
+  })
+end
+
+-- Which-key
+local ok, which_key = pcall(require, "which-key")
+if ok then
+  which_key.setup({
+    delay = 300,
+    icons = {
+      mappings = false,
+    },
+  })
+end
+
+-- Comment.nvim
+local ok, comment = pcall(require, "Comment")
+if ok then
+  comment.setup()
+end
+
+-- nvim-autopairs
+local ok, autopairs = pcall(require, "nvim-autopairs")
+if ok then
+  autopairs.setup({
+    check_ts = true,
+  })
+end
+
+-- gitsigns.nvim
+local ok, gitsigns = pcall(require, "gitsigns")
+if ok then
+  gitsigns.setup({
+    signs = {
+      add          = { text = '+' },
+      change       = { text = '>' },
+      delete       = { text = '-' },
+      topdelete    = { text = '^' },
+      changedelete = { text = '<' },
+    },
+    current_line_blame = false,
+    on_attach = function(bufnr)
+      local gs = package.loaded.gitsigns
+      local function map(mode, l, r, opts)
+        opts = opts or {}
+        opts.buffer = bufnr
+        vim.keymap.set(mode, l, r, opts)
+      end
+      -- Navigation
+      map('n', ']c', function()
+        if vim.wo.diff then return ']c' end
+        vim.schedule(function() gs.next_hunk() end)
+        return '<Ignore>'
+      end, {expr=true})
+      map('n', '[c', function()
+        if vim.wo.diff then return '[c' end
+        vim.schedule(function() gs.prev_hunk() end)
+        return '<Ignore>'
+      end, {expr=true})
+    end
+  })
+end
+
+-- indent-blankline
+local ok, ibl = pcall(require, "ibl")
+if ok then
+  ibl.setup({
+    indent = {
+      char = "│",
+    },
+    scope = {
+      enabled = true,
+      show_start = false,
+      show_end = false,
+    },
+  })
+end
+
+-- noice.nvim
+local ok, noice = pcall(require, "noice")
+if ok then
+  noice.setup({
+    lsp = {
+      override = {
+        ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+        ["vim.lsp.util.stylize_markdown"] = true,
+      },
+    },
+    presets = {
+      bottom_search = true,
+      command_palette = true,
+      long_message_to_split = true,
+    },
+  })
+end
 EOF

@@ -75,6 +75,10 @@ after-startup-command = [
     if.app-id = 'ru.keepcoder.Telegram'
     run = 'layout floating'
 
+[[on-window-detected]]
+    if.app-id = 'com.getupnote.desktop'
+    run = 'layout floating'
+
 # ==============================================================================
 # 3. KEYBINDING MODES
 # ==============================================================================

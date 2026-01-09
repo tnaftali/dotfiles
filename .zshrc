@@ -189,12 +189,12 @@ wt() {
     echo "⚠️  mix compile had issues, but continuing..."
   }
 
-  if command -v cursor &>/dev/null; then
-    # Launch cursor in background without blocking the shell
-    (cursor "$worktree_path" &) 2>/dev/null
-  else
-    echo "💡 Tip: Install Cursor or open manually in your editor."
-  fi
+  # if command -v cursor &>/dev/null; then
+  #   # Launch cursor in background without blocking the shell
+  #   (cursor "$worktree_path" &) 2>/dev/null
+  # else
+  #   echo "💡 Tip: Install Cursor or open manually in your editor."
+  # fi
 
   echo "✅ Worktree '$feature_name' created at $worktree_path and checked out."
 }
