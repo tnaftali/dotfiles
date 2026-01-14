@@ -38,11 +38,13 @@ Plug 'vim-test/vim-test'
 Plug 'tpope/vim-fugitive'
 Plug 'lewis6991/gitsigns.nvim'
 Plug 'kdheepak/lazygit.nvim'
+Plug 'sindrets/diffview.nvim'
 
 " Language specific
 Plug 'elixir-editors/vim-elixir'
 Plug 'mhinz/vim-mix-format'
 Plug 'MeanderingProgrammer/render-markdown.nvim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 
 " UI
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
@@ -137,6 +139,11 @@ highlight ConflictMarkerSeparator guifg=#e06c75
 highlight ConflictMarkerTheirs guibg=#344f69
 highlight ConflictMarkerEnd guifg=#e06c75
 
+" Markdown preview configuration
+let g:mkdp_auto_close = 0
+let g:mkdp_refresh_slow = 0
+let g:mkdp_browser = ''
+
 " ============================================================================
 " KEY MAPPINGS
 " ============================================================================
@@ -174,13 +181,22 @@ nnoremap <C-l> <C-w>l
 nnoremap <leader><space> :nohlsearch<CR>
 nnoremap <leader>gg :LazyGit<CR>
 
+" Diffview mappings
+nnoremap <leader>do :DiffviewOpen<CR>
+nnoremap <leader>dc :DiffviewClose<CR>
+nnoremap <leader>dh :DiffviewFileHistory %<CR>
+
 " Edit config files
 nnoremap <leader>en <cmd>edit ~/.config/nvim/init.vim<cr>
 nnoremap <leader>ez <cmd>edit ~/dotfiles/.zshrc<cr>
 nnoremap <leader>eg <cmd>edit ~/.config/ghostty/config<cr>
 
-" Markdown preview toggle
+" Markdown preview toggle (inline)
 nnoremap <leader>mp :RenderMarkdown toggle<CR>
+
+" Markdown preview (browser)
+nnoremap <leader>md :MarkdownPreview<CR>
+nnoremap <leader>ms :MarkdownPreviewStop<CR>
 
 " Resize panes
 nnoremap <silent> <leader>r+ :vertical resize +10<CR>
@@ -515,6 +531,19 @@ local ok, render_markdown = pcall(require, "render-markdown")
 if ok then
   render_markdown.setup({
     headings = { '󰲡 ', '󰲣 ', '󰲥 ', '󰲧 ', '󰲩 ', '󰲫 ' },
+  })
+end
+
+-- diffview.nvim
+local ok, diffview = pcall(require, "diffview")
+if ok then
+  diffview.setup({
+    use_icons = true,
+    view = {
+      merge_tool = {
+        layout = "diff3_mixed",
+      },
+    },
   })
 end
 EOF

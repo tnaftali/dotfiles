@@ -124,10 +124,9 @@
       "Skill(format-run-tests-and-credo)",
       "mcp__*"
     ],
-    "deny": [
-      "Bash(psql:*)"
-    ]
+    "deny": []
   },
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -170,6 +169,5 @@
     "ralph-wiggum@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true
-  },
-  "model": "opus"
+  }
 }
