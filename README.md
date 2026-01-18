@@ -1,12 +1,12 @@
 # Dotfiles
 
-Personal configuration files for macOS.
+Personal config files for development.
 
 ## Contents
 
-- `.zshrc` - Zsh config
-- `.tmux.conf` - Tmux config (Catppuccin theme, Ctrl+S prefix)
-- `init.vim` - Neovim config
+- `.zshrc` - zsh config
+- `.tmux.conf` - tmux config
+- `init.vim` - neovim config
 - `ghostty.config` - Ghostty terminal
 - `.aerospace.toml` - AeroSpace window manager
 - `.gitconfig` - Git settings
@@ -15,10 +15,11 @@ Personal configuration files for macOS.
 ## AI Tools
 
 Shared configs in `.agents/` with tool-specific symlinks:
-- `.agents/` - Source of truth for agents, commands, hooks
-- `.claude/` - Claude Code (symlinks to .agents/)
-- `.opencode/` - OpenCode (symlinks to .agents/)
-- `AGENTS.md`, `GEMINI.md` - Root symlinks for tool discovery
+- `.agents/` - Source of truth (agents, commands, hooks)
+- `.claude/`, `.opencode/`, `.agent/` - Tool-specific symlinks
+- `.cursorrules`, `AGENTS.md`, `GEMINI.md` - Root symlinks
+
+Supported: Claude Code, OpenCode, Gemini CLI, Cursor, Google Antigravity
 
 ## Archive
 
@@ -26,7 +27,10 @@ Legacy configs in `archive/` (Linux, old terminals).
 
 ## Setup
 
-Symlink files to their expected locations:
-```
+```bash
+# Symlink shell/editor configs
 ln -sf ~/dotfiles/.zshrc ~/.zshrc
+
+# Setup all AI tools
+./setup-ai-tools.sh
 ```

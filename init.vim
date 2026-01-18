@@ -45,7 +45,6 @@ Plug 'sindrets/diffview.nvim'
 " Language specific
 Plug 'elixir-editors/vim-elixir'
 Plug 'mhinz/vim-mix-format'
-Plug 'MeanderingProgrammer/render-markdown.nvim'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 
 " UI
@@ -196,9 +195,6 @@ nnoremap <leader>en <cmd>edit ~/.config/nvim/init.vim<cr>
 nnoremap <leader>ez <cmd>edit ~/dotfiles/.zshrc<cr>
 nnoremap <leader>et <cmd>edit ~/dotfiles/.tmux.conf<cr>
 nnoremap <leader>eg <cmd>edit ~/.config/ghostty/config<cr>
-
-" Markdown preview toggle (inline)
-nnoremap <leader>mp :RenderMarkdown toggle<CR>
 
 " Markdown preview (browser)
 nnoremap <leader>md :MarkdownPreview<CR>
@@ -529,14 +525,6 @@ if ok then
     git_status = {
       window = { position = "float" },
     },
-  })
-end
-
--- render-markdown.nvim
-local ok, render_markdown = pcall(require, "render-markdown")
-if ok then
-  render_markdown.setup({
-    headings = { '󰲡 ', '󰲣 ', '󰲥 ', '󰲧 ', '󰲩 ', '󰲫 ' },
   })
 end
 
