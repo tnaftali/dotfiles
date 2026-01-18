@@ -53,6 +53,6 @@ create_symlink "$DOTFILES/ide/keybindings.json" "$CURSOR_DIR/keybindings.json"
 # Google Antigravity - global skills
 echo "Setting up Google Antigravity..."
 mkdir -p ~/.gemini/antigravity
-create_symlink "$DOTFILES/.agents/agents" ~/.gemini/antigravity/skills
+create_symlink "$DOTFILES/.agents/skills" ~/.gemini/antigravity/skills
 
 echo "Done! AI tools configured."
