@@ -32,7 +32,7 @@ create_symlink "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
 # OpenCode
 echo "Setting up OpenCode..."
 mkdir -p ~/.config/opencode
-create_symlink "$DOTFILES/.agents/AGENTS.md" ~/.config/opencode/AGENTS.md
+create_symlink "$DOTFILES/.agents/agents" ~/.config/opencode/agents
 
 # Gemini CLI
 echo "Setting up Gemini CLI..."
@@ -49,11 +49,6 @@ fi
 mkdir -p "$CURSOR_DIR"
 create_symlink "$DOTFILES/ide/settings.json" "$CURSOR_DIR/settings.json"
 create_symlink "$DOTFILES/ide/keybindings.json" "$CURSOR_DIR/keybindings.json"
-
-# Cursor AI - global rules (project-level .cursorrules is in repo)
-echo "Setting up Cursor AI rules..."
-mkdir -p ~/.cursor
-create_symlink "$DOTFILES/.agents/AGENTS.md" ~/.cursor/rules
 
 # Google Antigravity - global skills
 echo "Setting up Google Antigravity..."
