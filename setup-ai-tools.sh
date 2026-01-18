@@ -31,8 +31,8 @@ create_symlink "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
 
 # OpenCode
 echo "Setting up OpenCode..."
-mkdir -p ~/.opencode
-create_symlink "$DOTFILES/.agents/agents" ~/.opencode/agents
+mkdir -p ~/.config/opencode
+create_symlink "$DOTFILES/.agents/AGENTS.md" ~/.config/opencode/AGENTS.md
 
 # Gemini CLI
 echo "Setting up Gemini CLI..."
