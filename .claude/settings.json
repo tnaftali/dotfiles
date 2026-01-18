@@ -155,7 +155,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.claude/hooks/format-elixir.sh\""
+            "command": "\"$HOME/.agents/hooks/format-elixir.sh\""
           }
         ]
       }

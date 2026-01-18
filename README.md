@@ -10,14 +10,15 @@ Personal configuration files for macOS.
 - `ghostty.config` - Ghostty terminal
 - `.aerospace.toml` - AeroSpace window manager
 - `.gitconfig` - Git settings
-- `settings.json` / `keybindings.json` - Cursor editor
+- `ide/` - Cursor/VS Code settings and keybindings
 
-## Claude Code
+## AI Tools
 
-Custom agents and commands in `.claude/`:
-- `agents/` - Codebase analysis tools
-- `commands/` - Workflow automation (research, planning, testing)
-- `hooks/` - Post-edit formatting
+Shared configs in `.agents/` with tool-specific symlinks:
+- `.agents/` - Source of truth for agents, commands, hooks
+- `.claude/` - Claude Code (symlinks to .agents/)
+- `.opencode/` - OpenCode (symlinks to .agents/)
+- `AGENTS.md`, `GEMINI.md` - Root symlinks for tool discovery
 
 ## Archive
 
@@ -25,7 +26,7 @@ Legacy configs in `archive/` (Linux, old terminals).
 
 ## Setup
 
-Symlink files to their expected locations. Example:
+Symlink files to their expected locations:
 ```
 ln -sf ~/dotfiles/.zshrc ~/.zshrc
 ```
