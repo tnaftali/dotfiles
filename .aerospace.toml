@@ -26,7 +26,7 @@ enable-normalization-opposite-orientation-for-nested-containers = false
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 after-startup-command = [
-  'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0'
+  'exec-and-forget borders active_color=0xff5de4e7 inactive_color=0xff494d64 width=5.0'
 ]
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
@@ -162,6 +162,10 @@ after-startup-command = [
     # --------------------------------------------------------------------------
 
     alt-shift-semicolon = 'reload-config'
+
+    # App launchers (new window)
+    alt-shift-t = 'exec-and-forget open -n -a Ghostty'
+    alt-shift-b = 'exec-and-forget open -n -a "Brave Browser"'
 
     cmd-h = [] # Disable "hide application"
     cmd-alt-h = [] # Disable "hide others"

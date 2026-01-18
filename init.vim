@@ -26,6 +26,8 @@ Plug 'rhysd/conflict-marker.vim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'nvim-neo-tree/neo-tree.nvim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'preservim/vimux'
 
 " LSP & Syntax
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
@@ -144,6 +146,9 @@ let g:mkdp_auto_close = 0
 let g:mkdp_refresh_slow = 0
 let g:mkdp_browser = ''
 
+" Tmux navigator configuration
+let g:tmux_navigator_disable_when_zoomed = 1
+
 " ============================================================================
 " KEY MAPPINGS
 " ============================================================================
@@ -189,6 +194,7 @@ nnoremap <leader>dh :DiffviewFileHistory %<CR>
 " Edit config files
 nnoremap <leader>en <cmd>edit ~/.config/nvim/init.vim<cr>
 nnoremap <leader>ez <cmd>edit ~/dotfiles/.zshrc<cr>
+nnoremap <leader>et <cmd>edit ~/dotfiles/.tmux.conf<cr>
 nnoremap <leader>eg <cmd>edit ~/.config/ghostty/config<cr>
 
 " Markdown preview toggle (inline)
