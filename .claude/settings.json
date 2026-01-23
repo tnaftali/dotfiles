@@ -124,7 +124,11 @@
       "Skill(format-run-tests-and-credo)",
       "mcp__*"
     ],
-    "deny": []
+    "deny": [
+      "Bash(gh pr merge)",
+      "Bash(gh repo delete)",
+      "Bash(gh api)"
+    ]
   },
   "model": "opus",
   "hooks": {
@@ -144,7 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Hero.aiff && osascript -e 'display notification \"Claude needs attention\" with title \"Action Required\"'"
+            "command": "afplay /System/Library/Sounds/Hero.aiff && osascript -e 'display notification \"Claude needs attention\" with title \"Claude Code\"'"
           }
         ]
       }

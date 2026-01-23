@@ -68,6 +68,8 @@ alias srct="tmux source-file ~/dotfiles/.tmux.conf"
 
 # Utility Aliases
 alias list="exa --long --header --git --icons --all"
+alias lg="lazygit"
+alias nv="nvim"
 
 # ── Node Version Manager (NVM) Setup ────────────────────────────────────────────
 export NVM_DIR=~/.nvm
