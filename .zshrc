@@ -244,3 +244,6 @@ export PATH="$PATH:/Users/tobi/.local/bin"
 . "$HOME/.atuin/bin/env"
 eval "$(atuin init zsh)"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# opencode
+export PATH=/Users/tobi/.opencode/bin:$PATH
