@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(claude:*)",
@@ -137,7 +140,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff && osascript -e 'display notification \"Task Complete\" with title \"Claude Code\"'"
+            "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"'"
           }
         ]
       }
@@ -148,7 +151,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Hero.aiff && osascript -e 'display notification \"Claude needs attention\" with title \"Claude Code\"'"
+            "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"'"
           }
         ]
       }
@@ -173,6 +176,9 @@
     "ralph-wiggum@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "claude-hud@claude-hud": true
-  }
+    "claude-hud@claude-hud": true,
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "effortLevel": "medium"
 }

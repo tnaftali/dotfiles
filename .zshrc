@@ -13,6 +13,7 @@ COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 LANG="en_US.UTF-8"
 DISABLE_AUTO_TITLE="true"
+unset MAILCHECK
 
 plugins=(
   git
@@ -70,6 +71,7 @@ alias srct="tmux source-file ~/dotfiles/.tmux.conf"
 alias list="exa --long --header --git --icons --all"
 alias lg="lazygit"
 alias nv="nvim"
+alias fm="frogmouth"
 
 # ── Node Version Manager (NVM) Setup ────────────────────────────────────────────
 export NVM_DIR=~/.nvm

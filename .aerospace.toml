@@ -25,19 +25,19 @@ enable-normalization-opposite-orientation-for-nested-containers = false
 # Mouse follows focus when focused monitor changes
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
-after-startup-command = [
-  'exec-and-forget borders active_color=0xff5de4e7 inactive_color=0xff494d64 width=10.0'
-]
+# after-startup-command = [
+#   'exec-and-forget borders active_color=0xff5de4e7 inactive_color=0xff494d64 width=10.0'
+# ]
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # All values are preserved from your config.
 [gaps]
-    inner.horizontal = 10
-    inner.vertical =   10
-    outer.left =       10
-    outer.bottom =     10
-    outer.top =        10
-    outer.right =      10
+    inner.horizontal = 5
+    inner.vertical =   5
+    outer.left =       5
+    outer.bottom =     5
+    outer.top =        5
+    outer.right =      5
 
 
 # ==============================================================================
@@ -77,6 +77,10 @@ after-startup-command = [
 
 [[on-window-detected]]
     if.app-id = 'com.getupnote.desktop'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.iCal'
     run = 'layout floating'
 
 # ==============================================================================

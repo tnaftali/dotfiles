@@ -183,7 +183,7 @@ nnoremap <C-l> <C-w>l
 
 " General mappings
 nnoremap <leader><space> :nohlsearch<CR>
-nnoremap <leader>gg :LazyGit<CR>
+nnoremap <leader>lg :LazyGit<CR>
 
 " Diffview mappings
 nnoremap <leader>do :DiffviewOpen<CR>
