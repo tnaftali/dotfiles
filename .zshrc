@@ -72,6 +72,7 @@ alias list="exa --long --header --git --icons --all"
 alias lg="lazygit"
 alias nv="nvim"
 alias fm="frogmouth"
+alias t="tmux a"
 
 # ── Node Version Manager (NVM) Setup ────────────────────────────────────────────
 export NVM_DIR=~/.nvm

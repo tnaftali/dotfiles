@@ -1,7 +1,7 @@
 #!/bin/bash
 direction=$1
 current=$(tmux display-message -p '#{session_name}')
-sessions=($(tmux list-sessions -F '#{session_name}'))
+sessions=($(tmux list-sessions -F '#{session_id}:#{session_name}' | sort -t'$' -k2 -n | cut -d: -f2))
 count=${#sessions[@]}
 
 for i in "${!sessions[@]}"; do
