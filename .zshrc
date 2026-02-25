@@ -156,32 +156,13 @@ wt() {
     return 1
   }
 
-  # Use correct Node version for npm install
-  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-    # Ensure nvm is properly loaded in this subshell
-    export NVM_DIR="$HOME/.nvm"
-    source "$NVM_DIR/nvm.sh" 2>/dev/null || true
-
-    # Try to use node 20 (trying specific version first, then any 20.x)
-    nvm use 20.19 &>/dev/null || nvm use 20 &>/dev/null || echo "⚠️  Could not switch to Node 20"
+  # Symlink node_modules if it exists in source
+  if [[ -d "$project_dir/node_modules" ]]; then
+    echo "📦 Symlinking node_modules..."
+    ln -s "$project_dir/node_modules" "$worktree_path/node_modules" && echo "📦 Symlinked node_modules."
+  else
+    echo "⚠️  No node_modules found in source directory."
   fi
-
-  # Temporarily disable engine-strict to avoid version mismatch errors
-  local old_engine_strict
-  old_engine_strict=$(npm config get engine-strict 2>/dev/null || echo "false")
-  npm config set engine-strict false 2>/dev/null || true
-
-  # Run npm install with error handling - use --force to bypass engine checks if needed
-  echo "📦 Installing npm dependencies..."
-  if ! npm install 2>&1; then
-    echo "⚠️  npm install had issues, trying with --force..."
-    if ! npm install --force 2>&1; then
-      echo "⚠️  npm install failed, but continuing..."
-    fi
-  fi
-
-  # Restore original engine-strict setting
-  npm config set engine-strict "$old_engine_strict" 2>/dev/null || true
 
   # Run mix commands with error handling
   echo "🔧 Getting Elixir dependencies..."

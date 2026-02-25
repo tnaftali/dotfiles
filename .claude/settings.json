@@ -2,6 +2,10 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(claude:*)",
@@ -165,6 +169,24 @@
             "command": "\"$HOME/.agents/hooks/format-elixir.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/tobi/.claude/hooks/gsd-context-monitor.js\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/tobi/.claude/hooks/gsd-check-update.js\""
+          }
+        ]
       }
     ]
   },
@@ -178,11 +200,8 @@
     "code-simplifier@claude-plugins-official": true,
     "claude-hud@claude-hud": true,
     "frontend-design@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
   },
-  "effortLevel": "medium",
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  }
+  "effortLevel": "medium"
 }
