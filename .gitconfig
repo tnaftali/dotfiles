@@ -2,46 +2,45 @@
 # GIT CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# ── User Identity ───────────────────────────────────────────────────────────────
+# ── User Identity ─────────────────────────────────────────────────────────────
 [user]
-  name = Tobias Naftali
-  email = 8753873+tnaftali@users.noreply.github.com
+	email = tobias.naftali@gmail.com
+	name = Tobias Naftali
 
-[github]
-  user = tnaftali
+# ── Core Settings ─────────────────────────────────────────────────────────────
+[init]
+	defaultBranch = main
 
-# ── Core Settings ───────────────────────────────────────────────────────────────
 [core]
-	pager = /opt/diff-so-fancy/diff-so-fancy | less --tabs=2 -RFX
+	pager = delta
 
-# ── Diff & Merge Tools ──────────────────────────────────────────────────────────
-[diff]
-    tool = meld
+[interactive]
+	diffFilter = delta --color-only
 
-[difftool]
-    prompt = false
+# ── Delta (diff pager) ───────────────────────────────────────────────────────
+[delta]
+	side-by-side = true
+	line-numbers = true
+	syntax-theme = Nord
 
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
+# ── Git LFS ───────────────────────────────────────────────────────────────────
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
 
-# ── Color Configuration ─────────────────────────────────────────────────────────
-[color]
-	ui = true
+# ── Push & Pull ───────────────────────────────────────────────────────────────
+[push]
+	autoSetupRemote = true
 
-[color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green bold
-	newHighlight = green bold 22
+# ── Merge & Conflicts ────────────────────────────────────────────────────────
+[merge]
+	conflictstyle = diff3
 
-[color "diff"]
-	meta = 11
-	frag = magenta bold
-	commit = yellow bold
-	old = red bold
-	new = green bold
-	whitespace = red reverse
+[rerere]
+	enabled = true
 
-# ── Branch & Checkout Settings ──────────────────────────────────────────────────
+# ── Branch & Checkout Settings ────────────────────────────────────────────────
 [checkout]
-     defaultRemote = origin
+	defaultRemote = origin

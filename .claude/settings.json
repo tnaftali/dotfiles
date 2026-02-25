@@ -147,6 +147,15 @@
             "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"'"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y codevator stop"
+          }
+        ]
       }
     ],
     "Notification": [
@@ -156,6 +165,15 @@
           {
             "type": "command",
             "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"'"
+          }
+        ]
+      },
+      {
+        "matcher": "permission_prompt|idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y codevator stop"
           }
         ]
       }
@@ -185,6 +203,18 @@
           {
             "type": "command",
             "command": "node \"/Users/tobi/.claude/hooks/gsd-check-update.js\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y codevator play",
+            "async": true
           }
         ]
       }
