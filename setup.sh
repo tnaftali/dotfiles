@@ -35,8 +35,11 @@ create_symlink "$DOTFILES/ghostty.config" ~/.config/ghostty/config
 
 # Claude Code
 echo "Setting up Claude Code..."
-mkdir -p ~/.claude
-create_symlink "$DOTFILES/.agents/agents" ~/.claude/agents
+mkdir -p ~/.claude/agents
+# Symlink individual agent files (directory has other files from plugins)
+for f in "$DOTFILES/.agents/agents/"*.md; do
+  create_symlink "$f" ~/.claude/agents/"$(basename "$f")"
+done
 create_symlink "$DOTFILES/.agents/commands" ~/.claude/commands
 create_symlink "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
 create_symlink "$DOTFILES/.claude/CLAUDE.md" ~/.claude/CLAUDE.md
