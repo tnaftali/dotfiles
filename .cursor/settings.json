@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit*)",
+      "Bash(git add*)",
+      "Bash(git checkout*)",
+      "Bash(git switch*)",
+      "Bash(git branch*)",
+      "Bash(git stash*)",
+      "Bash(git rebase*)",
+      "Bash(git merge*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git status*)",
+      "Bash(.cursor/hooks/cursor-agent-complete.sh)",
+      "Bash(.cursor/hooks/cursor-agent-needs-attention.sh)",
+      "Bash(bash .cursor/hooks/cursor-agent-complete.sh)",
+      "Bash(bash .cursor/hooks/cursor-agent-needs-attention.sh)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .cursor/hooks/cursor-agent-complete.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|idle_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .cursor/hooks/cursor-agent-needs-attention.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "_mcpNote": "MCP servers (tidewave, etc.) are in repo root .mcp.json — enable in Cursor MCP settings"
+}

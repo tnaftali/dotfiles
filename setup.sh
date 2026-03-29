@@ -33,6 +33,10 @@ create_symlink "$DOTFILES/init.vim" ~/.config/nvim/init.vim
 mkdir -p ~/.config/ghostty
 create_symlink "$DOTFILES/ghostty.config" ~/.config/ghostty/config
 
+# Agent config (hooks, shared agents) — used by Claude and others
+echo "Setting up agent config..."
+create_symlink "$DOTFILES/.agents" ~/.agents
+
 # Claude Code
 echo "Setting up Claude Code..."
 mkdir -p ~/.claude/agents
@@ -43,6 +47,10 @@ done
 create_symlink "$DOTFILES/.agents/commands" ~/.claude/commands
 create_symlink "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
 create_symlink "$DOTFILES/.claude/CLAUDE.md" ~/.claude/CLAUDE.md
+
+# Cursor (global fallback when not in a project)
+echo "Setting up Cursor..."
+create_symlink "$DOTFILES/.cursor" ~/.cursor
 
 # OpenCode
 echo "Setting up OpenCode..."

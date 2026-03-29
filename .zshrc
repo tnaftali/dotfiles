@@ -69,6 +69,7 @@ alias srct="tmux source-file ~/dotfiles/.tmux.conf"
 
 # Utility Aliases
 alias list="exa --long --header --git --icons --all"
+alias ls="eza --icons --grid --group-directories-first"
 alias lg="lazygit"
 alias nv="nvim"
 alias fm="frogmouth"
@@ -144,12 +145,23 @@ wt() {
     cp "$project_dir/.local.env" "$worktree_path/.local.env" && echo "📋 Copied .local.env into worktree."
   fi
 
-  local hidden_dirs=(.instrumental .agent_os .claude .cursor)
-  for dir in $hidden_dirs; do
+  # Copy other hidden dirs; symlink .claude, .cursor, .mcp.json to main repo so worktrees share one config
+  local main_repo
+  main_repo=$(git -C "$project_dir" worktree list --porcelain | awk '/^worktree /{print $2; exit}')
+  for dir in .instrumental .agent_os; do
     if [[ -d "$project_dir/$dir" ]]; then
       cp -R "$project_dir/$dir" "$worktree_path/$dir" && echo "📂 Copied $dir into worktree."
     fi
   done
+  if [[ -d "$main_repo/.claude" ]]; then
+    ln -sf "$main_repo/.claude" "$worktree_path/.claude" && echo "🔗 Symlinked .claude to main repo."
+  fi
+  if [[ -d "$main_repo/.cursor" ]]; then
+    ln -sf "$main_repo/.cursor" "$worktree_path/.cursor" && echo "🔗 Symlinked .cursor to main repo."
+  fi
+  if [[ -f "$main_repo/.mcp.json" ]]; then
+    ln -sf "$main_repo/.mcp.json" "$worktree_path/.mcp.json" && echo "🔗 Symlinked .mcp.json to main repo."
+  fi
 
   cd "$worktree_path" || {
     echo "❌ Failed to change to worktree directory."
@@ -225,6 +237,8 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
 export PATH="$PATH:/Users/tobi/.local/bin"
 
 # ── Shell History & Completion ──────────────────────────────────────────────────
+# fzf first, then atuin — so atuin's Ctrl+R binding takes priority
+source <(fzf --zsh)
 . "$HOME/.atuin/bin/env"
 eval "$(atuin init zsh)"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

@@ -14,10 +14,24 @@ Personal config files for macOS development.
 ## AI Tools
 
 Shared configs in `.agents/` with tool-specific symlinks:
-- `.agents/` - Source of truth (agents, commands, hooks)
-- `.claude/` - Claude Code settings and hooks
+- `~/.agents` → `.agents/` (agents, commands, hooks — e.g. format-elixir)
+- `~/.claude/` — Claude Code (setup.sh symlinks agents, commands, settings, CLAUDE.md)
+- `~/.cursor` → `.cursor/` — global Cursor config when a project has no own `.cursor`
 
-Supported: Claude Code, OpenCode
+Supported: Claude Code, OpenCode, Cursor
+
+### Worktrees (core repo)
+
+Agent config and MCP live in the **main repo**; worktrees symlink to it. New worktrees get this automatically from `wt()`.
+
+1. **Merge MCP from all worktrees into main** (in case any worktree had its own `.mcp.json`):
+   ```bash
+   cd ~/Projects/core && ~/dotfiles/scripts/merge-mcp-into-main.sh
+   ```
+2. **Fix existing worktrees** (symlink `.claude`, `.cursor`, `.mcp.json` to main):
+   ```bash
+   cd ~/Projects/core && ~/dotfiles/scripts/fix-worktrees-agent-config.sh
+   ```
 
 ## Archive
 

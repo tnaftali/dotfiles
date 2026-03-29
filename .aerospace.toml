@@ -99,6 +99,14 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
     if.app-id = 'com.apple.MobileSMS'
     run = 'layout floating'
 
+[[on-window-detected]]
+    if.app-id = 'app.soulver.mac'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.max-langer.Latest'
+    run = 'layout floating'
+
 # ==============================================================================
 # 3. KEYBINDING MODES
 # ==============================================================================

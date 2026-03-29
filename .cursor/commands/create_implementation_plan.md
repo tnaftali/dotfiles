@@ -1,0 +1,1 @@
+Create an implementation plan document using the following methodology: @.agents/commands/create_implementation_plan.md

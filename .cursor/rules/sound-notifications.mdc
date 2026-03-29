@@ -1,0 +1,22 @@
+---
+description: Play sound + macOS notification when agent completes or needs input (same as Claude Code)
+alwaysApply: true
+---
+
+# Sound notifications for Cursor Agent
+
+Use the same sound + macOS notification behaviour as Claude Code:
+
+1. **When you finish a task** (e.g. implementation done, plan written, tests passing): run the "task complete" hook so the user gets a sound and notification:
+   ```bash
+   .cursor/hooks/cursor-agent-complete.sh
+   ```
+   Or from repo root: `bash .cursor/hooks/cursor-agent-complete.sh`
+
+2. **When you need user input** (e.g. permission, clarification, approval): run the "needs attention" hook:
+   ```bash
+   .cursor/hooks/cursor-agent-needs-attention.sh
+   ```
+   Or: `bash .cursor/hooks/cursor-agent-needs-attention.sh`
+
+Scripts play Glass.aiff (complete) or Hero.aiff (needs attention) and show a macOS notification with the project folder name. Run them from the project root so the title is correct.

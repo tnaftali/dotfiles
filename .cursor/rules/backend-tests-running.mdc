@@ -1,0 +1,9 @@
+---
+description: Project-specific test run instructions — request this rule in repos that define it
+alwaysApply: false
+---
+# Backend tests
+
+This is a placeholder. Projects define their own test commands and setup (e.g. in the repo’s `.cursor/rules/` or `.agents/rules/`).
+
+Use the project’s test docs or `make test` / `mix test` as appropriate.

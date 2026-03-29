@@ -1,0 +1,9 @@
+---
+description: Project-specific database access — request this rule in repos that define it
+alwaysApply: false
+---
+# Database Access
+
+This is a placeholder. Projects that need database credentials and connection details define their own rule (e.g. in the repo’s `.cursor/rules/` or `.agents/rules/`).
+
+Ask for or open the project’s database-access documentation when you need to run DB commands or use env vars.

@@ -1,0 +1,6 @@
+---
+globs: **/*_test.exs,**/test/**/*.exs
+alwaysApply: false
+description: Test insertion time handling patterns
+---
+@.agents/rules/backend/test/timestamp-handling.md

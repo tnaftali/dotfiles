@@ -1,0 +1,5 @@
+---
+globs: **/graphql/*.ex,**/graphql/**/*.ex
+alwaysApply: false
+---
+@.agents/rules/backend/graphql/elm-graphql.md
