@@ -32,7 +32,6 @@
       "Bash(mix ecto.reset*)"
     ]
   },
-  "model": "opus[1m]",
   "hooks": {
     "Stop": [
       {
@@ -40,15 +39,6 @@
           {
             "type": "command",
             "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"'"
-          }
-        ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx -y codevator stop"
           }
         ]
       }
@@ -60,15 +50,6 @@
           {
             "type": "command",
             "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"'"
-          }
-        ]
-      },
-      {
-        "matcher": "permission_prompt|idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx -y codevator stop"
           }
         ]
       }
@@ -118,17 +99,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y codevator play",
-            "async": true
-          }
-        ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node /Users/tobi/.claude/plugins/cache/claude-context-mode/context-mode/0.9.17/hooks/pretooluse.mjs"
+            "command": "node /Users/tobi/.claude/plugins/marketplaces/0.9.17/hooks/pretooluse.mjs"
           }
         ]
       }
@@ -139,7 +110,6 @@
     "command": "bash -c '\"/opt/homebrew/bin/node\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
-    "ralph-wiggum@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "claude-hud@claude-hud": true,
