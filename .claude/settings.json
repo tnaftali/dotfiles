@@ -1,10 +1,13 @@
 {
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
+    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   },
   "attribution": {
-    "commit": "",
-    "pr": ""
+    "commit": "Co-authored-by: Claude <noreply@anthropic.com>",
+    "pr": "Co-authored-by: Claude <noreply@anthropic.com>"
   },
   "permissions": {
     "allow": [
@@ -14,6 +17,8 @@
       "NotebookEdit",
       "Skill(research_codebase)",
       "Skill(format-run-tests-and-credo)",
+      "WebFetch",
+      "WebSearch",
       "mcp__*",
       "mcp__plugin_context-mode_context-mode__*"
     ],
@@ -32,6 +37,7 @@
       "Bash(mix ecto.reset*)"
     ]
   },
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -116,8 +122,18 @@
     "frontend-design@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true,
-    "context-mode@claude-context-mode": true
+    "context-mode@claude-context-mode": true,
+    "caveman@caveman": true
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
   },
   "effortLevel": "medium",
+  "plansDirectory": "./tmp/plans",
   "autoDreamEnabled": true
 }

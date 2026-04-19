@@ -245,3 +245,9 @@ eval "$(atuin init zsh)"
 
 # opencode
 export PATH=/Users/tobi/.opencode/bin:$PATH
+
+# dotfiles bin
+export PATH="$HOME/dotfiles/bin:$PATH"
+
+# Claude
+export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1

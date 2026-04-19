@@ -107,6 +107,22 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
     if.app-id = 'com.max-langer.Latest'
     run = 'layout floating'
 
+[[on-window-detected]]
+    if.app-id = 'com.google.GeminiMacOS'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.surteesstudios.Bartender'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.mimestream.Mimestream'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.bitwarden.desktop'
+    run = 'layout floating'
+
 # ==============================================================================
 # 3. KEYBINDING MODES
 # ==============================================================================

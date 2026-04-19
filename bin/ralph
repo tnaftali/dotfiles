@@ -1,0 +1,50 @@
+#!/bin/bash
+# ralph - wiggum loop for claude code
+# Usage: ralph [prompt-file] [max-iterations]
+#
+# Runs claude in --print mode repeatedly until:
+#   - Agent creates .ralph-done file (completion signal)
+#   - Max iterations reached (if set)
+#   - Ctrl-C
+#
+# The prompt file should instruct the agent to create .ralph-done when finished.
+# Exports RALPH_LOOP=1 and RALPH_ITERATION=N so the agent can detect it's in a loop.
+
+set -euo pipefail
+
+PROMPT_FILE="${1:-prompt.md}"
+MAX="${2:-0}"
+DONE_FILE=".ralph-done"
+PAUSE=3
+
+if [[ ! -f "$PROMPT_FILE" ]]; then
+  echo "prompt file not found: $PROMPT_FILE" >&2
+  exit 1
+fi
+
+rm -f "$DONE_FILE"
+
+export RALPH_LOOP=1
+
+i=0
+while true; do
+  ((i++))
+  export RALPH_ITERATION=$i
+  echo "--- ralph iteration $i ---"
+
+  claude --print --prompt-file "$PROMPT_FILE"
+
+  if [[ -f "$DONE_FILE" ]]; then
+    echo "--- ralph done after $i iteration(s) ---"
+    rm -f "$DONE_FILE"
+    break
+  fi
+
+  if [[ $MAX -gt 0 && $i -ge $MAX ]]; then
+    echo "--- ralph hit max iterations ($MAX) ---"
+    break
+  fi
+
+  echo "--- pausing ${PAUSE}s ---"
+  sleep $PAUSE
+done
