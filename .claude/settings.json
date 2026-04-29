@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"'"
+            "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"; [ -n \"$TMUX\" ] && sess=$(tmux display -p -t \"$TMUX_PANE\" \"#{session_name}\") && tmux set -t \"$sess\" @claude_state done'"
           }
         ]
       }
@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"'"
+            "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"; [ -n \"$TMUX\" ] && sess=$(tmux display -p -t \"$TMUX_PANE\" \"#{session_name}\") && tmux set -t \"$sess\" @claude_state needs_input'"
           }
         ]
       }
@@ -135,5 +135,6 @@
   },
   "effortLevel": "medium",
   "plansDirectory": "./tmp/plans",
-  "autoDreamEnabled": true
+  "autoDreamEnabled": true,
+  "preferredNotifChannel": "ghostty"
 }

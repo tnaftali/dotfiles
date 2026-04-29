@@ -1,3 +1,25 @@
+# Analyze PR Comments v2 — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Rewrite `/analyze-pr-comments` to fetch all PR comments (human + bot), verify each against the codebase, assign deterministic statuses, and produce a grouped actionable summary.
+
+**Architecture:** Single Claude Code command file that orchestrates 3 parallel subagents (human review threads, bot reviews, general comments). Each agent fetches its comments, verifies against code, returns structured findings. Main agent merges, deduplicates, writes to file + terminal.
+
+**Tech Stack:** Claude Code command (markdown prompt), GitHub CLI (`gh`), GraphQL API, REST API
+
+---
+
+### Task 1: Rewrite the command file
+
+**Files:**
+- Modify: `~/.claude/commands/analyze-pr-comments.md`
+
+**Reference:** Design spec at `docs/superpowers/specs/2026-04-16-analyze-pr-comments-v2-design.md`
+
+- [ ] **Step 1: Replace the command file with the new version**
+
+```markdown
 ---
 description: Analyze all PR comments with code verification and deterministic status assignment
 ---
@@ -23,7 +45,7 @@ Spawn 3 parallel subagents. Each agent receives the PR number, repo owner/name, 
 
 ### Agent A: Human Review Threads
 
-Fetch all review thread comments (inline code comments and review bodies) via GraphQL. For thread resolve/reply/list operations elsewhere in the workflow, use the **gh-pr-review-threads** skill — REST cannot resolve threads.
+Fetch all review thread comments (inline code comments and review bodies) via GraphQL:
 
 ```graphql
 {
@@ -214,3 +236,46 @@ After presenting the analysis, ask:
 > "Want to start addressing the Fix items?"
 
 ultrathink throughout. Be thorough — read every referenced file, verify every claim.
+```
+
+- [ ] **Step 2: Verify the command is detected**
+
+Run `/analyze-pr-comments` in a Claude Code session and confirm it loads the new version (check that the description shows "Analyze all PR comments with code verification and deterministic status assignment").
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add ~/.claude/commands/analyze-pr-comments.md
+git commit -m "feat: rewrite analyze-pr-comments with parallel verification and deterministic statuses"
+```
+
+### Task 2: Test against a real PR
+
+- [ ] **Step 1: Switch to a project with an active PR**
+
+```bash
+cd ~/Projects/core
+git checkout <branch-with-pr-comments>
+```
+
+- [ ] **Step 2: Run the command**
+
+```
+/analyze-pr-comments
+```
+
+- [ ] **Step 3: Verify output**
+
+Check that:
+- All 3 comment sources are fetched (human threads, bot reviews, general)
+- Bot review findings are parsed as individual items (not one giant blob)
+- Each item has a status, reasoning, and link
+- Fix items include "what to change"
+- Reply items include a drafted reply
+- Output is written to `thoughts/shared/pr-comments-analysis.md`
+- Deduplication worked (no repeated findings)
+- Statuses seem correct based on your knowledge of the PR
+
+- [ ] **Step 4: Iterate if needed**
+
+If output is wrong or missing items, adjust the command and re-test.

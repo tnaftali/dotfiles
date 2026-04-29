@@ -32,7 +32,16 @@ while true; do
   export RALPH_ITERATION=$i
   echo "--- ralph iteration $i ---"
 
-  claude --print --prompt-file "$PROMPT_FILE"
+  claude --print --verbose --output-format stream-json < "$PROMPT_FILE" \
+    | jq -r --unbuffered '
+        if .type == "assistant" then
+          (.message.content[]? | select(.type == "text") | .text),
+          (.message.content[]? | select(.type == "tool_use") | "▶ \(.name) \(.input | tostring | .[0:120])")
+        elif .type == "user" then
+          (.message.content[]? | select(.type == "tool_result") | "◀ \(.content | tostring | .[0:120])")
+        elif .type == "result" then
+          "=== done (\(.subtype // "ok"), \(.duration_ms // 0)ms) ==="
+        else empty end' 2>/dev/null || true
 
   if [[ -f "$DONE_FILE" ]]; then
     echo "--- ralph done after $i iteration(s) ---"

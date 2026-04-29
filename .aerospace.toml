@@ -123,6 +123,14 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
     if.app-id = 'com.bitwarden.desktop'
     run = 'layout floating'
 
+[[on-window-detected]]
+    if.app-id = 'com.apple.Preview'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'ch.sudo.cyberduck'
+    run = 'layout floating'
+
 # ==============================================================================
 # 3. KEYBINDING MODES
 # ==============================================================================

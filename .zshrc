@@ -251,3 +251,5 @@ export PATH="$HOME/dotfiles/bin:$PATH"
 
 # Claude
 export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
+
+launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl load ~/Library/LaunchAgents/com.acsandmann.swipe.plist

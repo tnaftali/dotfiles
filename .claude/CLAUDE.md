@@ -25,3 +25,5 @@ When all tasks are checked, run: `touch .ralph-done`
 ```
 
 This format works both interactively and with the ralph loop (`ralph plan.md`).
+
+@RTK.md
