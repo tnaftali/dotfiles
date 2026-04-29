@@ -15,3 +15,7 @@
 # Python
 __pycache__/
 *.pyc
+
+# Override global ~/.config/git/ignore — for this dotfiles repo we DO want
+# to track local Claude/Cursor settings as the source of truth.
+!.claude/settings.local.json

@@ -108,6 +108,15 @@
             "command": "node /Users/tobi/.claude/plugins/marketplaces/0.9.17/hooks/pretooluse.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
       }
     ]
   },

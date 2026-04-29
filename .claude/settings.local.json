@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xxd:*)",
+      "Bash(du:*)",
+      "Bash(top:*)",
+      "Bash(vm_stat:*)",
+      "Bash(sysctl:*)",
+      "Bash(ps:*)",
+      "Bash(memory_pressure)",
+      "WebSearch",
+      "WebFetch(domain:cursor.com)",
+      "WebFetch(domain:opencode.ai)",
+      "WebFetch(domain:geminicli.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:hexdocs.pm)",
+      "Bash(tmux list-sessions:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git rm:*)",
+      "Bash(/Users/tobi/dotfiles/setup.sh)",
+      "Bash(tmux source-file ~/.tmux.conf 2>/dev/null && echo \"tmux reloaded\" || echo \"tmux not running or failed\")",
+      "mcp__linear-server__list_issues",
+      "Bash(python3:*)",
+      "Bash(bash /Users/tobi/dotfiles/bin/daily-brief-terminal.sh:*)",
+      "Bash(rm ~/.claude/settings.json ~/.claude/settings.json.bak)",
+      "Read(//Users/tobi/.cursor/**)",
+      "Read(//Users/tobi/.cursor/skills/**)"
+    ]
+  }
+}
