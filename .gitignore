@@ -16,6 +16,9 @@
 __pycache__/
 *.pyc
 
+# Plans dir auto-created by Claude Code (plansDirectory: ./tmp/plans)
+tmp/
+
 # Override global ~/.config/git/ignore — for this dotfiles repo we DO want
 # to track local Claude/Cursor settings as the source of truth.
 !.claude/settings.local.json

@@ -145,5 +145,6 @@
   "effortLevel": "medium",
   "plansDirectory": "./tmp/plans",
   "autoDreamEnabled": true,
-  "preferredNotifChannel": "ghostty"
+  "preferredNotifChannel": "ghostty",
+  "awaySummaryEnabled": false
 }

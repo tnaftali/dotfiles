@@ -1,7 +1,0 @@
-{
-  "project_context": "Global Cursor config — use when the project has no own .cursor",
-  "architecture_notes": [
-    "Project-specific rules and commands live in the repo's .cursor or .agents/.cursor",
-    "This config is a fallback for ad-hoc or non-core projects"
-  ]
-}

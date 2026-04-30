@@ -13,12 +13,23 @@ Personal config files for macOS development.
 
 ## AI Tools
 
-Shared configs in `.agents/` with tool-specific symlinks:
+Shared configs in `.agents/` with tool-specific symlinks. The repo is the
+single source of truth — `~/.claude` and `~/.cursor` are populated entirely
+by symlinks back into dotfiles.
+
 - `~/.agents` → `.agents/` (agents, commands, hooks — e.g. format-elixir)
-- `~/.claude/` — Claude Code (setup.sh symlinks agents, commands, settings, CLAUDE.md)
-- `~/.cursor` → `.cursor/` — global Cursor config when a project has no own `.cursor`
+- `~/.claude/` — per-entry symlinks: `agents/*.md`, `commands`, `skills/*`,
+  `settings.json`, `settings.local.json`, `CLAUDE.md`, `RTK.md`
+- `~/.cursor/` — per-entry symlinks: `agents`, `commands`, `hooks`, `rules`,
+  `skills/*` (Cursor pre-creates `~/.cursor` as a state dir, so we cannot
+  symlink the whole dir)
 
 Supported: Claude Code, OpenCode, Cursor
+
+## Scripts
+
+- `bin/` — scripts on `$PATH` (e.g. `ralph`, daily-brief generators)
+- `scripts/` — one-off setup helpers (worktree fixers)
 
 ### Worktrees (core repo)
 
