@@ -253,3 +253,7 @@ export PATH="$HOME/dotfiles/bin:$PATH"
 export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
 
 launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl load ~/Library/LaunchAgents/com.acsandmann.swipe.plist
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/tobi/.local/bin:$PATH"

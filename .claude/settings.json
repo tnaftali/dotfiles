@@ -132,7 +132,8 @@
     "superpowers@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true,
     "context-mode@claude-context-mode": true,
-    "caveman@caveman": true
+    "caveman@caveman": true,
+    "token-optimizer@alexgreensh-token-optimizer": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
@@ -140,11 +141,17 @@
         "source": "github",
         "repo": "JuliusBrussee/caveman"
       }
+    },
+    "alexgreensh-token-optimizer": {
+      "source": {
+        "source": "github",
+        "repo": "alexgreensh/token-optimizer"
+      }
     }
   },
   "effortLevel": "medium",
+  "awaySummaryEnabled": false,
   "plansDirectory": "./tmp/plans",
   "autoDreamEnabled": true,
-  "preferredNotifChannel": "ghostty",
-  "awaySummaryEnabled": false
+  "preferredNotifChannel": "ghostty"
 }
