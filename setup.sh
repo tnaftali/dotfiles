@@ -30,6 +30,17 @@ create_symlink() {
   ln -s "$source" "$target"
 }
 
+# Seed a file only if absent. Used for configs Claude Code rewrites at runtime
+# (settings.json gains an `autoMode` block naming internal hosts/secret names).
+# This repo is public, so that file must NOT be a symlink back into it.
+copy_if_absent() {
+  if [ -e "$2" ]; then
+    return 0
+  fi
+  cp "$1" "$2"
+  echo "  Seeded $2 (local copy, not symlinked - edit both when it changes)"
+}
+
 echo "Setting up dotfiles from $DOTFILES..."
 
 # Shell & editor configs
@@ -42,6 +53,9 @@ mkdir -p ~/.config/nvim
 create_symlink "$DOTFILES/init.vim" ~/.config/nvim/init.vim
 mkdir -p ~/.config/ghostty
 create_symlink "$DOTFILES/ghostty.config" ~/.config/ghostty/config
+# herdr: dir holds live sockets/logs/session.json, so symlink only the config file
+mkdir -p ~/.config/herdr
+create_symlink "$DOTFILES/herdr.config.toml" ~/.config/herdr/config.toml
 
 # Agent config (hooks, shared agents) — used by Claude and others
 echo "Setting up agent config..."
@@ -55,10 +69,16 @@ for f in "$DOTFILES/.agents/agents/"*.md; do
   create_symlink "$f" ~/.claude/agents/"$(basename "$f")"
 done
 create_symlink "$DOTFILES/.agents/commands" ~/.claude/commands
-create_symlink "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
+copy_if_absent "$DOTFILES/.claude/settings.json" ~/.claude/settings.json
 create_symlink "$DOTFILES/.claude/settings.local.json" ~/.claude/settings.local.json
 create_symlink "$DOTFILES/.claude/CLAUDE.md" ~/.claude/CLAUDE.md
 create_symlink "$DOTFILES/.claude/RTK.md" ~/.claude/RTK.md
+# Hooks (dir also holds plugin-installed hooks, so symlink per file)
+mkdir -p ~/.claude/hooks
+for f in "$DOTFILES/.claude/hooks/"*; do
+  [ -f "$f" ] || continue
+  create_symlink "$f" ~/.claude/hooks/"$(basename "$f")"
+done
 # Skills (each gets its own symlink; ~/.claude/skills/ also holds plugin entries)
 mkdir -p ~/.claude/skills
 for d in "$DOTFILES/.agents/skills/"*/; do

@@ -1,8 +1,9 @@
 {
+  "cleanupPeriodDays": 99999,
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
     "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   },
   "attribution": {
@@ -19,8 +20,7 @@
       "Skill(format-run-tests-and-credo)",
       "WebFetch",
       "WebSearch",
-      "mcp__*",
-      "mcp__plugin_context-mode_context-mode__*"
+      "mcp__context-mode__*"
     ],
     "deny": [
       "Bash(gh pr merge)",
@@ -37,29 +37,8 @@
       "Bash(mix ecto.reset*)"
     ]
   },
-  "model": "opus",
+  "model": "claude-opus-4-8",
   "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'afplay /System/Library/Sounds/Glass.aiff && osascript -e \"display notification \\\"Task Complete\\\" with title \\\"Claude Code (${CLAUDE_PROJECT_DIR##*/})\\\"\"; [ -n \"$TMUX\" ] && sess=$(tmux display -p -t \"$TMUX_PANE\" \"#{session_name}\") && tmux set -t \"$sess\" @claude_state done'"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "permission_prompt|idle_prompt|elicitation_dialog",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'env > /tmp/claude-hook-env.txt && afplay /System/Library/Sounds/Hero.aiff && osascript -e \"display notification \\\"Needs attention\\\" with title \\\"Claude Code (${PWD##*/})\\\"\"; [ -n \"$TMUX\" ] && sess=$(tmux display -p -t \"$TMUX_PANE\" \"#{session_name}\") && tmux set -t \"$sess\" @claude_state needs_input'"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -84,17 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/tobi/.claude/hooks/gsd-context-monitor.js\""
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/tobi/.claude/hooks/gsd-check-update.js\""
+            "command": "node \"$HOME/.claude/hooks/gsd-context-monitor.js\""
           }
         ]
       }
@@ -105,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /Users/tobi/.claude/plugins/marketplaces/0.9.17/hooks/pretooluse.mjs"
+            "command": "f=\"$HOME/.claude/plugins/marketplaces/0.9.17/hooks/pretooluse.mjs\"; [ -f \"$f\" ] && node \"$f\" || exit 0"
           }
         ]
       },
@@ -118,6 +87,26 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/gsd-check-update.js\""
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "h=\"$HOME/.claude/hooks/herdr-agent-state.sh\"; [ -f \"$h\" ] && bash \"$h\" session || exit 0",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -125,27 +114,48 @@
     "command": "bash -c '\"/opt/homebrew/bin/node\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
+    "caveman@caveman": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "claude-hud@claude-hud": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "claude-hud@claude-hud": true,
+    "context-mode@context-mode": true,
     "frontend-design@claude-plugins-official": true,
+    "revdiff@revdiff": true,
     "superpowers@claude-plugins-official": true,
-    "clangd-lsp@claude-plugins-official": true,
-    "context-mode@claude-context-mode": true,
-    "caveman@caveman": true,
-    "token-optimizer@alexgreensh-token-optimizer": true
+    "token-optimizer@alexgreensh-token-optimizer": true,
+    "ponytail@ponytail": true,
+    "engram@engram": true
   },
   "extraKnownMarketplaces": {
+    "alexgreensh-token-optimizer": {
+      "source": {
+        "source": "github",
+        "repo": "alexgreensh/token-optimizer"
+      }
+    },
     "caveman": {
       "source": {
         "source": "github",
         "repo": "JuliusBrussee/caveman"
       }
     },
-    "alexgreensh-token-optimizer": {
+    "revdiff": {
       "source": {
         "source": "github",
-        "repo": "alexgreensh/token-optimizer"
+        "repo": "umputun/revdiff"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "engram": {
+      "source": {
+        "source": "github",
+        "repo": "Gentleman-Programming/engram"
       }
     }
   },
