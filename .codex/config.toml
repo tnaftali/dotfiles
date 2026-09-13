@@ -1,0 +1,20 @@
+# Codex CLI user config — ~/.codex/config.toml
+# Seeded by setup.sh as a COPY, not a symlink: Codex rewrites this file at
+# runtime (trusted projects, MCP state), and this repo is public.
+# Reference: https://developers.openai.com/codex/config-file/config-reference
+
+# model = "gpt-5.5"
+model_reasoning_effort = "high"
+
+# on-request = interactive; never = non-interactive runs
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# AGENTS.md discovery: also treat CLAUDE.md as an instructions file so repos
+# that only have one still give Codex the same guidance.
+project_doc_fallback_filenames = ["CLAUDE.md"]
+project_doc_max_bytes = 65536
+
+# Tables last — any top-level key after a [table] header belongs to that table.
+[sandbox_workspace_write]
+network_access = true

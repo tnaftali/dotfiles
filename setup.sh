@@ -102,6 +102,14 @@ for d in "$DOTFILES/.agents/skills/"*/; do
   create_symlink "$d" ~/.cursor/skills/"$(basename "$d")"
 done
 
+# Codex CLI
+# Copies, not symlinks: the two agent configs are meant to diverge (different
+# machines, different use), and Codex rewrites config.toml at runtime.
+echo "Setting up Codex..."
+mkdir -p ~/.codex
+copy_if_absent "$DOTFILES/.codex/AGENTS.md" ~/.codex/AGENTS.md
+copy_if_absent "$DOTFILES/.codex/config.toml" ~/.codex/config.toml
+
 # OpenCode
 echo "Setting up OpenCode..."
 mkdir -p ~/.config/opencode
