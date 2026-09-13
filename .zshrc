@@ -51,9 +51,8 @@ export ADBLOCK=1
 
 # ── Aliases ─────────────────────────────────────────────────────────────────────
 # Development Server Aliases
-alias srcsrv="source .local.env && nvm use 20 && iex -S mix phx.server"
+alias srcsrv="source .local.env && nvm use 24.14.0 && iex -S mix phx.server"
 alias srctst="source .local.env && MIX_ENV=test bin/migrate && mix test --color; afplay /System/Library/Sounds/Ping.aiff"
-alias srctstbf="source .local.env && MIX_ENV=test bin/migrate && mix test apps/betafolio/test --color; afplay /System/Library/Sounds/Ping.aiff"
 alias srctstcr="source .local.env && MIX_ENV=test bin/migrate && mix test apps/core/test --color; afplay /System/Library/Sounds/Ping.aiff"
 
 # Git Aliases
@@ -255,5 +254,5 @@ export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
 launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl load ~/Library/LaunchAgents/com.acsandmann.swipe.plist
 
 
-# Added by Antigravity CLI installer
-export PATH="/Users/tobi/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
