@@ -50,16 +50,6 @@
         ]
       },
       {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "test -f \"$CLAUDE_PROJECT_DIR/.agents/.claude/hooks/validate-elm.sh\" && bash \"$CLAUDE_PROJECT_DIR/.agents/.claude/hooks/validate-elm.sh\"",
-            "timeout": 30
-          }
-        ]
-      },
-      {
         "hooks": [
           {
             "type": "command",
