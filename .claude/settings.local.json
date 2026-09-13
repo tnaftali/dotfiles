@@ -25,7 +25,11 @@
       "Bash(bash /Users/tobi/dotfiles/bin/daily-brief-terminal.sh:*)",
       "Bash(rm ~/.claude/settings.json ~/.claude/settings.json.bak)",
       "Read(//Users/tobi/.cursor/**)",
-      "Read(//Users/tobi/.cursor/skills/**)"
+      "Read(//Users/tobi/.cursor/skills/**)",
+      "mcp__context-mode__fetch_and_index",
+      "mcp__context-mode__search",
+      "mcp__plugin_engram_engram__mem_search",
+      "mcp__plugin_engram_engram__mem_save"
     ]
   }
 }
