@@ -30,14 +30,9 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # ]
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
-# All values are preserved from your config.
-[gaps]
-    inner.horizontal = 5
-    inner.vertical =   5
-    outer.left =       5
-    outer.bottom =     5
-    outer.top =        5
-    outer.right =      5
+# NB: the [gaps] table lives at the BOTTOM of this file. In TOML, every
+# top-level key after a table header belongs to that table, so [gaps] must come
+# after the top-level 'on-window-detected' array below.
 
 
 # ==============================================================================
@@ -45,91 +40,48 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 #
 # These rules apply the 'layout floating' command when specific applications
 # are detected, ensuring they do not tile automatically.
+#
+# Fires once per *newly detected* window only — never on focus, reveal, or
+# manual moves. So a window you move by hand afterwards stays where you put it.
+# See: https://nikitabobko.github.io/AeroSpace/guide#on-window-detected-callback
+#
+# Evaluated top-down; the FIRST matching object wins and the rest are skipped.
+# Add 'check-further-callbacks = true' to an object to keep the list going.
 # ==============================================================================
 
-[[on-window-detected]]
-    if.app-id = 'com.apple.finder'
-    run = 'layout floating'
+on-window-detected = [
+    # --- Fixed workspace assignments ------------------------------------------
+    # Applied once, when the window is first detected. Move a window by hand
+    # afterwards and it stays put; a *second* window of the same app still
+    # lands here, and 'reload-config' re-applies these to all open windows.
+    { if = 'test %{app-bundle-id} = com.brave.Browser.origin',      run = 'move-node-to-workspace 1' },
+    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty',         run = 'move-node-to-workspace 2' },
+    { if = 'test %{app-bundle-id} = com.spotify.client',            run = 'move-node-to-workspace 3' },
+    { if = 'test %{app-bundle-id} = org.jkiss.dbeaver.core.product', run = 'move-node-to-workspace 4' },
 
-[[on-window-detected]]
-    if.app-id = 'com.apple.systempreferences '
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'net.whatsapp.WhatsApp'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.culturedcode.ThingsMac'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.mitchellh.ghostty'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'cc.ffitch.shottr'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'ru.keepcoder.Telegram'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.getupnote.desktop'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.apple.iCal'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.brave.Browser.app.gdfaincndogidkdcdkhapmbffkckdkhn'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.granola.app'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.apple.ActivityMonitor'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.apple.MobileSMS'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'app.soulver.mac'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.max-langer.Latest'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.google.GeminiMacOS'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.surteesstudios.Bartender'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.mimestream.Mimestream'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.bitwarden.desktop'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'com.apple.Preview'
-    run = 'layout floating'
-
-[[on-window-detected]]
-    if.app-id = 'ch.sudo.cyberduck'
-    run = 'layout floating'
+    # --- Force-float utility windows ------------------------------------------
+    { if = 'test %{app-bundle-id} = com.apple.finder',            run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.apple.systempreferences', run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = net.whatsapp.WhatsApp',       run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.culturedcode.ThingsMac',  run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = cc.ffitch.shottr',            run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = ru.keepcoder.Telegram',       run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.apple.iCal',              run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.amazon.Lassen',           run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.granola.app',             run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.apple.ActivityMonitor',   run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = net.freemacsoft.AppCleaner',  run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.1password.1password',     run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.apple.MobileSMS',         run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = app.soulver.mac',             run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.max-langer.Latest',       run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.bitwarden.desktop',       run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.apple.Preview',           run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = ch.sudo.cyberduck',           run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = io.ente.auth.mac',            run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.stonerl.Thaw',            run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.getupnote.desktop',       run = 'layout floating' },
+]
 
 # ==============================================================================
 # 3. KEYBINDING MODES
@@ -221,3 +173,19 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
     cmd-h = [] # Disable "hide application"
     cmd-alt-h = [] # Disable "hide others"
+
+
+# ==============================================================================
+# 4. GAPS
+#
+# Kept last: TOML assigns any following top-level key to the preceding table,
+# so all table headers must come after the top-level keys in section 1 and 2.
+# ==============================================================================
+
+[gaps]
+    inner.horizontal = 10
+    inner.vertical =   10
+    outer.left =       5
+    outer.bottom =     5
+    outer.top =        5
+    outer.right =      5
