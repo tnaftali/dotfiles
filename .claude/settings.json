@@ -35,9 +35,9 @@
       "Bash(*drop*)",
       "Bash(mix ecto.drop*)",
       "Bash(mix ecto.reset*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
-  "model": "claude-opus-4-8",
   "hooks": {
     "PostToolUse": [
       {
@@ -96,6 +96,24 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/tobi/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/tobi/.claude/hooks/context-mode-cache-heal.mjs\""
+          }
+        ]
       }
     ]
   },
@@ -105,12 +123,12 @@
   },
   "enabledPlugins": {
     "caveman@caveman": true,
-    "clangd-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": false,
     "claude-hud@claude-hud": true,
-    "code-review@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
     "context-mode@context-mode": true,
-    "frontend-design@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": false,
     "revdiff@revdiff": true,
     "superpowers@claude-plugins-official": true,
     "token-optimizer@alexgreensh-token-optimizer": true,
@@ -122,36 +140,57 @@
       "source": {
         "source": "github",
         "repo": "alexgreensh/token-optimizer"
-      }
+      },
+      "autoUpdate": true
     },
     "caveman": {
       "source": {
         "source": "github",
         "repo": "JuliusBrussee/caveman"
-      }
+      },
+      "autoUpdate": true
     },
     "revdiff": {
       "source": {
         "source": "github",
         "repo": "umputun/revdiff"
-      }
+      },
+      "autoUpdate": true
     },
     "ponytail": {
       "source": {
         "source": "github",
         "repo": "DietrichGebert/ponytail"
-      }
+      },
+      "autoUpdate": true
     },
     "engram": {
       "source": {
         "source": "github",
         "repo": "Gentleman-Programming/engram"
-      }
+      },
+      "autoUpdate": true
+    },
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      },
+      "autoUpdate": true
+    },
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
+      },
+      "autoUpdate": true
     }
   },
   "effortLevel": "medium",
   "awaySummaryEnabled": false,
   "plansDirectory": "./tmp/plans",
+  "tui": "fullscreen",
   "autoDreamEnabled": true,
-  "preferredNotifChannel": "ghostty"
+  "preferredNotifChannel": "ghostty",
+  "agentPushNotifEnabled": true
 }

@@ -76,8 +76,11 @@ alias t="tmux a"
 
 # ── Node Version Manager (NVM) Setup ────────────────────────────────────────────
 export NVM_DIR=~/.nvm
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-source $(brew --prefix nvm)/nvm.sh
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+  source "$NVM_DIR/nvm.sh"
+elif (( $+commands[brew] )) && nvm_prefix="$(brew --prefix nvm 2>/dev/null)"; then
+  [[ -s "$nvm_prefix/nvm.sh" ]] && source "$nvm_prefix/nvm.sh"
+fi
 
 # export DEFAULT_USER=""
 
@@ -96,8 +99,13 @@ aerospace workspace next --wrap-around > /dev/null 2>&1
 aerospace workspace prev --wrap-around > /dev/null 2>&1
 
 # ── Additional PATH Configuration ───────────────────────────────────────────────
-# # Add the .mix directory for the current GLOBAL asdf version to the PATH (for rebar/rebar3)
-export PATH="${HOME}/.asdf/installs/elixir/`asdf current elixir | awk '{print $1}'`/.mix:${PATH}"
+# Add the .mix directory for the current global asdf Elixir version (for rebar/rebar3).
+if (( $+commands[asdf] )); then
+  asdf_elixir_version="$(asdf current elixir 2>/dev/null | awk 'NR == 1 { print $1 }')"
+  if [[ -n "$asdf_elixir_version" && "$asdf_elixir_version" != 'No' ]]; then
+    export PATH="${HOME}/.asdf/installs/elixir/${asdf_elixir_version}/.mix:${PATH}"
+  fi
+fi
 
 # ── System Greeting ─────────────────────────────────────────────────────────────
 neofetch
@@ -256,3 +264,5 @@ launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl 
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# mise version manager
+eval "$(mise activate zsh)"

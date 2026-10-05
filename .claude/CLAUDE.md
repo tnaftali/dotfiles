@@ -65,4 +65,51 @@ Always write implementation plans as **HTML files** (`.html`), never `.md`.
 <p>All checked → run <code>touch .ralph-done</code></p>
 ```
 
+## Explanations & Reports
+
+Any explanation, comparison, walkthrough, or report longer than ~3 paragraphs
+goes in a **local `.html` file on disk** — same as implementation plans. Richer
+format aids understanding — the whole point of the output.
+
+- **Local files, never published Claude Artifacts.** Write with the `Write`
+  tool to a `.html` file in the project (or a path I give), then open it with
+  `open <file>`. Do not use the `Artifact` tool / claude.ai publishing unless I
+  explicitly ask.
+- **Lead with a diagram** when structure, flow, or architecture is involved —
+  inline SVG, or mermaid via a `mermaid` CDN `<script>` in the file so it renders
+  in the browser. The terminal does not render diagrams, so they belong in the
+  `.html`, never in chat.
+- Same skimmable style as plans: bottom line first, tables and short fragments
+  over prose, `<code>` for paths/commands, fold detail in `<details>`.
+- Use `dataviz` for chart design, `artifact-diagramming` for diagram mechanics —
+  for the content, not as a reason to publish.
+- Short Q&A, a single fact, or an action confirmation stays in the terminal —
+  do not over-produce. Caveman still governs the chat around the file.
+
+## Document Theme — Catppuccin Macchiato
+
+Every document I build — implementation plans, reports, explanations, any HTML
+output — uses the **Catppuccin Macchiato** palette. Dark theme. Apply it unasked.
+
+Define these as CSS variables and build everything off them:
+
+```css
+:root {
+  --base: #24273a; --mantle: #1e2030; --crust: #181926;
+  --surface0: #363a4f; --surface1: #494d64; --surface2: #5b6078;
+  --overlay0: #6e738d; --overlay1: #8087a2; --overlay2: #939ab7;
+  --text: #cad3f5; --subtext1: #b8c0e0; --subtext0: #a5adcb;
+  --rosewater: #f4dbd6; --flamingo: #f0c6c6; --pink: #f5bde6; --mauve: #c6a0f6;
+  --red: #ed8796; --maroon: #ee99a0; --peach: #f5a97f; --yellow: #eed49f;
+  --green: #a6da95; --teal: #8bd5ca; --sky: #91d7e3; --sapphire: #7dc4e4;
+  --blue: #8aadf4; --lavender: #b7bdf8;
+}
+```
+
+Role mapping:
+- Page background `--base`; nested panels/cards `--mantle`; deepest wells `--crust`.
+- Body text `--text`; muted/secondary `--subtext0`; borders/dividers `--surface0`/`--surface1`.
+- Accent/links/headings `--blue` or `--mauve`; code `--green`.
+- Status: done `--green`, todo `--overlay1`, risk/warn `--yellow`/`--peach`, error `--red`, dependency `--sky`.
+
 @RTK.md
