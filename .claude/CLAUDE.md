@@ -112,4 +112,5 @@ Role mapping:
 - Accent/links/headings `--blue` or `--mauve`; code `--green`.
 - Status: done `--green`, todo `--overlay1`, risk/warn `--yellow`/`--peach`, error `--red`, dependency `--sky`.
 
+@devlog.md
 @RTK.md

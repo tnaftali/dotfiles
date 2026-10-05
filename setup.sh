@@ -53,9 +53,11 @@ mkdir -p ~/.config/nvim
 create_symlink "$DOTFILES/init.vim" ~/.config/nvim/init.vim
 mkdir -p ~/.config/ghostty
 create_symlink "$DOTFILES/ghostty.config" ~/.config/ghostty/config
-# herdr: dir holds live sockets/logs/session.json, so symlink only the config file
+# herdr: dir holds live sockets/logs/session.json, so link only the config file.
+# Hardlink, not symlink: herdr-gpui refuses symlinked shared config.
+# Re-run setup.sh if git/an editor replaces the file and breaks the link.
 mkdir -p ~/.config/herdr
-create_symlink "$DOTFILES/herdr.config.toml" ~/.config/herdr/config.toml
+ln -f "$DOTFILES/herdr.config.toml" ~/.config/herdr/config.toml
 
 # Agent config (hooks, shared agents) — used by Claude and others
 echo "Setting up agent config..."

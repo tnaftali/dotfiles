@@ -65,6 +65,7 @@ sidebar_width = 32
 sidebar_min_width = 18
 sidebar_max_width = 36
 
+agent_panel_sort = "spaces"
 [ui.toast]
 delivery = "herdr"          # in-app toast, click-to-focus target pane; off | herdr | terminal | system
 

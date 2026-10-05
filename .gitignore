@@ -19,6 +19,14 @@ __pycache__/
 # Plans dir auto-created by Claude Code (plansDirectory: ./tmp/plans)
 tmp/
 
-# Override global ~/.config/git/ignore — for this dotfiles repo we DO want
-# to track local Claude/Cursor settings as the source of truth.
-!.claude/settings.local.json
+# Machine-local, private Claude settings (autoMode infra map, local hooks,
+# machine paths). Symlinked into ~/.claude but never tracked — this repo is public.
+.claude/settings.local.json
+
+# Devlog tooling — THIS MACHINE ONLY, never pushed (work-log workflow;
+# scaffolds reference employer/clients and a personal work email).
+.claude/devlog.md
+.claude/hooks/devlog-session-start.sh
+.claude/hooks/devlog-session-end.sh
+.agents/commands/distill.md
+.agents/commands/endeavor.md

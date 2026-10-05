@@ -265,4 +265,4 @@ launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl 
 export PATH="$HOME/.local/bin:$PATH"
 
 # mise version manager
-eval "$(mise activate zsh)"
+# eval "$(mise activate zsh)"
