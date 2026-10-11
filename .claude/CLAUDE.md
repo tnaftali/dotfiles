@@ -51,6 +51,8 @@ Always write implementation plans as **HTML files** (`.html`), never `.md`.
 **Required in every plan:**
 
 - A **checkbox** (`<input type="checkbox">`) per task — toggle `checked` when done
+- A **favicon** so the tab is recognizable — inline emoji SVG data URI, emoji picked to fit the project (e.g. 🛒 for a groceries app):
+  `<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">`
 - **This execution block** at the top, after the title:
 
 ```html

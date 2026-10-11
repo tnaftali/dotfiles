@@ -12,7 +12,6 @@
   },
   "permissions": {
     "allow": [
-      "Bash(*)",
       "Edit",
       "Write",
       "NotebookEdit",
@@ -93,6 +92,14 @@
             "type": "command",
             "command": "h=\"$HOME/.claude/hooks/herdr-agent-state.sh\"; [ -f \"$h\" ] && bash \"$h\" session || exit 0",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/hooks/context-mode-cache-heal.mjs\"; [ -f \"$f\" ] && node \"$f\" || exit 0"
           }
         ]
       }
@@ -181,5 +188,10 @@
   "tui": "fullscreen",
   "autoDreamEnabled": true,
   "preferredNotifChannel": "ghostty",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  }
 }

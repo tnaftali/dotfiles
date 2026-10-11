@@ -30,3 +30,6 @@ tmp/
 .claude/hooks/devlog-session-end.sh
 .agents/commands/distill.md
 .agents/commands/endeavor.md
+
+# Org/client regexes for githooks/pre-commit — naming them in a tracked file would leak them.
+githooks/patterns.local

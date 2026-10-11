@@ -1,0 +1,22 @@
+#!/bin/bash
+# Block commits that add work/org details or secrets. This repo is public.
+# Checks added lines only. Bypass a false positive with `git commit --no-verify`.
+
+pattern='autoMode|heroku|sk-ant-|ghp_[A-Za-z0-9]{20}|github_pat_|AKIA[0-9A-Z]{16}|xox[abp]-|BEGIN [A-Z ]*PRIVATE KEY'
+
+# Employer/client names live in a gitignored file (one regex per line) — naming them here would leak them.
+local_patterns="$(dirname "$0")/patterns.local"
+if [ -s "$local_patterns" ]; then
+  pattern="$pattern|$(grep -v '^#' "$local_patterns" | grep . | paste -sd'|' -)"
+fi
+
+hits=$(git diff --cached -U0 --no-color -- . ':!githooks/pre-commit' |
+  awk '/^\+\+\+ /{f=substr($0,7); next} /^\+/{print f": "substr($0,2)}' |
+  grep -iE "$pattern")
+
+if [ -n "$hits" ]; then
+  echo "pre-commit: staged changes look sensitive:" >&2
+  echo "$hits" | cut -c1-200 >&2
+  echo "Move it to a gitignored file (e.g. .claude/settings.local.json) or use --no-verify." >&2
+  exit 1
+fi

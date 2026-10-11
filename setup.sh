@@ -43,6 +43,9 @@ copy_if_absent() {
 
 echo "Setting up dotfiles from $DOTFILES..."
 
+# Repo git hooks (pre-commit blocks work/org details and secrets — repo is public)
+git -C "$DOTFILES" config core.hooksPath githooks
+
 # Shell & editor configs
 echo "Setting up shell and editor configs..."
 create_symlink "$DOTFILES/.zshrc" ~/.zshrc
