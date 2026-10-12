@@ -192,8 +192,8 @@ nnoremap <leader>dh :DiffviewFileHistory %<CR>
 
 " Edit config files
 nnoremap <leader>en <cmd>edit ~/.config/nvim/init.vim<cr>
-nnoremap <leader>ez <cmd>edit ~/dotfiles/.zshrc<cr>
-nnoremap <leader>et <cmd>edit ~/dotfiles/.tmux.conf<cr>
+nnoremap <leader>ez <cmd>edit ~/.zshrc<cr>
+nnoremap <leader>et <cmd>edit ~/.tmux.conf<cr>
 nnoremap <leader>eg <cmd>edit ~/.config/ghostty/config<cr>
 
 " Markdown preview (browser)

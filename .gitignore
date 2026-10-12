@@ -33,3 +33,6 @@ tmp/
 
 # Org/client regexes for githooks/pre-commit — naming them in a tracked file would leak them.
 githooks/patterns.local
+
+# Herdr runtime lock (empty, recreated on launch)
+.herdr.config.toml.gpui-lock

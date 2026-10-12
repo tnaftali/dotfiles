@@ -1,4 +1,4 @@
-# herdr configuration — symlinked to ~/.config/herdr/config.toml by setup.sh
+# herdr configuration — hardlinked to ~/.config/herdr/config.toml by an agent following SETUP.md
 # Full option reference: herdr --default-config  (or https://herdr.dev/docs/configuration/)
 
 # Show first-run onboarding on startup. Disabled — already set up.
@@ -66,11 +66,17 @@ sidebar_min_width = 18
 sidebar_max_width = 36
 
 agent_panel_sort = "spaces"
+hide_tab_bar_when_single_tab = false
 [ui.toast]
 delivery = "herdr"          # in-app toast, click-to-focus target pane; off | herdr | terminal | system
 
 [ui.sound]
 enabled = true
+
+[ui.sidebar]
+
+[ui.sidebar.agents]
+rows = [["state_icon", "machine", "workspace", "tab"], ["agent"], ["state_text"]]
 
 [session]
 resume_agents_on_restore = true
@@ -80,3 +86,6 @@ directory = "~/.herdr/worktrees"
 
 [advanced]
 scrollback_limit_bytes = 10485760
+
+[experimental]
+pane_history = true

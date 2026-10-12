@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal config files for macOS development.
+Personal config files for macOS and Linux (Omarchy) development.
 
 ## Contents
 
@@ -37,11 +37,11 @@ Agent config and MCP live in the **main repo**; worktrees symlink to it. New wor
 
 1. **Merge MCP from all worktrees into main** (in case any worktree had its own `.mcp.json`):
    ```bash
-   cd ~/Projects/core && ~/dotfiles/scripts/merge-mcp-into-main.sh
+   cd ~/Projects/core && "$DOTFILES"/scripts/merge-mcp-into-main.sh
    ```
 2. **Fix existing worktrees** (symlink `.claude`, `.cursor`, `.mcp.json` to main):
    ```bash
-   cd ~/Projects/core && ~/dotfiles/scripts/fix-worktrees-agent-config.sh
+   cd ~/Projects/core && "$DOTFILES"/scripts/fix-worktrees-agent-config.sh
    ```
 
 ## Archive
@@ -50,6 +50,4 @@ Legacy configs in `archive/` (Linux, old terminals, Cursor/VS Code).
 
 ## Setup
 
-```bash
-./setup.sh
-```
+Ask an AI agent to follow [SETUP.md](SETUP.md).

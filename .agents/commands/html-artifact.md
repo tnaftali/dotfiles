@@ -7,8 +7,6 @@ argument-hint: "<topic> | --enrich <md> | --from <sources> <topic>"
 
 Author a rich, single-file HTML artifact from scratch (or by enriching an existing markdown source). Use when the content benefits from visual representation that markdown cannot convey: SVG diagrams, mockup grids, interactive controls, annotated diffs, side-by-side comparisons, kanban boards.
 
-Contrast with `/md-to-html` (mechanical pandoc conversion — no invented visuals).
-
 ## Usage
 
 - `/html-artifact <topic-or-description>` — author from scratch
@@ -30,12 +28,12 @@ Decide based on the content. Multiple patterns can coexist in one file.
 | Annotate code or diff | Two-column: code on left, margin notes on right | CSS grid, color-coded severity |
 | Walk through algorithm | Step-through with prev/next buttons | JS state machine |
 | Show data shape | Tables + JSON viewer (collapsible `<details>`) | native HTML |
-| Implementation plan | TOC sidebar + sections + task checkboxes + SVG data-flow | full template |
+| Implementation plan | TOC sidebar + sections + task checkboxes + SVG data-flow | full layout |
 
 ## Authoring guidelines
 
 1. **Single self-contained file.** Inline CSS in `<style>`, inline JS in `<script>`. External resources only via CDN (Prism, mermaid). Must work opened directly from disk.
-2. **Dark/light theme via `prefers-color-scheme`.** Define CSS vars.
+2. **Theme.** Catppuccin Mocha, dark only, as CSS vars — the "Document Theme" and "All Documents" sections of `~/.claude/CLAUDE.md` are the source of truth (palette, type scale, stat tiles, favicon).
 3. **Sticky TOC sidebar** for any document over ~3 sections.
 4. **Always include a "Copy as prompt" or "Copy as JSON" button** for interactive artifacts so the user can feed state back to Claude. Pattern:
 
@@ -49,20 +47,21 @@ Decide based on the content. Multiple patterns can coexist in one file.
 5. **Mockups**: use real HTML/CSS, not screenshots. Wrap in a `.mockup` frame with browser-chrome or device-frame styling so they're visually distinct from real UI.
 6. **SVG diagrams**: prefer hand-authored `<svg>` over mermaid when the diagram needs precise positioning, custom shapes, or annotations. Use mermaid when it's a standard flowchart/sequence/ER.
 7. **Code snippets**: `<pre><code class="language-X">` so Prism highlights them. Annotate inline with a 2-column grid (code | notes) when explaining.
-8. **Task lists**: `<ul class="task-list">` with `<input type="checkbox">` items, persisted to `localStorage` keyed on `location.pathname`. Compatible with the `/md-to-html` template's behavior.
+8. **Task lists**: `<ul class="task-list">` with `<input type="checkbox">` items, persisted to `localStorage` keyed on `location.pathname`.
 9. **Mobile responsive**: collapse multi-column layouts under ~900px.
 10. **No build step.** No npm, no bundler. Browser-native modules only.
 
 ## Base skeleton
 
-Start from the shared template at `~/dotfiles/.agents/templates/html/pandoc-template.html` (copy its `<style>` + script block) and replace `$body$` with hand-authored content. Or use this minimal shell:
+Use this minimal shell:
 
 ```html
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{TITLE}}</title>
-<style>/* embed full theme — copy from pandoc-template.html */</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+<style>/* Catppuccin Mocha vars + styles, per CLAUDE.md Document Theme */</style>
 </head><body>
 <div class="layout">
   <nav class="toc"><h2>Contents</h2><ul><!-- TOC links --></ul></nav>

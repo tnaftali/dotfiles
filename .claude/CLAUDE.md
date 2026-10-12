@@ -51,8 +51,7 @@ Always write implementation plans as **HTML files** (`.html`), never `.md`.
 **Required in every plan:**
 
 - A **checkbox** (`<input type="checkbox">`) per task — toggle `checked` when done
-- A **favicon** so the tab is recognizable — inline emoji SVG data URI, emoji picked to fit the project (e.g. 🛒 for a groceries app):
-  `<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">`
+- A **favicon** (see "All Documents")
 - **This execution block** at the top, after the title:
 
 ```html
@@ -61,7 +60,7 @@ Always write implementation plans as **HTML files** (`.html`), never `.md`.
 <ol>
   <li>Implement</li>
   <li>Run tests</li>
-  <li>Commit (if tests pass)</li>
+  <li>Commit only if tests pass <em>and</em> I asked for commits. Otherwise leave changes unstaged.</li>
   <li>Mark done — add <code>checked</code> to its checkbox</li>
 </ol>
 <p>All checked → run <code>touch .ralph-done</code></p>
@@ -77,6 +76,9 @@ format aids understanding — the whole point of the output.
   tool to a `.html` file in the project (or a path I give), then open it with
   `open <file>`. Do not use the `Artifact` tool / claude.ai publishing unless I
   explicitly ask.
+- **Where files go.** Inside a repo or project folder: that folder. Anywhere
+  else (e.g. working from `~`): `~/Documents/claude/`. Never loose in `~`.
+  Applies to plans, reports, research, and explanations.
 - **Lead with a diagram** when structure, flow, or architecture is involved —
   inline SVG, or mermaid via a `mermaid` CDN `<script>` in the file so it renders
   in the browser. The terminal does not render diagrams, so they belong in the
@@ -88,7 +90,17 @@ format aids understanding — the whole point of the output.
 - Short Q&A, a single fact, or an action confirmation stays in the terminal —
   do not over-produce. Caveman still governs the chat around the file.
 
-## Document Theme — Catppuccin Macchiato
+## All Documents
+
+These apply to every document I ask for — plans, reports, explanations, research, any HTML:
+
+- **Favicon.** Every `.html` file has one: an inline emoji SVG data URI, emoji picked to fit the topic (e.g. 🛒 for a groceries app):
+  `<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">`
+- **Writing Style.** Document prose follows the same rules as chat: ASD-STE100 and Zinsser's four principles.
+- **Fact Verification.** Check every factual claim in the document against a real source from this session. Mark each unverifiable claim `[UNVERIFIED]` in the document. End the document with one `Verified: N/N claims checked against <sources>` line.
+- **Progress Bars.** Building a document in several steps → show the progress bar in chat, as for any multi-step work.
+
+## Document Theme — Catppuccin Macchiato, Sans Titles
 
 Every document I build — implementation plans, reports, explanations, any HTML
 output — uses the **Catppuccin Macchiato** palette. Dark theme. Apply it unasked.
@@ -105,6 +117,9 @@ Define these as CSS variables and build everything off them:
   --red: #ed8796; --maroon: #ee99a0; --peach: #f5a97f; --yellow: #eed49f;
   --green: #a6da95; --teal: #8bd5ca; --sky: #91d7e3; --sapphire: #7dc4e4;
   --blue: #8aadf4; --lavender: #b7bdf8;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --title: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "JetBrains Mono", monospace;
 }
 ```
 
@@ -113,6 +128,11 @@ Role mapping:
 - Body text `--text`; muted/secondary `--subtext0`; borders/dividers `--surface0`/`--surface1`.
 - Accent/links/headings `--blue` or `--mauve`; code `--green`.
 - Status: done `--green`, todo `--overlay1`, risk/warn `--yellow`/`--peach`, error `--red`, dependency `--sky`.
+- No serif fonts anywhere. Body uses `--sans`. Titles (`h1`–`h3`) use `--title` (Inter): `h1` 26px `--blue` weight 700, `h2` 18px `--mauve` weight 600, `h3` 14px `--subtext1` weight 600.
+- Load Inter with this tag in `<head>`; offline, `--title` falls back to the system font:
+  `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">`
+- Lead with a row of stat tiles for the headline numbers (label 12px uppercase `--subtext0`, value 28px weight 650, tabular-nums). The deciding number (price, cost, total) goes first and biggest.
+- Reference look: `~/Documents/claude/pc-electricity-cost.html` (tiles, cards, quiet tables, pill badges).
 
 @devlog.md
 @RTK.md

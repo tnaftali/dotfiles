@@ -3,10 +3,15 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # ── Oh My Zsh Setup ─────────────────────────────────────────────────────────────
-export ZSH="/Users/tobi/.oh-my-zsh"
+# Repo location, resolved through the ~/.zshrc symlink (works wherever it's cloned)
+export DOTFILES="${${(%):-%x}:A:h}"
+
+export ZSH="$HOME/.oh-my-zsh"
 
 # ZSH_THEME="avit"
 ZSH_THEME="agnoster-newline"
+# Custom theme not installed on this machine yet: fall back to stock agnoster
+[[ -f "${ZSH_CUSTOM:-$ZSH/custom}/themes/$ZSH_THEME.zsh-theme" ]] || ZSH_THEME="agnoster"
 
 HYPHEN_INSENSITIVE="true"
 COMPLETION_WAITING_DOTS="true"
@@ -34,7 +39,7 @@ source $ZSH/oh-my-zsh.sh
 export MANPATH="/usr/local/man:$MANPATH"
 export LANG=en_US.UTF-8
 export EDITOR='nvim'
-export ARCHFLAGS="-arch x86_64"
+[[ $OSTYPE == darwin* ]] && export ARCHFLAGS="-arch x86_64"
 export SSH_KEY_PATH="~/.ssh/id_rsa"
 export TERM="xterm-256color"
 
@@ -50,10 +55,19 @@ export DISABLE_OPENCOLLECTIVE=1
 export ADBLOCK=1
 
 # ── Aliases ─────────────────────────────────────────────────────────────────────
+# Play a sound when a long command finishes
+ding() {
+  if (( $+commands[afplay] )); then
+    afplay /System/Library/Sounds/Ping.aiff
+  elif (( $+commands[paplay] )); then
+    paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+  fi
+}
+
 # Development Server Aliases
 alias srcsrv="source .local.env && nvm use 24.14.0 && iex -S mix phx.server"
-alias srctst="source .local.env && MIX_ENV=test bin/migrate && mix test --color; afplay /System/Library/Sounds/Ping.aiff"
-alias srctstcr="source .local.env && MIX_ENV=test bin/migrate && mix test apps/core/test --color; afplay /System/Library/Sounds/Ping.aiff"
+alias srctst="source .local.env && MIX_ENV=test bin/migrate && mix test --color; ding"
+alias srctstcr="source .local.env && MIX_ENV=test bin/migrate && mix test apps/core/test --color; ding"
 
 # Git Aliases
 alias gas="git add . && git status"
@@ -63,8 +77,8 @@ alias gp="git pull origin $1"
 alias gdiff="git diff --staged --color-words"
 
 # Configuration Reload Aliases
-alias srcz="source ~/dotfiles/.zshrc"
-alias srct="tmux source-file ~/dotfiles/.tmux.conf"
+alias srcz="source $DOTFILES/.zshrc"
+alias srct="tmux source-file $DOTFILES/.tmux.conf"
 
 # Utility Aliases
 alias list="exa --long --header --git --icons --all"
@@ -91,12 +105,14 @@ prompt_context() {
 }
 
 # ── System Configuration ────────────────────────────────────────────────────────
-defaults write -g NSWindowShouldDragOnGesture -bool true
+if [[ $OSTYPE == darwin* ]]; then
+  defaults write -g NSWindowShouldDragOnGesture -bool true
 
-# Aerospace Window Manager
-# Move to the next/prev workspace on the current monitor silently
-aerospace workspace next --wrap-around > /dev/null 2>&1
-aerospace workspace prev --wrap-around > /dev/null 2>&1
+  # Aerospace Window Manager
+  # Move to the next/prev workspace on the current monitor silently
+  aerospace workspace next --wrap-around > /dev/null 2>&1
+  aerospace workspace prev --wrap-around > /dev/null 2>&1
+fi
 
 # ── Additional PATH Configuration ───────────────────────────────────────────────
 # Add the .mix directory for the current global asdf Elixir version (for rebar/rebar3).
@@ -108,7 +124,11 @@ if (( $+commands[asdf] )); then
 fi
 
 # ── System Greeting ─────────────────────────────────────────────────────────────
-neofetch
+if (( $+commands[neofetch] )); then
+  neofetch
+elif (( $+commands[fastfetch] )); then
+  fastfetch
+fi
 
 # ── Custom Functions ────────────────────────────────────────────────────────────
 # Worktrees function START
@@ -238,31 +258,39 @@ add-zsh-hook preexec _title_preexec
 add-zsh-hook precmd _title_precmd
 
 # ── PATH Configuration ──────────────────────────────────────────────────────────
-export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
+[[ $OSTYPE == darwin* ]] && export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
 # Created by `pipx` on 2025-07-08 13:14:22
-export PATH="$PATH:/Users/tobi/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 # ── Shell History & Completion ──────────────────────────────────────────────────
 # fzf first, then atuin — so atuin's Ctrl+R binding takes priority
 source <(fzf --zsh)
-. "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh)"
+[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
+(( $+commands[atuin] )) && eval "$(atuin init zsh)"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # opencode
-export PATH=/Users/tobi/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # dotfiles bin
-export PATH="$HOME/dotfiles/bin:$PATH"
+export PATH="$DOTFILES/bin:$PATH"
 
 # Claude
 export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
 
-launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl load ~/Library/LaunchAgents/com.acsandmann.swipe.plist
+[[ $OSTYPE == darwin* ]] && launchctl unload ~/Library/LaunchAgents/com.acsandmann.swipe.plist && launchctl load ~/Library/LaunchAgents/com.acsandmann.swipe.plist
 
 
 export PATH="$HOME/.local/bin:$PATH"
 
 # mise version manager
 # eval "$(mise activate zsh)"
+
+# ── Linux ───────────────────────────────────────────────────────────────────────
+if [[ $OSTYPE == linux* ]]; then
+  # Omarchy installs node, gh, claude, etc. through mise
+  (( $+commands[mise] )) && eval "$(mise activate zsh)"
+
+  open() { xdg-open "$@" >/dev/null 2>&1 &! }
+fi
