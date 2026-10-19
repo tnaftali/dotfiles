@@ -84,16 +84,9 @@ Use `git clone --depth 1`. For vim-plug, if `${XDG_DATA_HOME:-~/.local/share}/nv
 
 **Skill exception:** on `Linux`, skip `herdr-gpui-browser`. Herdr rewrites that skill per OS, and the tracked copy uses the macOS binary path.
 
-**Cursor** (only if `~/.cursor` exists or `cursor` is on `PATH`)
-- Link `agents`, `commands`, `hooks`, `rules` from `$DOTFILES/.cursor/` into `~/.cursor/`. Cursor owns `~/.cursor`, so link per entry.
-- Link each `$DOTFILES/.agents/skills/*/` into `~/.cursor/skills/`.
-- Delete `~/.cursor/.cursor` if it is a symlink (leftover from old runs).
-
 **Codex** — copy only if absent. Codex rewrites `config.toml`, and the two configs are meant to diverge.
 - `$DOTFILES/.codex/AGENTS.md` → `~/.codex/AGENTS.md`
 - `$DOTFILES/.codex/config.toml` → `~/.codex/config.toml`
-
-**OpenCode:** link `$DOTFILES/.agents/agents` to `~/.config/opencode/agents`.
 
 ## 7. Verify
 

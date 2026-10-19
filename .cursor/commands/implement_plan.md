@@ -1,1 +1,0 @@
-Implement the plan using the following methodology: @.agents/commands/implement_plan.md

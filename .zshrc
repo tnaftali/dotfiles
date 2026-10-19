@@ -81,7 +81,7 @@ alias srcz="source $DOTFILES/.zshrc"
 alias srct="tmux source-file $DOTFILES/.tmux.conf"
 
 # Utility Aliases
-alias list="exa --long --header --git --icons --all"
+alias list="eza --long --header --git --icons --all"
 alias ls="eza --icons --grid --group-directories-first"
 alias lg="lazygit"
 alias nv="nvim"
@@ -260,18 +260,12 @@ add-zsh-hook precmd _title_precmd
 # ── PATH Configuration ──────────────────────────────────────────────────────────
 [[ $OSTYPE == darwin* ]] && export PATH="/opt/homebrew/bin:/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
-# Created by `pipx` on 2025-07-08 13:14:22
-export PATH="$PATH:$HOME/.local/bin"
-
 # ── Shell History & Completion ──────────────────────────────────────────────────
 # fzf first, then atuin — so atuin's Ctrl+R binding takes priority
 source <(fzf --zsh)
 [[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
 (( $+commands[atuin] )) && eval "$(atuin init zsh)"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"
 
 # dotfiles bin
 export PATH="$DOTFILES/bin:$PATH"
@@ -283,9 +277,6 @@ export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
 
 
 export PATH="$HOME/.local/bin:$PATH"
-
-# mise version manager
-# eval "$(mise activate zsh)"
 
 # ── Linux ───────────────────────────────────────────────────────────────────────
 if [[ $OSTYPE == linux* ]]; then

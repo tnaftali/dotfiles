@@ -87,6 +87,9 @@ format aids understanding — the whole point of the output.
   over prose, `<code>` for paths/commands, fold detail in `<details>`.
 - Use `dataviz` for chart design, `artifact-diagramming` for diagram mechanics —
   for the content, not as a reason to publish.
+- Interactive controls export their state: add a "Copy as prompt" button so I
+  can feed it back to you.
+- Never overwrite an existing file silently — ask, or version the filename.
 - Short Q&A, a single fact, or an action confirmation stays in the terminal —
   do not over-produce. Caveman still governs the chat around the file.
 

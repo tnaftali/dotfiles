@@ -40,13 +40,12 @@ Behavior:
 
 Named after Ralph Wiggum — dumb, persistent, eventually gets there.
 
-### 3. Slash commands (`~/.agents/commands/`, symlinked into `.claude/` and `.cursor/`)
+### 3. Slash commands (`~/.agents/commands/`, symlinked into `.claude/`)
 
 Cross-tool via a single `.agents/` directory:
 
 | Command | Purpose |
 |---|---|
-| `/create-implementation-plan` | Interactive plan builder — researches codebase, asks questions, writes checkboxed plan |
 | `/implement-plan <path>` | Walks an existing plan, updating checkboxes |
 | `/research-codebase` | Parallel codebase + thoughts research |
 | `/review-plan` | Red-team a plan for bugs/inconsistencies before execution |
@@ -55,20 +54,19 @@ Cross-tool via a single `.agents/` directory:
 | `/format-run-tests-and-credo` | Elixir-specific QA |
 | `/analyze-pr-comments`, `/triage-pr-comments` | PR feedback workflow |
 | `/daily_brief` | Morning brief (calendar, notifications, priorities) |
-| `/cleanup-and-simplify` | Refactor pass on diff |
 
 ### 4. Plan-maker agents (in `.agents/skills/` and `.agents/agents/`)
 
 - `codebase-locator`, `codebase-analyzer`, `codebase-pattern-finder`
 - `thoughts-locator`, `thoughts-analyzer`
 
-Invoked by `/create-implementation-plan` to parallelize research before drafting.
+Spawned to parallelize research before drafting a plan.
 
 ## The Typical Flow
 
 ```bash
-# 1. plan
-claude /create-implementation-plan "ticket description or file"
+# 1. plan (CLAUDE.md sets the format)
+claude "write an implementation plan for <ticket description or file>"
 # → produces plan.md with checkboxes + execution header
 
 # 2. (optional) sanity check the plan
@@ -88,7 +86,7 @@ For smaller tasks skip the loop and run the plan interactively — same file wor
 ```
 ~/dotfiles/
   bin/ralph                    # loop runner
-  .agents/                     # shared across Claude/Cursor/OpenCode
+  .agents/                     # shared agent config
     commands/                  # slash commands
     skills/                    # skill definitions
     agents/                    # subagent prompts
@@ -98,7 +96,6 @@ For smaller tasks skip the loop and run the plan interactively — same file wor
     settings.json              # model, hooks, permissions
     commands → ../.agents/commands   # symlinks
     agents   → ../.agents/agents
-  .cursor/                     # same symlink pattern
 ```
 
 One source of truth, every AI tool sees the same commands.

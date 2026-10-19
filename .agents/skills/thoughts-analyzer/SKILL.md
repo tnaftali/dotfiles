@@ -1,1 +1,0 @@
-../../agents/thoughts-analyzer.md

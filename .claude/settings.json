@@ -46,14 +46,6 @@
             "command": "\"$HOME/.agents/hooks/format-elixir.sh\""
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$HOME/.claude/hooks/gsd-context-monitor.js\""
-          }
-        ]
       }
     ],
     "PreToolUse": [
@@ -77,14 +69,6 @@
       }
     ],
     "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$HOME/.claude/hooks/gsd-check-update.js\""
-          }
-        ]
-      },
       {
         "matcher": "*",
         "hooks": [

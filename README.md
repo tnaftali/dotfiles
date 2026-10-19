@@ -14,17 +14,14 @@ Personal config files for macOS and Linux (Omarchy) development.
 ## AI Tools
 
 Shared configs in `.agents/` with tool-specific symlinks. The repo is the
-single source of truth — `~/.claude` and `~/.cursor` are populated entirely
-by symlinks back into dotfiles.
+single source of truth — `~/.claude` is populated entirely by symlinks back
+into dotfiles.
 
 - `~/.agents` → `.agents/` (agents, commands, hooks — e.g. format-elixir)
 - `~/.claude/` — per-entry symlinks: `agents/*.md`, `commands`, `skills/*`,
   `settings.json`, `settings.local.json`, `CLAUDE.md`, `RTK.md`
-- `~/.cursor/` — per-entry symlinks: `agents`, `commands`, `hooks`, `rules`,
-  `skills/*` (Cursor pre-creates `~/.cursor` as a state dir, so we cannot
-  symlink the whole dir)
 
-Supported: Claude Code, OpenCode, Cursor
+Supported: Claude Code, Codex (seeded copies)
 
 ## Scripts
 
