@@ -66,6 +66,8 @@ sidebar_min_width = 18
 sidebar_max_width = 36
 
 agent_panel_sort = "spaces"
+status_indicators = "dots"
+tab_bar_position = "top"
 hide_tab_bar_when_single_tab = false
 [ui.toast]
 delivery = "herdr"          # in-app toast, click-to-focus target pane; off | herdr | terminal | system
