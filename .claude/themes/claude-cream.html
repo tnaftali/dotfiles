@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Cream Theme</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥛</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Domine:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #e6e0d2; --panel: #ede8dc; --well: #ddd6c6;
+  --border: #d4ccba; --border-strong: #bfb6a2;
+  --text: #2b2925; --muted: #57534b; --faint: #625d54;
+  --accent: #a34c31; --accent-soft: #e8d5c8;
+  --green: #4f6d43; --amber: #8a6223; --red: #9c3d33; --blue: #415e80;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --title: "Domine", Georgia, serif;
+  --mono: ui-monospace, "JetBrains Mono", monospace;
+}
+:root[data-theme="dark"] {
+  --bg: #262624; --panel: #2f2f2c; --well: #1f1e1d;
+  --border: #3a3936; --border-strong: #4a4945;
+  --text: #f5f4ed; --muted: #b7b5a9; --faint: #9a988e;
+  --accent: #d97757; --accent-soft: #3d2c25;
+  --green: #9bb98a; --amber: #d4a85a; --red: #e08a7d; --blue: #8eaacb;
+}
+/* ---- base ---- */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); }
+main { max-width: 860px; margin: 0 auto; padding: 48px 16px 80px; }
+h1, h2, h3 { font-family: var(--title); color: var(--text); letter-spacing: -0.005em; }
+h1 { font-size: 30px; font-weight: 700; margin: 0 0 4px; }
+h2 { font-size: 19px; font-weight: 600; margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 14px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+.sub { color: var(--faint); margin: 0 0 28px; font-size: 14px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+code { font-family: var(--mono); font-size: 13px; background: var(--well); padding: 1px 5px; border-radius: 4px; }
+ul, ol { padding-left: 20px; } li { margin: 3px 0; }
+.wrap { overflow-x: auto; }
+.toggle { position: fixed; top: 14px; right: 16px; background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font: 13px var(--sans); cursor: pointer; }
+.foot { color: var(--faint); font-size: 13px; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 12px; }
+/* ---- tiles + cards ---- */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .l { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
+.tile .v { font-family: var(--title); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile.lead .v { color: var(--accent); font-size: 32px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
+.card.bl { border-left: 3px solid var(--accent); }
+/* ---- visual cues ---- */
+.num { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--well); border: 1px solid var(--border-strong); font: 600 13px var(--sans); color: var(--text); }
+.callout { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border: 1px solid var(--border); border-left-width: 3px; border-radius: 10px; padding: 10px 14px; margin: 12px 0; font-size: 14px; }
+.callout .ico { flex: none; font-weight: 700; width: 18px; text-align: center; }
+.callout.note { border-left-color: var(--blue); } .callout.note .ico { color: var(--blue); }
+.callout.warn { border-left-color: var(--amber); } .callout.warn .ico { color: var(--amber); }
+.callout.err  { border-left-color: var(--red); }   .callout.err .ico  { color: var(--red); }
+.callout.ok   { border-left-color: var(--green); } .callout.ok .ico   { color: var(--green); }
+.chip { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--well); color: var(--muted); white-space: nowrap; }
+.meter { height: 6px; background: var(--well); border-radius: 999px; overflow: hidden; margin: 6px 0 2px; }
+.meter > span { display: block; height: 100%; width: 0; background: var(--green); transition: width .2s; }
+ol.steps { list-style: none; counter-reset: s; padding: 0; }
+ol.steps > li { counter-increment: s; position: relative; padding-left: 36px; margin: 8px 0; min-height: 26px; }
+ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 24px; height: 24px; border-radius: 50%; background: var(--well); border: 1px solid var(--border-strong); display: grid; place-items: center; font: 600 12px var(--sans); }
+/* ---- tables ---- */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--faint); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+tr.group td { background: var(--well); font-weight: 600; padding: 7px 8px; }
+tr.s-todo td:first-child { box-shadow: inset 3px 0 var(--border-strong); }
+tr.s-warn td:first-child { box-shadow: inset 3px 0 var(--amber); }
+tr.s-dep  td:first-child { box-shadow: inset 3px 0 var(--blue); }
+tr.s-err  td:first-child { box-shadow: inset 3px 0 var(--red); }
+tr:has(input:checked) td:first-child { box-shadow: inset 3px 0 var(--green); }
+tr:has(input:checked) td:not(:first-child) { opacity: .5; }
+tr:has(input:checked) b { text-decoration: line-through; }
+/* ---- status pills (outlined, with icon) ---- */
+.pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid currentColor; white-space: nowrap; }
+.ok { color: var(--green); } .warn { color: var(--amber); } .err { color: var(--red); } .dep { color: var(--blue); } .todo { color: var(--faint); }
+.pill.ok::before { content: "✓ "; } .pill.warn::before { content: "! "; } .pill.err::before { content: "✕ "; } .pill.dep::before { content: "↗ "; } .pill.todo::before { content: "○ "; }
+/* ---- folds ---- */
+details { border-top: 1px solid var(--border); padding: 10px 0; }
+summary { cursor: pointer; color: var(--muted); list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "▸"; display: inline-block; width: 16px; transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
+</style>
+<script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<button class="toggle" onclick="const r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme)}catch(e){}">◐ theme</button>
+<main>
+<h1>Claude Cream</h1>
+<p class="sub">Reference page for the minimal warm theme · every component in one place</p>
+
+<div class="tiles">
+  <div class="tile lead"><div class="l">Deciding number</div><div class="v">£1,240</div></div>
+  <div class="tile"><div class="l">Tasks done</div><div class="v"><span id="done">0</span>/3</div><div class="meter"><span id="bar"></span></div></div>
+  <div class="tile"><div class="l">Risks</div><div class="v">2</div></div>
+</div>
+
+<div class="card bl">
+  <h3>Bottom line</h3>
+  <p style="margin:0">The accent appears in three places only: links, the lead tile and this callout border. Everything else is ink on cream.</p>
+</div>
+
+<h2><span class="num">1</span>Numbered section</h2>
+<p>Number the <code>h2</code> sections when order matters (phases, steps). Plain <code>h2</code> otherwise.</p>
+<div class="callout note"><span class="ico">i</span><div><b>Note.</b> Context the reader needs, one or two sentences.</div></div>
+<div class="callout warn"><span class="ico">!</span><div><b>Risk.</b> Something that can go wrong, and the mitigation.</div></div>
+<div class="callout err"><span class="ico">✕</span><div><b>Blocker.</b> Work stops until this is resolved.</div></div>
+<div class="callout ok"><span class="ico">✓</span><div><b>Decided.</b> A settled choice, so nobody re-opens it.</div></div>
+
+<h2><span class="num">2</span>Task table</h2>
+<div class="wrap">
+<table id="tasks">
+<tr><th></th><th>Task</th><th>Owner</th><th>Status</th></tr>
+<tr class="group"><td colspan="4">Phase A · Prepare</td></tr>
+<tr class="s-todo"><td><input type="checkbox"></td><td><b>Parse input</b> <code>lib/parse.ex</code></td><td><span class="chip">Tobi</span></td><td><span class="pill todo">todo</span></td></tr>
+<tr class="s-warn"><td><input type="checkbox"></td><td><b>Migrate data</b> <code>priv/repo/migrations</code></td><td><span class="chip">Miguel</span></td><td><span class="pill warn">risk</span></td></tr>
+<tr class="group"><td colspan="4">Phase B · Ship</td></tr>
+<tr class="s-dep"><td><input type="checkbox"></td><td><b>Upstream API</b> <a href="#">link</a></td><td><span class="chip">Nacho</span></td><td><span class="pill dep">dependency</span></td></tr>
+</table>
+</div>
+<p style="font-size:13px;color:var(--faint)">Row edge colour = status. Ticked rows turn green and fade. Pills: <span class="pill ok">done</span> <span class="pill todo">todo</span> <span class="pill warn">risk</span> <span class="pill err">blocked</span> <span class="pill dep">dependency</span></p>
+
+<h2><span class="num">3</span>Steps</h2>
+<ol class="steps">
+  <li>Implement</li>
+  <li>Run tests</li>
+  <li>Mark done</li>
+</ol>
+
+<h2>Folded detail</h2>
+<details open><summary>Summary line you can skim</summary><p>Body on demand.</p></details>
+<details><summary>Another section</summary><p>Hidden until opened.</p></details>
+
+<p class="foot">Verified: line goes here.</p>
+</main>
+<script>
+function meter(){const b=[...document.querySelectorAll('#tasks input')],d=b.filter(x=>x.checked).length;document.getElementById('done').textContent=d;document.getElementById('bar').style.width=(100*d/b.length)+'%'}
+document.addEventListener('change',meter);meter();
+</script>
+</body>
+</html>

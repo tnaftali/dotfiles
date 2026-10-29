@@ -67,6 +67,8 @@ on-window-detected = [
     { if = { app-id = 'cc.ffitch.shottr' },            run = 'layout floating' },
     { if = { app-id = 'ru.keepcoder.Telegram' },       run = 'layout floating' },
     { if = { app-id = 'com.apple.iCal' },              run = 'layout floating' },
+    # Google Calendar Brave PWA
+    { if = { app-id = 'com.brave.Browser.origin.app.kjbdgfilnfhdoflbpgamdcdgpehopbep' }, run = 'layout floating' },
     { if = { app-id = 'com.amazon.Lassen' },           run = 'layout floating' },
     { if = { app-id = 'com.granola.app' },             run = 'layout floating' },
     { if = { app-id = 'com.apple.ActivityMonitor' },   run = 'layout floating' },

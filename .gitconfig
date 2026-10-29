@@ -44,3 +44,7 @@
 # ── Branch & Checkout Settings ────────────────────────────────────────────────
 [checkout]
 	defaultRemote = origin
+
+# Per-machine settings (credentials etc.); git skips it when missing
+[include]
+	path = ~/.gitconfig.local

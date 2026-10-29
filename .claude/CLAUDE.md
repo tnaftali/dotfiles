@@ -14,6 +14,9 @@ Every reply, every session. Use ASD-STE100 (Simplified Technical English) and Zi
 - **Clarity** — no ambiguity about what's wrong, why it matters, what to change; concrete `file:line` over abstraction.
 - **Humanity** — one engineer to another; direct, natural, never bureaucratic or robotic.
 
+**Sign-off on text for others.** Any reply, comment or message I draft for Tobi to send, or post on Tobi's behalf (Basecamp, Slack, GitHub, email), ends with this line:
+`✻ text drafted by Claude, verified by Tobi`
+
 ## Progress Bars
 
 During any multi-step build or work session, show an ASCII progress bar so I can follow along. Every session, unasked.
@@ -136,6 +139,51 @@ Role mapping:
   `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">`
 - Lead with a row of stat tiles for the headline numbers (label 12px uppercase `--subtext0`, value 28px weight 650, tabular-nums). The deciding number (price, cost, total) goes first and biggest.
 - Reference look: `~/Documents/claude/pc-electricity-cost.html` (tiles, cards, quiet tables, pill badges).
+
+## Alternate Theme — Claude Cream (opt-in)
+
+Use only when I ask for "cream" / "Claude Cream" / a light warm look. Macchiato stays the default.
+
+Minimal, warm, light by default, with a dark toggle. Copy the `:root` block, the dark block and the component styles from the reference page: `~/dotfiles/.claude/themes/claude-cream.html`.
+
+```css
+:root {
+  --bg: #e6e0d2; --panel: #ede8dc; --well: #ddd6c6;
+  --border: #d4ccba; --border-strong: #bfb6a2;
+  --text: #2b2925; --muted: #57534b; --faint: #625d54;
+  --accent: #a34c31; --accent-soft: #e8d5c8;
+  --green: #4f6d43; --amber: #8a6223; --red: #9c3d33; --blue: #415e80;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --title: "Domine", Georgia, serif;
+  --mono: ui-monospace, "JetBrains Mono", monospace;
+}
+:root[data-theme="dark"] {
+  --bg: #262624; --panel: #2f2f2c; --well: #1f1e1d;
+  --border: #3a3936; --border-strong: #4a4945;
+  --text: #f5f4ed; --muted: #b7b5a9; --faint: #9a988e;
+  --accent: #d97757; --accent-soft: #3d2c25;
+  --green: #9bb98a; --amber: #d4a85a; --red: #e08a7d; --blue: #8eaacb;
+}
+```
+
+Rules:
+- Ink on cream. Headings use `--text`, not color.
+- Titles (`h1`–`h3`) and stat-tile values use `--title` (Domine, a serif): `h1` 30px 700, `h2` 19px 600, `h3` 14px 600 `--muted`, letter-spacing -0.005em. Body stays system sans. Serif for titles only.
+- Load it in `<head>`; offline, `--title` falls back to the system font: `<link href="https://fonts.googleapis.com/css2?family=Domine:wght@500;600;700&display=swap" rel="stylesheet">`
+- Accent `--accent` (clay) in three places only: links, the lead stat tile, the bottom-line callout border.
+- Cards `--panel` + 1px `--border`, 12px radius. Code on `--well`.
+- Status pills are outlined, not filled: done `--green`, todo `--faint`, risk `--amber`, error `--red`, dependency `--blue`.
+- Same structure as Macchiato: stat tiles first, bottom-line callout, quiet tables, `<details>` folds.
+- Visual cues, used sparingly so pages scan fast and are not a wall of text. Copy the CSS from the reference page:
+  - numbered `h2` (`.num`) when order matters
+  - callouts (`.callout note|warn|err|ok`) instead of paragraphs for notes, risks, blockers, decisions
+  - owner `.chip`s
+  - task rows: group rows (`tr.group`), a status-coloured left edge (`tr.s-todo|warn|dep|err`), and ticked rows fade
+  - a progress `.meter` tile for checklists
+  - `ol.steps` for ordered steps
+  - pills carry an icon (✓ ○ ! ✕ ↗)
+  - `<details>` with a rotating ▸
+- Persist the dark toggle in `localStorage` (try/catch), as the reference page does.
 
 @devlog.md
 @RTK.md
