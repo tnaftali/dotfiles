@@ -47,29 +47,13 @@ o.window("DBeaver", { workspace = "4" })
 o.window("org.qbittorrent.qBittorrent", { workspace = "4 silent" })
 
 -- Floating apps
-o.window("(brave-web.whatsapp.com__-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop)", { float = true })
+o.window("(brave-web.whatsapp.com__-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default)", { float = true })
 
--- Quick notes (Raycast Notes style): Iotas as a normal floating window, so a
--- click outside it moves focus. ALT+M brings it to the current workspace, or
--- hides it in an unused special workspace. Starts Iotas on first use.
-local notes_class = "org.gnome.World.Iotas"
-o.window(notes_class, { float = true, center = true })
-o.window(notes_class, { size = { 900, 700 } })
-o.bind("ALT + M", "Notes", function()
-  local window = hl.get_windows({ class = notes_class })[1]
-  if not window then
-    hl.dispatch(hl.dsp.exec_cmd("iotas"))
-    return
-  end
-  local target = "address:" .. window.address
-  local active = hl.get_active_workspace().name
-  if window.workspace and window.workspace.name == active then
-    hl.dispatch(hl.dsp.window.move({ workspace = "special:notes", follow = false, window = target }))
-  else
-    hl.dispatch(hl.dsp.window.move({ workspace = active, follow = false, window = target }))
-    hl.dispatch(hl.dsp.focus({ window = target }))
-  end
-end)
+-- Quick notes (Raycast Notes style): ~/Projects/jot, a native GPUI text
+-- window, pinned to show on every workspace. SUPER+N opens it, or closes it if open. The app restores its own size
+-- and position, so no size or center rule here.
+o.window("jot", { float = true, pin = true })
+o.bind("SUPER + N", "Notes", "/home/tobi/.local/bin/jot-toggle")
 
 o.bind("ALT + R", "WhatsApp", "omarchy-launch-or-focus-webapp WhatsApp https://web.whatsapp.com/")
 

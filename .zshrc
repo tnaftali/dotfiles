@@ -284,4 +284,13 @@ if [[ $OSTYPE == linux* ]]; then
   (( $+commands[mise] )) && eval "$(mise activate zsh)"
 
   open() { xdg-open "$@" >/dev/null 2>&1 &! }
+
+  # Power off this PC after a y/N prompt
+  poweroff() {
+    if read -q "?Power off $HOST? [y/N] "; then
+      echo; command systemctl poweroff
+    else
+      echo
+    fi
+  }
 fi

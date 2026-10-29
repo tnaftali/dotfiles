@@ -69,6 +69,7 @@ agent_panel_sort = "spaces"
 status_indicators = "dots"
 tab_bar_position = "top"
 hide_tab_bar_when_single_tab = false
+accent = "cyan"
 [ui.toast]
 delivery = "herdr"          # in-app toast, click-to-focus target pane; off | herdr | terminal | system
 

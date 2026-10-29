@@ -5,6 +5,13 @@
 - Be concise. No preamble, no summaries, no restating what I said.
 - I'm a senior engineer. Skip basic explanations unless I ask for them.
 
+## Nightly Power-Off (Linux home PC)
+
+- A root timer powers this PC off at 02:00: `nightly-poweroff.timer` runs `/usr/local/bin/nightly-poweroff` at 01:55.
+- It skips the night if `~/.skip-poweroff` exists, or if a `claude` process runs and a transcript changed in the last 15 min.
+- "Skip poweroff", "keep the PC on tonight" → run `touch ~/.skip-poweroff`. One night only: the script deletes the flag. Works until 02:00.
+- Undo a skip: `rm ~/.skip-poweroff`. Status: `systemctl list-timers nightly-poweroff.timer`. Log: `journalctl -u nightly-poweroff`.
+
 ## Writing Style
 
 Every reply, every session. Use ASD-STE100 (Simplified Technical English) and Zinsser's four principles:
