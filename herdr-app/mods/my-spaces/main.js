@@ -1,6 +1,6 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
 // grouped by machine when more than one is known. After a space's name, the repo
-// its first terminal is in now, only where unusual: branch, ahead/behind. Agent state shows as a dot on the right, detail in the agents list. Click to
+// its first terminal is in now, its branch, ahead/behind. Agent state shows as a dot on the right, detail in the agents list. Click to
 // switch, right-click for its menu, drag to reorder.
 
 import { View, div, svg } from "gpui-kit";
@@ -89,7 +89,7 @@ export default class Spaces extends View {
           delete colors[m[1]];
           if (name) colors[name] = color || colors[name] || "none";
           setShared("group.colors", colors);
-        } else if ((m = /^panel:(files|changes)$/.exec(c))) {
+        } else if ((m = /^panel:(files|changes|prs)$/.exec(c))) {
           const body = findNode(layout(), "panel-body"), panel = findNode(layout(), "panel");
           if (panel && !panel.hidden && body?.active === m[1]) run("layout.hide", { id: "panel" });
           else { run("layout.select", { stack: "panel-body", child: m[1] }); run("layout.show", { id: "panel" }); }
@@ -530,16 +530,10 @@ export default class Spaces extends View {
     });
   }
 
-  // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
-  // branch goes when the name already says it (a worktree is named after its branch),
-  // and master/main go: nearly every space is on one.
+  // After the name, always: "herdr \u00b7 spike \u21912 \u21931". Repo and branch show on
+  // every space in a repo; a space outside git has no `g` and no tail.
   gitTail(g, tree, name, t, rid) {
-    const raw = g.branch ?? "detached";
-    const same = (a) => a.toLowerCase() === name.toLowerCase();
-    const branch = same(raw) || raw === "master" || raw === "main" ? "" : raw;
-    const repo = tree || same(g.name) ? "" : g.name;
-    const where = [repo, branch].filter(Boolean).join(" \u00b7 ");
-    if (!where && !g.ahead && !g.behind) return null;
+    const where = [g.name, g.branch ?? "detached"].filter(Boolean).join(" \u00b7 ");
     return h_flex()
       .min_w(0)
       .gap(5)

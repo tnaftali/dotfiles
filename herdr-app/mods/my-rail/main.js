@@ -13,6 +13,7 @@ const TOOLS = [
   { id: "lazygit", text: "Lazygit", icon: "git", color: "#f5a97f", cmd: "my-spaces.lazygit" },
   { id: "files", text: "Files", icon: "folder-tree", color: "#eed49f", cmd: "my-spaces.panel:files", panel: true },
   { id: "changes", text: "Changes", icon: "diff", color: "#c6a0f6", cmd: "my-spaces.panel:changes", panel: true },
+  { id: "prs", text: "PRs", icon: "pr", color: "#f5bde6", cmd: "my-spaces.panel:prs", panel: true },
 ];
 
 export default class Rail extends View {

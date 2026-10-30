@@ -127,6 +127,13 @@
                       "content": {
                         "mod": "changes"
                       }
+                    },
+                    {
+                      "id": "prs",
+                      "type": "block",
+                      "content": {
+                        "mod": "my-prs"
+                      }
                     }
                   ],
                   "active": "files"

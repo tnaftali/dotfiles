@@ -42,18 +42,23 @@ ln -f "$DOTFILES/herdr.config.toml" ~/.config/herdr/config.toml
 - `Linux` and `~/.config/herdr/config.toml` already exists → skip. The distro ships its own.
 - An editor or `git` can replace the file and break the hardlink. Run `ln -f` again to fix it.
 
-## 3b. Herdr app config (`Linux` only)
+## 3b. Herdr app config
 
 `herdr-app/` holds the Herdr app config: keys, settings, theme, the `my-main` layout, and the custom mods. Herdr writes its own state into `~/.config/herdr-app/` (`shared.json`, `view.json`, `layouts/.state/`, ...). Link only the entries below.
 
 ```bash
 mkdir -p ~/.config/herdr-app/layouts
-for f in keys.json settings.json themes layouts/my-main.json; do ln -s "$DOTFILES/herdr-app/$f" ~/.config/herdr-app/$f; done
+keys=keys.json; [ "$OS" = Darwin ] && keys=keys.macos.json
+ln -s "$DOTFILES/herdr-app/$keys" ~/.config/herdr-app/keys.json
+for f in settings.json themes layouts/my-main.json; do ln -s "$DOTFILES/herdr-app/$f" ~/.config/herdr-app/$f; done
 "$DOTFILES/herdr-app/link-mods.sh"
 ```
 
+- Keys: `keys.json` is the Linux set (ctrl/alt). `keys.macos.json` is the macOS set (cmd), plus the same `ctrl-s` chords.
+- `settings.json` needs the `JetBrainsMono Nerd Font` font. macOS: `brew install --cask font-jetbrains-mono-nerd-font`.
 - Config files and `themes`: symlinks. `TARGET` is a real file or directory (Herdr creates `themes/` on first start) → warn, do not replace. The user decides.
-- Mods: hardlinks, made by `link-mods.sh`. Herdr 0.1.8 does not load svg files behind a symlinked mod folder.
+- `Darwin`: run `"$DOTFILES/herdr-app/set-icon.sh"` to give `/Applications/Herdr.app` the dark icon (`icon-dark.icns`). Run it again after a Herdr update.
+- Mods: hardlinks, made by `link-mods.sh`. Herdr (checked on 0.1.9) does not load svg files through a symlink, whether it links the folder or a file.
 - A `git pull` or an editor can replace a linked file and break the hardlink. Run `link-mods.sh` again to fix it.
 - Never put stock Herdr mods (`workspace-chrome`, ...) in `herdr-app/mods/`. A Herdr update rewrites them.
 
