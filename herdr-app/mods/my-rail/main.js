@@ -14,6 +14,7 @@ const TOOLS = [
   { id: "files", text: "Files", icon: "folder-tree", color: "#eed49f", cmd: "my-spaces.panel:files", panel: true },
   { id: "changes", text: "Changes", icon: "diff", color: "#c6a0f6", cmd: "my-spaces.panel:changes", panel: true },
   { id: "prs", text: "PRs", icon: "pr", color: "#f5bde6", cmd: "my-spaces.panel:prs", panel: true },
+  { id: "board", text: "Board", icon: "board", color: "#8bd5ca", cmd: "layout.toggle", args: { id: "board" }, block: "board" },
 ];
 
 export default class Rail extends View {
@@ -46,7 +47,8 @@ export default class Rail extends View {
     const list = this.ordered();
     const dragging = this.pressed !== null && this.over !== this.pressed;
     const button = (b) => {
-      const on = b.panel && panel && !panel.hidden && body?.active === b.id;
+      const block = b.block && findNode(layout(), b.block);
+      const on = block ? !block.hidden : b.panel && panel && !panel.hidden && body?.active === b.id;
       const i = list.indexOf(b), from = list.findIndex((x) => x.id === this.pressed);
       return v_flex().id(`rail-${b.id}`).relative().w(collapsed ? 36 : 52).py(collapsed ? 8 : 6).gap(3).flex_none().items_center().rounded(8).cursor_pointer()
         .bg(on ? t.selected : t.chrome).text_color(t.muted).hover(s => s.bg(t.hover))
@@ -58,7 +60,7 @@ export default class Rail extends View {
           const f = this.pressed;
           this.pressed = this.over = null;
           if (f !== null && f !== b.id) this.move(f, b.id);
-          else run(b.cmd);
+          else run(b.cmd, b.args);
           cx.notify();
         })
         .child(svg(`mods/my-rail/${b.icon}.svg`).size(20).text_color(b.color))

@@ -74,6 +74,18 @@
           "window_drag": true
         },
         {
+          "id": "board",
+          "type": "block",
+          "content": {
+            "mod": "my-board"
+          },
+          "size": {
+            "px": 300
+          },
+          "min": 160,
+          "hidden": true
+        },
+        {
           "id": "work-body",
           "type": "row",
           "children": [
