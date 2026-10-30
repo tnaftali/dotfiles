@@ -42,6 +42,21 @@ ln -f "$DOTFILES/herdr.config.toml" ~/.config/herdr/config.toml
 - `Linux` and `~/.config/herdr/config.toml` already exists → skip. The distro ships its own.
 - An editor or `git` can replace the file and break the hardlink. Run `ln -f` again to fix it.
 
+## 3b. Herdr app config (`Linux` only)
+
+`herdr-app/` holds the Herdr app config: keys, settings, theme, the `my-main` layout, and the custom mods. Herdr writes its own state into `~/.config/herdr-app/` (`shared.json`, `view.json`, `layouts/.state/`, ...). Link only the entries below.
+
+```bash
+mkdir -p ~/.config/herdr-app/layouts
+for f in keys.json settings.json themes layouts/my-main.json; do ln -s "$DOTFILES/herdr-app/$f" ~/.config/herdr-app/$f; done
+"$DOTFILES/herdr-app/link-mods.sh"
+```
+
+- Config files and `themes`: symlinks. `TARGET` is a real file or directory (Herdr creates `themes/` on first start) → warn, do not replace. The user decides.
+- Mods: hardlinks, made by `link-mods.sh`. Herdr 0.1.8 does not load svg files behind a symlinked mod folder.
+- A `git pull` or an editor can replace a linked file and break the hardlink. Run `link-mods.sh` again to fix it.
+- Never put stock Herdr mods (`workspace-chrome`, ...) in `herdr-app/mods/`. A Herdr update rewrites them.
+
 ## 4. Hyprland binds (`Linux` and `~/.config/hypr` exists)
 
 ```bash
@@ -81,8 +96,6 @@ Use `git clone --depth 1`. For vim-plug, if `${XDG_DATA_HOME:-~/.local/share}/nv
 - `$DOTFILES/.claude/hooks/*` (files only) → `~/.claude/hooks/<name>`
 - `$DOTFILES/.agents/skills/*/` → `~/.claude/skills/<name>`
 - **Copy, do not link**, only if absent: `$DOTFILES/.claude/settings.json` → `~/.claude/settings.json`. Claude Code rewrites it at runtime with internal host names, and this repo is public.
-
-**Skill exception:** on `Linux`, skip `herdr-gpui-browser`. Herdr rewrites that skill per OS, and the tracked copy uses the macOS binary path.
 
 **Codex** — copy only if absent. Codex rewrites `config.toml`, and the two configs are meant to diverge.
 - `$DOTFILES/.codex/AGENTS.md` → `~/.codex/AGENTS.md`

@@ -62,6 +62,40 @@ o.window(".*", { persistent_size = true })
 
 o.bind("ALT + SHIFT + C", "Center floating window", hl.dsp.window.center())
 
+-- Universal paste (SUPER+V). Omarchy's version sends Ctrl+V to any window that is not
+-- tagged "terminal". Herdr is not tagged, and its Ctrl+V only pastes images: with text
+-- on the clipboard the shell gets a bare Ctrl+V. In Herdr it sends Shift+Insert (terminal.paste).
+-- Never run wl-paste here: it talks to the compositor, which is blocked waiting for it, so Hyprland freezes.
+-- Image paste: use the real Ctrl+V. Other windows act as in Omarchy.
+local function key_once(mods, key)
+  hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "down" }))
+  hl.timer(function()
+    hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "up" }))
+  end, { timeout = 50, type = "oneshot" })
+end
+
+local function active_window_is_terminal()
+  local window = hl.get_active_window()
+  for _, tag in ipairs(window and window.tags or {}) do
+    if tag:gsub("%*$", "") == "terminal" then
+      return true
+    end
+  end
+  return false
+end
+
+hl.unbind("SUPER + V")
+o.bind("SUPER + V", "Universal paste", function()
+  local window = hl.get_active_window()
+  if window and window.class == "herdr-app" then
+    key_once("SHIFT", "Insert")
+  elseif active_window_is_terminal() then
+    key_once("SHIFT", "Insert")
+  else
+    key_once("CTRL", "V")
+  end
+end)
+
 -- Mouse back/forward per app. Non-consuming, so other apps still get their
 -- normal back/forward click.
 --   Ghostty, Herdr: previous/next herdr workspace (alt+[ / alt+])
@@ -71,6 +105,7 @@ o.bind("ALT + SHIFT + C", "Center floating window", hl.dsp.window.center())
 local mouse_nav = {
   ["com.mitchellh.ghostty"] = { modifiers = { { "ALT", "Alt_L" } } },
   ["so.pen.herdr-gpui"] = { modifiers = { { "ALT", "Alt_L" } } },
+  ["herdr-app"] = { modifiers = { { "ALT", "Alt_L" } } },
   ["brave-web.whatsapp.com__-Default"] = {
     modifiers = { { "CTRL", "Control_L" }, { "ALT", "Alt_L" }, { "SHIFT", "Shift_L" } },
   },
