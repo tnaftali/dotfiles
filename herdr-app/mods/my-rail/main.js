@@ -8,13 +8,12 @@ const findNode = (node, id) => node?.id === id ? node : (node?.children ?? []).m
 // Like the left sidebar it collapses to icons only; the toggle stays in view.
 const WIDE = 64, NARROW = 44;
 const TOOLS = [
-  { id: "nvim", text: "Neovim", icon: "nvim", color: "#a6da95", cmd: "my-spaces.nvim" },
-  { id: "revdiff", text: "Review", icon: "review", color: "#8aadf4", cmd: "my-spaces.revdiff" },
-  { id: "lazygit", text: "Lazygit", icon: "git", color: "#f5a97f", cmd: "my-spaces.lazygit" },
-  { id: "files", text: "Files", icon: "folder-tree", color: "#eed49f", cmd: "my-spaces.panel:files", panel: true },
-  { id: "changes", text: "Changes", icon: "diff", color: "#c6a0f6", cmd: "my-spaces.panel:changes", panel: true },
-  { id: "prs", text: "PRs", icon: "pr", color: "#f5bde6", cmd: "my-spaces.panel:prs", panel: true },
-  { id: "board", text: "Board", icon: "board", color: "#8bd5ca", cmd: "layout.toggle", args: { id: "board" }, block: "board" },
+  { id: "nvim", text: "Neovim", icon: "nvim", cmd: "my-spaces.nvim" },
+  { id: "revdiff", text: "Review", icon: "review", cmd: "my-spaces.revdiff" },
+  { id: "lazygit", text: "Lazygit", icon: "git", cmd: "my-spaces.lazygit" },
+  { id: "files", text: "Files", icon: "folder-tree", cmd: "my-spaces.panel:files", panel: true },
+  { id: "changes", text: "Changes", icon: "diff", cmd: "my-spaces.panel:changes", panel: true },
+  { id: "prs", text: "PRs", icon: "pr", cmd: "my-spaces.panel:prs", panel: true },
 ];
 
 export default class Rail extends View {
@@ -50,7 +49,7 @@ export default class Rail extends View {
       const block = b.block && findNode(layout(), b.block);
       const on = block ? !block.hidden : b.panel && panel && !panel.hidden && body?.active === b.id;
       const i = list.indexOf(b), from = list.findIndex((x) => x.id === this.pressed);
-      return v_flex().id(`rail-${b.id}`).relative().w(collapsed ? 36 : 52).py(collapsed ? 8 : 6).gap(3).flex_none().items_center().rounded(8).cursor_pointer()
+      return v_flex().id(`rail-${b.id}`).relative().w(collapsed ? 36 : 52).py(collapsed ? 8 : 6).gap(3).flex_none().items_center().rounded(12).cursor_pointer()
         .bg(on ? t.selected : t.chrome).text_color(t.muted).hover(s => s.bg(t.hover))
         .when(dragging && this.pressed === b.id, (el) => el.opacity(0.4))
         .when(dragging && this.over === b.id, (el) => el.bg(t.hover).child(div().absolute().left(4).right(4).h(2).rounded(1).bg(t.accent).when(from < i, (l) => l.bottom(-1)).when(from > i, (l) => l.top(-1))))
@@ -63,10 +62,10 @@ export default class Rail extends View {
           else run(b.cmd, b.args);
           cx.notify();
         })
-        .child(svg(`mods/my-rail/${b.icon}.svg`).size(20).text_color(b.color))
+        .child(svg(`mods/my-rail/${b.icon}.svg`).size(20).text_color(t.accent))
         .when(!collapsed, (el) => el.child(div().text_size(9.5).child(b.text)));
     };
-    const toggleButton = div().id("rail-toggle").size(26).flex_none().flex().items_center().justify_center().rounded(6).text_color(t.muted)
+    const toggleButton = div().id("rail-toggle").size(26).flex_none().flex().items_center().justify_center().rounded(9).text_color(t.muted)
       .hover(s => s.bg(t.hover).text_color(t.foreground)).on_mouse_down("left", (_e, cx) => cx.stop_propagation()).on_click(toggle)
       .child(svg("mods/my-rail/sidebar-right.svg").size(15));
     return v_flex().size_full().bg(t.chrome).border_l(1).border_color(t.border)

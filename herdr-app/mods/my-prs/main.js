@@ -63,11 +63,11 @@ export default class Prs extends View {
       const pr = this.prs[key].v;
       const [state, color] = STATE[pr.isDraft && pr.state === "OPEN" ? "DRAFT" : pr.state] ?? [pr.state, t.muted];
       const c = checks(pr.statusCheckRollup), review = REVIEW[pr.reviewDecision];
-      return v_flex().id(`pr-${s.id}`).flex_none().p(10).gap(5).rounded(8).border_1().border_color(t.border).bg(t.surface).cursor_pointer()
+      return v_flex().id(`pr-${s.id}`).flex_none().p(10).gap(5).rounded(12).border_1().border_color(t.border).bg(t.surface).cursor_pointer()
         .hover((st) => st.bg(t.hover)).on_click((_e, cx) => cx.open_url(pr.url))
         .child(h_flex().gap(6).items_center().text_size(11).text_color(t.dim)
           .child(div().flex_1().min_w(0).truncate().child(s.name))
-          .child(div().flex_none().px(5).py(1).rounded(4).border_1().border_color(color).text_color(color).child(state)))
+          .child(div().flex_none().px(5).py(1).rounded(6).border_1().border_color(color).text_color(color).child(state)))
         .child(h_flex().gap(6).min_w(0).child(div().flex_none().text_color(t.dim).child(`#${pr.number}`)).child(div().flex_1().min_w(0).truncate().child(pr.title)))
         .child(h_flex().gap(10).items_center().text_size(11)
           .when(Boolean(c), (el) => el.child(label(CHECK[c])))
@@ -75,12 +75,12 @@ export default class Prs extends View {
           .child(div().flex_1().min_w(0).text_color(t.dim).truncate().child(pr.headRefName)));
     };
 
-    const refresh = div().id("prs-refresh").px(6).py(2).rounded(5).cursor_pointer().text_color(t.muted).hover((st) => st.bg(t.hover).text_color(t.foreground))
+    const refresh = div().id("prs-refresh").px(6).py(2).rounded(8).cursor_pointer().text_color(t.muted).hover((st) => st.bg(t.hover).text_color(t.foreground))
       .on_click((_e, cx) => { for (const k in this.prs) this.prs[k].at = 0; cx.notify(); }).child("↻");
-    return v_flex().id("prs").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id("prs").size_full().min_h(0).rounded(14).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Pull requests"))
-        .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(`${found.length}`))
+        .child(div().px(5).py(1).rounded(6).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(`${found.length}`))
         .child(div().flex_1()).child(refresh))
       .child(v_flex().id("prs-list").flex_1().min_h(0).overflow_y_scrollbar().p(8).gap(8).children(found.map(card))
         .when(!found.length, (el) => el.child(div().p(6).text_color(t.dim).child(waiting ? "Looking for pull requests…" : "No space has a pull request"))));

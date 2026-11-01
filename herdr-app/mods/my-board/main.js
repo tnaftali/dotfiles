@@ -49,7 +49,7 @@ export default class Board extends View {
       cx.notify();
     };
 
-    const card = (s, col) => v_flex().id(`board-${s.id}`).relative().flex_none().px(10).py(8).gap(3).rounded(8).cursor_pointer()
+    const card = (s, col) => v_flex().id(`board-${s.id}`).relative().flex_none().px(10).py(8).gap(3).rounded(12).cursor_pointer()
       .bg(s.active ? t.selected : t.surface).border_1().border_color(t.border).hover((st) => st.bg(t.hover))
       .when(dragging && this.pressed === s.id, (el) => el.opacity(0.4))
       .when(dragging && this.over?.before === s.id, (el) => el.child(div().absolute().left(4).right(4).top(-6).h(2).rounded(1).bg(t.accent)))
@@ -63,7 +63,7 @@ export default class Board extends View {
         .child(div().flex_1().min_w(0).truncate().text_size(12.5).child(s.name)))
       .when(Boolean(s.branch), (el) => el.child(div().pl(13).text_size(11).text_color(t.dim).truncate().child(s.branch)));
 
-    const column = (c) => v_flex().id(`board-col-${c.id}`).flex_1().min_w(0).h_full().p(6).gap(6).rounded(8)
+    const column = (c) => v_flex().id(`board-col-${c.id}`).flex_1().min_w(0).h_full().p(6).gap(6).rounded(12)
       .bg(dragging && this.over?.col === c.id && this.over.before === null ? t.hover : t.chrome)
       .on_hover((h, cx) => { if (h && this.over?.col !== c.id) land(cx, c.id, null); })
       .child(h_flex().h(24).flex_none().px(4).gap(6).items_center().text_size(11.5)

@@ -35,7 +35,7 @@ export default class Prompt extends View {
     const t = theme();
     const p = props() ?? {};
     const label = (text) => div().pt(16).pb(7).text_size(11.5).text_color(t.dim).child(text);
-    const button = (id, text, primary, action) => h_flex().id(id).h(32).px(14).items_center().rounded(8)
+    const button = (id, text, primary, action) => h_flex().id(id).h(32).px(14).items_center().rounded(12)
       .border_1().border_color(primary ? t.solid : t.input).bg(primary ? t.solid : t.raised)
       .text_color(primary ? t.solid_foreground : t.foreground).text_size(12.5).font_medium().cursor_pointer()
       .hover(s => s.opacity(0.88)).on_click(action).child(text);
@@ -44,7 +44,7 @@ export default class Prompt extends View {
       .child(h_flex().items_center().child(div().flex_1().text_size(15).font_semibold().child(p.title ?? ""))
         .child(div().text_size(11).text_color(t.dim).child("Esc")))
       .child(label(p.label ?? ""))
-      .child(Input.new(this.input).h(36).px(10).rounded(9).border_1().border_color(this.inputFocused ? t.accent : t.input).bg(t.background).text_size(12.8).text_color(t.foreground))
+      .child(Input.new(this.input).h(36).px(10).rounded(13).border_1().border_color(this.inputFocused ? t.accent : t.input).bg(t.background).text_size(12.8).text_color(t.foreground))
       .when(Boolean(p.swatches), el => el.child(h_flex().pt(14).gap(9).items_center()
         .children((p.swatches ?? []).map(([key, hex]) => div().id(`sw-${key}`).size(24).rounded(12).flex_none().cursor_pointer()
           .flex().items_center().justify_center().text_size(12).text_color(t.dim)

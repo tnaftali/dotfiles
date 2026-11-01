@@ -22,6 +22,17 @@
           "window_drag": true
         },
         {
+          "id": "stats",
+          "type": "block",
+          "content": {
+            "mod": "my-stats"
+          },
+          "size": {
+            "px": 40
+          },
+          "hidden": true
+        },
+        {
           "id": "sidebar-lists",
           "type": "column",
           "children": [
@@ -45,9 +56,20 @@
               "size": {
                 "weight": 1
               },
-              "min": 90
+              "min": 90,
+              "hidden": true
             }
           ]
+        },
+        {
+          "id": "player",
+          "type": "block",
+          "content": {
+            "mod": "my-player"
+          },
+          "size": {
+            "px": 72
+          }
         }
       ],
       "size": {
@@ -112,7 +134,7 @@
                     "width": 1,
                     "color": "accent"
                   },
-                  "radius": 10,
+                  "radius": 16,
                   "gap": 8,
                   "lone": true
                 }

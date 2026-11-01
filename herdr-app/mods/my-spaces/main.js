@@ -3,9 +3,9 @@
 // its first terminal is in now, its branch, ahead/behind. Agent state shows as a dot on the right, detail in the agents list. Click to
 // switch, right-click for its menu, drag to reorder.
 
-import { View, div, svg } from "gpui-kit";
+import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { nextCommand, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals } from "herdr";
+import { nextCommand, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals, agents } from "herdr";
 
 // Where a space is now: its first terminal's live folder, else where it was made.
 // `ps`: panes(), read once by the caller (each read copies every pane).
@@ -14,6 +14,9 @@ function place(s, ps) {
   return ps.find((p) => tabs.has(p.tab) && p.cwd)?.cwd || s.folder;
 }
 const findNode = (node, id) => node?.id === id ? node : (node?.children ?? []).map((c) => findNode(c, id)).find(Boolean) ?? null;
+// jq: the text the agent wrote since your last prompt. Its ASCII bar "[████░░] 4/8 ·" is how far it is.
+const SINCE_PROMPT = '. as $a | ([range(0; length)] | map(select($a[.].type=="user" and (($a[.].message.content|type)=="string" or ([$a[.].message.content[]?|.type]|index("tool_result")|not)))) | last // -1) as $u | [$a[($u+1):][] | select(.type=="assistant") | .message.content[]? | select(.type=="text") | .text] | join("\\n")';
+const RANK = { blocked: 4, done: 3, working: 2, idle: 1 };
 const rowHeight = ({ tree }, tail) => (tail ? 54 : tree ? 32 : 42);
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
@@ -58,6 +61,7 @@ export default class Spaces extends View {
     this.born = {};
     this.pressed = null;
     this.tip = null; // { row, text }: the status icon under the pointer
+    this.prog = {}; // terminal address -> how far its agent says it is, 0 to 1
     this.over = null; // the row index, or "g:<name>" for a group header, under a drag
     this.dragGroup = null; // the group whose header is being dragged
     this.gd = null; // where that group would land: { name, block, after }
@@ -154,13 +158,13 @@ export default class Spaces extends View {
     this.tracking = true;
     cx.spawn(async () => {
       try {
-        const found = {};
+        const found = {}, prog = {};
         if (live.length) {
-          const script = 'for a in "$@"; do pid=$(hc get "$a" | jq -r .foreground.pid); f="$HOME/.claude/sessions/$pid.json"; [ -f "$f" ] && echo "$a $(jq -c "{id: .sessionId, cwd: .cwd}" "$f")"; done';
-          const r = await exec("sh", ["-c", script, "sh", ...live.map((t) => t.address)]);
+          const script = 'F=$1; shift; for a in "$@"; do pid=$(hc get "$a" | jq -r .foreground.pid); f="$HOME/.claude/sessions/$pid.json"; [ -f "$f" ] || continue; id=$(jq -r .sessionId "$f"); t=$(printf "%s\\n" "$HOME"/.claude/projects/*/"$id".jsonl | head -1); p=""; [ -f "$t" ] && p=$(tail -n 300 "$t" | jq -Rc "fromjson?" | jq -rs "$F" | grep -oE "\\] [0-9]+/[0-9]+" | tail -1 | tr -d "] "); echo "$a $(jq -c --arg p "$p" "{id: .sessionId, cwd: .cwd, prog: \\$p}" "$f")"; done';
+          const r = await exec("sh", ["-c", script, "sh", SINCE_PROMPT, ...live.map((t) => t.address)]);
           for (const line of r.stdout.split("\n")) {
             const m = line.match(/^(\S+) (\{.*\})$/);
-            if (m) found[m[1]] = JSON.parse(m[2]);
+            if (m) { const { prog: p, ...rec } = JSON.parse(m[2]); const [n, d] = p.split("/").map(Number); found[m[1]] = rec; if (d > 0) prog[m[1]] = Math.min(1, n / d); }
           }
         }
         const saved = shared("claude.sessions") ?? {};
@@ -173,6 +177,7 @@ export default class Spaces extends View {
           }
         }
         if (JSON.stringify(next) !== JSON.stringify(saved)) setShared("claude.sessions", next);
+        if (JSON.stringify(prog) !== JSON.stringify(this.prog)) { this.prog = prog; cx.notify(); }
       } catch {}
       this.tracking = false;
     });
@@ -445,7 +450,7 @@ export default class Spaces extends View {
     const gd = this.gd;
     const side = gd && gd.name === g ? (gd.after ? (folded ? "bottom" : null) : "top") : null;
     const bar = (el, s) => el.child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(s === "top", (b) => b.top(-1)).when(s === "bottom", (b) => b.bottom(-1)));
-    return h_flex().id(`group-${g}`).relative().h(26).flex_none().px(8).mt(4).gap(6).items_center().rounded(7).text_size(12).text_color(gc ?? t.dim)
+    return h_flex().id(`group-${g}`).relative().h(26).flex_none().px(8).mt(4).gap(6).items_center().rounded(10).text_size(12).text_color(gc ?? t.dim)
       .when(Boolean(gc), (el) => el.bg(`${gc}1f`))
       .cursor_pointer().hover((s) => s.bg(gc ? `${gc}33` : t.hover))
       .when(target, (el) => el.bg(t.hover).border_1().border_color(t.accent))
@@ -518,11 +523,11 @@ export default class Spaces extends View {
         .child(svg(`mods/workspace-chrome/${m ? "server" : "monitor"}.svg`).size(13).flex_none())
         .when(!collapsed, el => el.child(div().flex_1().truncate().child(m ?? "This computer"))
           .when(!connected, el => el.child(div().flex_none().child((machine?.state ?? "asleep").replace(/_/g, " "))))
-          .when(connected, el => el.child(div().id(`machine-add-${m ?? "local"}`).flex_none().px(4).rounded(4).hover(s => s.bg(t.hover).text_color(t.foreground))
+          .when(connected, el => el.child(div().id(`machine-add-${m ?? "local"}`).flex_none().px(4).rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
             .on_click((_e, cx) => { cx.stop_propagation(); run("space.new", m ? { machine: m } : {}); }).child("+")))
           .child(div().size(6).rounded(3).flex_none().bg(connected ? t.ansi2 : t.dim))
           .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
-      const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(28).flex_none().px(8).gap(7).items_center().rounded(7)
+      const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(28).flex_none().px(8).gap(7).items_center().rounded(10)
         .text_size(12).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
         .on_click(() => run("space.new", m ? { machine: m } : {}))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
@@ -546,8 +551,25 @@ export default class Spaces extends View {
       .when(g.behind > 0, (el) => el.child(div().id(`behind-${name}`).flex_none().hover((x) => x.opacity(0.7)).on_hover((h, cx) => this.tipHover(h, cx, rid, `${g.behind} commit${g.behind > 1 ? "s" : ""} behind upstream`)).text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
 
+  // The Claude icon of a space's lead agent in a ring: yellow (working: filled as far as the agent says it is,
+  // else turning), red (waiting for you), green (done), grey (idle). No agent: a faded icon with a z.
+  agentIcon(a, t) {
+    const ring = (color) => div().relative().size(36).flex_none().flex().items_center().justify_center().rounded(18).border(3).border_color(color);
+    if (!a) return ring(t.raised).opacity(0.5).child(image("icons/claude.svg").w(20).h(20).flex_none())
+      .child(div().absolute().right(-3).bottom(-5).text_size(10).font_bold().text_color(t.dim).child("z"));
+    const p = a.program, st = a.status;
+    const pic = p?.icon ? (p.tint ? svg(p.icon).size(20).flex_none().text_color(t.foreground) : image(p.icon).w(20).h(20).flex_none()) : div().size(10).rounded(5).bg(t.dim);
+    const color = st === "blocked" ? t.blocked : st === "done" ? t.done ?? t.ansi2 : st === "working" ? t.raised : t.surface ?? t.raised;
+    const f = this.prog[a.address];
+    return ring(color).child(pic)
+      .when(st === "working" && f === undefined, (el) => el.child(svg("mods/workspace-chrome/spinner.svg").absolute().top(-3).left(-3).size(36).text_color(t.working).spin(900)))
+      .when(st === "working" && f !== undefined, (el) => el.child(svg(`mods/my-spaces/icons/ring-${Math.round(f * 20) * 5}.svg`).absolute().top(-3).left(-3).size(36).text_color(t.working)));
+  }
+
   row({ w, i, g, tree }, t, indented) {
     const on = w.active;
+    const lead = agents().filter((a) => a.space === w.id && a.program?.key !== "lazygit")
+      .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0];
     const tail = g ? this.gitTail(g, tree, w.name, t, w.id) : null;
     const dragging = this.pressed !== null && this.over !== this.pressed;
     const gname = (shared("space.groups") ?? {})[w.id];
@@ -563,9 +585,9 @@ export default class Spaces extends View {
       .h(rowHeight({ tree }, tail))
       .flex_none()
       .justify_center()
-      .rounded(8)
+      .rounded(12)
       .when(Boolean(indented), (el) => el.ml(14))
-      .when(on, (el) => el.bg(t.selected).border_1().border_color(t.accent))
+      .when(on, (el) => el.bg(`${t.accent}1a`).border_1().border_color(t.accent))
       .when(!on && Boolean(gc), (el) => el.bg(`${gc}12`))
       .when(Boolean(gc), (el) => el.child(div().absolute().left(0).top(9).bottom(9).w(2).rounded(1).bg(`${gc}aa`)))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
@@ -573,7 +595,9 @@ export default class Spaces extends View {
       .when((dragging && this.pressed === i) || (gd !== null && gname === this.dragGroup), (el) => el.opacity(0.4))
       .when(Boolean(side), (el) => el.child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(side === "top", (b) => b.top(-1)).when(side === "bottom", (b) => b.bottom(-1))))
       .when(dragging && this.over === i && this.pressed !== i, (el) => el.bg(t.hover).child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(this.pressed < i, (b) => b.bottom(-1)).when(this.pressed > i, (b) => b.top(-1))))
-      .on_hover((h, cx) => { if (h && (this.pressed !== null || this.dragGroup !== null) && this.over !== i) { this.over = i; cx.notify(); } })
+      .on_hover((h, cx) => {
+        if (h && (this.pressed !== null || this.dragGroup !== null) && this.over !== i) { this.over = i; cx.notify(); }
+      })
       .on_mouse_down("left", () => {
         this.pressed = i;
         this.over = i;
@@ -600,20 +624,18 @@ export default class Spaces extends View {
         cx.notify();
       })
       .on_mouse_down("right", () => this.menu(w))
-      .when(this.tip?.row === w.id, (el) => el.child(div().absolute().right(6).bottom(3).px(6).py(1).rounded(5).bg(t.chrome).border_1().border_color(t.border).text_size(11).text_color(t.foreground).child(this.tip.text)))
+      .when(this.tip?.row === w.id, (el) => el.child(div().absolute().right(6).bottom(3).px(6).py(1).rounded(8).bg(t.chrome).border_1().border_color(t.border).text_size(11).text_color(t.foreground).child(this.tip.text)))
       .child(
         h_flex()
           .gap(9)
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
+          .child(this.agentIcon(lead, t))
           .child(v_flex().flex_1().min_w(0).gap(1)
             .child(h_flex().min_w(0).gap(6).items_center()
               .child(div().flex_1().min_w(0).truncate().text_color(t.foreground).child(w.name))
               .children(g ? this.marks(g, t, w.id) : [])
-              .when(w.status === "working", el => el.child(div().id(`agent-${w.id}`).flex_none().hover((x) => x.opacity(0.7)).on_hover((h, cx) => this.tipHover(h, cx, w.id, "Agent working"))
-                .child(svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900))))
-              .when(w.status === "blocked" || w.status === "done", el => el.child(div().id(`agent-${w.id}`).size(8).flex_none().rounded(4).hover((x) => x.opacity(0.7)).bg(tone(t, w.status))
-                .on_hover((h, cx) => this.tipHover(h, cx, w.id, w.status === "blocked" ? "Agent needs you" : "Agent done")))))
+              .when(lead?.status === "blocked", (el) => el.child(div().flex_none().text_size(11).font_semibold().text_color(t.blocked).child("Needs you"))))
             .when(Boolean(tail), el => el.child(tail))),
       );
   }
@@ -653,19 +675,15 @@ export default class Spaces extends View {
     if (changed) setShared("space.colors", kept);
     const groups = shared("space.groups") ?? {};
     const live = new Set(Object.values(groups)), gcol = shared("group.colors") ?? {};
-    // Colors only for groups that exist; one that has none (made before colors) gets the least used.
+    // Colors only for groups that exist; one without a choice has no color.
     const kept2 = Object.fromEntries(Object.entries(gcol).filter(([g]) => live.has(g)));
-    for (const g of live) {
-      if (kept2[g]) continue;
-      const keys = Object.keys(MARK), uses = (k) => Object.values(kept2).filter((v) => v === k).length;
-      kept2[g] = keys.reduce((best, k) => (uses(k) < uses(best) ? k : best));
-    }
+    for (const g of live) kept2[g] ||= "none";
     if (JSON.stringify(kept2) !== JSON.stringify(gcol)) setShared("group.colors", kept2);
     // Groups of spaces that are gone stay: pruning them here once wiped every group when spaces() was short at startup.
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(FONT ? 16 : 15).when(Boolean(FONT), (el) => el.font_family(FONT))
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
-        .child(div().id("space-new").px(5).text_size(22).rounded(5).hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
+        .child(div().id("space-new").px(5).text_size(22).rounded(8).hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
         .on_mouse_up("left", (_e, cx) => { this.pressed = null; this.dragGroup = null; cx.notify(); })
         .children(this.grouped(t, collapsed)));

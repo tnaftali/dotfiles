@@ -39,7 +39,7 @@ function toggleSidebar() {
 export default class Brand extends View {
   button(id, label, action) {
     const t = theme();
-    return div().id(id).size(26).flex_none().flex().items_center().justify_center().rounded(6).text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
+    return div().id(id).size(26).flex_none().flex().items_center().justify_center().rounded(9).text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
       .on_mouse_down("left", (_e, cx) => cx.stop_propagation()).on_click(action).child(label);
   }
   render() {
