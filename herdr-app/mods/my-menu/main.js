@@ -56,10 +56,12 @@ function items(p, git) {
     case "space":
       return [
         ["Rename", "space.rename", { id: tg.id }],
+        ((shared("space.pinned") ?? []).includes(tg.id) ? ["Unpin", `my-spaces.unpin:${tg.id}`, {}] : ["Pin", `my-spaces.pin:${tg.id}`, {}]),
         ["Group\u2026", `my-spaces.group-ask:${tg.id}`, {}],
         ...((shared("space.groups") ?? {})[tg.id] ? [["Remove from group", `my-spaces.group:${tg.id}=`, {}]] : []),
         ...(git ? [["New worktree", "worktree", { space: tg.id, action: "new" }], ["Open worktree", "worktree", { space: tg.id, action: "open" }]] : []),
         ...(git === "linked" ? [["Remove worktree", "worktree", { space: tg.id, action: "remove" }]] : []),
+        ((shared("space.minimized") ?? []).includes(tg.id) ? ["Restore", `my-spaces.restore:${tg.id}`, {}] : ["Minimize", `my-spaces.minimize:${tg.id}`, {}]),
         ["Close", "space.close", { id: tg.id }],
       ];
     default:

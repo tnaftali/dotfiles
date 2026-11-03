@@ -45,7 +45,8 @@ export default class Brand extends View {
   render() {
     const t = theme();
     const collapsed = narrow();
-    const ram = v_flex().flex_none().children(RAM.map((row) => h_flex().children([...row].map((c) => div().size(PX).flex_none().when(c === "X", (el) => el.bg(t.foreground))))));
+    // The colors of the dock icon (icon-dark.svg): a dark tile with a lavender ram.
+    const ram = v_flex().flex_none().p(6).rounded(10).bg("#1b1b27").children(RAM.map((row) => h_flex().children([...row].map((c) => div().size(PX).flex_none().when(c === "X", (el) => el.bg("#c1caf5"))))));
     return h_flex().size_full().bg(t.chrome).pl(collapsed ? 6 : 14).pr(10).gap(4).items_center().text_size(13.5)
       .when(window()?.platform === "macos" && !collapsed, el => el.pl(76))
       .when(!collapsed, el => el.child(h_flex().flex_1().gap(8).items_center().child(ram)))

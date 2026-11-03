@@ -5,7 +5,7 @@
 
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { nextCommand, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals, agents } from "herdr";
+import { nextCommand, notify, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals, agents } from "herdr";
 
 // Where a space is now: its first terminal's live folder, else where it was made.
 // `ps`: panes(), read once by the caller (each read copies every pane).
@@ -67,11 +67,18 @@ export default class Spaces extends View {
     this.gd = null; // where that group would land: { name, block, after }
     this.machines = [];
     this.folded = new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]"));
+    this.visible = []; // space ids in the order drawn: pinned tiles, then the list. Folded and minimized ones are not drawn, so not here.
+    this.pinDrag = null; // a pinned tile being dragged
+    this.pinOver = null;
+    this.minOpen = localStorage.getItem("minimized.open") === "1"; // the Minimized section, folded by default
     this.groupFolded = new Set(JSON.parse(localStorage.getItem("groups.folded") ?? "[]"));
     this.refreshMachines(cx);
     // Commands from the CLI, the prompts and the menu (the name carries the data):
     //   group:<space>=<name>       the space's group; empty removes it
     //   group-ask:<space>          the prompt for that
+    //   minimize:<space>, restore:<space>   hide a space under "Minimized", or bring it back
+    //   next, prev, select:<n>   go by what the sidebar shows, in the order it shows it
+    //   pin:<space>, unpin:<space>   a pinned space is a tile in a row at the top, not in the list
     //   group-rename:<old>=<new>|<color>   a whole group's name and color; empty name ungroups it
     //   group-rename-ask:<old>     the prompt for that
     cx.spawn(async (cx) => {
@@ -93,6 +100,17 @@ export default class Spaces extends View {
           delete colors[m[1]];
           if (name) colors[name] = color || colors[name] || "none";
           setShared("group.colors", colors);
+        } else if ((m = /^(minimize|restore):(.+)$/s.exec(c))) {
+          const rest = (shared("space.minimized") ?? []).filter((id) => id !== m[2]);
+          setShared("space.minimized", m[1] === "minimize" ? [...rest, m[2]] : rest);
+        } else if (c === "next" || c === "prev" || (m = /^select:(\d+)$/.exec(c))) {
+          const ids = this.visible, at = ids.indexOf(spaces().find((w) => w.active)?.id);
+          const to = m ? ids[Number(m[1]) - 1] : c === "next" ? ids[(at + 1) % ids.length] : ids[(at < 0 ? 0 : at - 1 + ids.length) % ids.length];
+          if (to) run("space.select", { id: to });
+        } else if ((m = /^(pin|unpin):(.+)$/s.exec(c))) {
+          const rest = (shared("space.pinned") ?? []).filter((id) => id !== m[2]);
+          setShared("space.pinned", m[1] === "pin" ? [...rest, m[2]] : rest);
+          if (m[1] === "pin") setShared("space.minimized", (shared("space.minimized") ?? []).filter((id) => id !== m[2]));
         } else if ((m = /^panel:(files|changes|prs)$/.exec(c))) {
           const body = findNode(layout(), "panel-body"), panel = findNode(layout(), "panel");
           if (panel && !panel.hidden && body?.active === m[1]) run("layout.hide", { id: "panel" });
@@ -124,6 +142,9 @@ export default class Spaces extends View {
   // a press opens it, the next press closes the overlay, and the tool keeps running.
   toggleFloat(cx, tool) {
     const f = focused(), cwd = f?.cwd;
+    const warn = (body) => notify({ title: `${tool} did not open`, body, level: "warning" });
+    if (!cwd) return warn("No folder in the focused pane.");
+    if (f.space.includes("/")) return warn("The space is on another machine. This runs on this PC only.");
     const live = terminals().find(t => t.state === "live" && t.cwd === cwd && t.name?.startsWith(`${tool}-`));
     if (live && this.floatOpen === live.address) { this.floatOpen = null; run("overlay.close"); return; }
     if (live) { this.floatOpen = live.address; run("terminal.peek", { terminal: live.address }); return; }
@@ -137,11 +158,11 @@ export default class Spaces extends View {
     // Own task: `hc` is slow and nextCommand drops commands while its loop is busy.
     cx.spawn(async (cx) => {
       // Not a repo: both tools would offer to create one, or fail.
-      const repo = cwd ? await exec("git", ["rev-parse", "--is-inside-work-tree"], { cwd }).catch(() => null) : null;
-      if (repo?.code !== 0) { this.floatBusy = false; return; }
+      const repo = await exec("git", ["rev-parse", "--is-inside-work-tree"], { cwd }).catch(() => null);
+      if (repo?.code !== 0) { this.floatBusy = false; warn(`${cwd} is not a git repo.`); return; }
       const r = await hc(["run", "--bg", "--json", "--no-parent", "--outlive-parent", "--rm", "--name", `${tool}-${Date.now().toString(36)}`, ...(cwd ? ["--cwd", cwd] : []), ...argv]);
       this.floatBusy = false;
-      if (r.code !== 0) return;
+      if (r.code !== 0) { warn(r.stderr.trim().split("\n").at(-1) || `hc exit ${r.code}`); return; }
       const address = JSON.parse(r.stdout).address;
       this.floatOpen = address;
       // The window learns of a new terminal a moment later; peeking at once fails.
@@ -379,7 +400,7 @@ export default class Spaces extends View {
 
   menu(w) {
     // A popup is as tall as its items; height is only the most.
-    openOverlay({ mod: "my-menu", kind: "popup", width: 200, height: 260, props: { tab: "space", target: { id: w.id } } });
+    openOverlay({ mod: "my-menu", kind: "popup", width: 200, height: 324, props: { tab: "space", target: { id: w.id } } });
   }
 
   setGroup(id, name) {
@@ -494,11 +515,85 @@ export default class Spaces extends View {
     return out;
   }
 
-  // The rows, under a header per machine once one isn't this computer.
+  // The spaces you work in, then the Minimized section. The active space is never minimized.
   grouped(t, collapsed) {
-    const rows = this.ordered();
+    this.visible = [];
+    const mini = new Set(shared("space.minimized") ?? []);
+    const pinned = shared("space.pinned") ?? [];
+    const every = this.ordered();
+    const tiles = pinned.map((id) => every.find((r) => r.w.id === id)).filter(Boolean);
+    const all = every.filter((r) => !tiles.includes(r));
+    const away = all.filter((r) => mini.has(r.w.id) && !r.w.active);
+    const main = [...this.pinnedBar(tiles, t, collapsed), ...this.groupedRows(all.filter((r) => !away.includes(r)), t, collapsed)];
+    if (!away.length) return main;
+    const alert = away.find((r) => r.w.status === "blocked") ?? away.find((r) => r.w.status === "done");
+    const head = h_flex().id("minimized").h(26).flex_none().px(collapsed ? 2 : 8).mt(8).gap(7).items_center().rounded(10).text_size(12).text_color(t.dim)
+      .cursor_pointer().hover((st) => st.bg(t.hover))
+      .on_click((_e, cx) => {
+        this.minOpen = !this.minOpen;
+        localStorage.setItem("minimized.open", this.minOpen ? "1" : "0");
+        cx.notify();
+      })
+      .child(svg("mods/workspace-chrome/archive.svg").size(13).flex_none())
+      .when(!collapsed, (el) => el.child(div().flex_1().truncate().child("Minimized"))
+        .when(!this.minOpen && Boolean(alert), (e) => e.child(div().flex_none().text_color(tone(t, alert.w.status)).child("\u25cf")))
+        .child(div().flex_none().text_size(11).child(String(away.length)))
+        .child(svg(`mods/workspace-chrome/chevron-${this.minOpen ? "down" : "right"}.svg`).size(11).flex_none()));
+    if (this.minOpen) this.visible.push(...away.map((r) => r.w.id));
+    return [...main, head, ...(this.minOpen ? away.map((r) => (collapsed ? this.compact(r, t) : this.row(r, t, false))) : [])];
+  }
+
+  // Pinned spaces: one tile each (its agent in a ring), in a row that wraps. The line under it names the tile under the pointer.
+  pinnedBar(rows, t, collapsed) {
+    if (!rows.length) return [];
+    this.visible.push(...rows.map((r) => r.w.id));
+    if (collapsed) return rows.map((r) => this.compact(r, t));
+    const hovered = rows.find((r) => r.w.id === this.pinHover)?.w;
+    // Drag a tile onto another to take its place; drop a list row on a tile to pin it there.
+    const place = (id, before) => {
+      const ids = (shared("space.pinned") ?? []).filter((x) => x !== id);
+      ids.splice(Math.max(0, ids.indexOf(before)), 0, id);
+      setShared("space.pinned", ids);
+      setShared("space.minimized", (shared("space.minimized") ?? []).filter((x) => x !== id));
+    };
+    const tile = ({ w }) => {
+      const lead = agents().filter((a) => a.space === w.id && a.program?.key !== "lazygit")
+        .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0];
+      return div().id(`pin-${w.id}`).size(44).flex_none().flex().items_center().justify_center().rounded(12).cursor_pointer()
+        .relative()
+        .when(w.active, (el) => el.bg(`${t.accent}1a`).border_1().border_color(t.accent))
+        .when(!w.active, (el) => el.hover((s) => s.bg(t.hover)))
+        .when(this.pinDrag === w.id, (el) => el.opacity(0.4))
+        .when(this.pinDrag !== null && this.pinDrag !== w.id && this.pinOver === w.id, (el) => el.child(div().absolute().top(6).bottom(6).left(-3).w(2).rounded(1).bg(t.accent)))
+        .on_hover((h, cx) => {
+          const next = h ? w.id : this.pinHover === w.id ? null : this.pinHover;
+          if (next !== this.pinHover) { this.pinHover = next; cx.notify(); }
+          if (h && this.pinDrag !== null && this.pinOver !== w.id) { this.pinOver = w.id; cx.notify(); }
+        })
+        .on_mouse_down("left", () => { this.pinDrag = w.id; this.pinOver = w.id; })
+        .on_mouse_up("left", (_e, cx) => {
+          const dragged = this.pinDrag, row = this.pressed;
+          this.pinDrag = null;
+          this.pressed = null;
+          if (dragged !== null && dragged !== w.id) place(dragged, w.id);
+          else if (dragged === null && row !== null) { const id = spaces()[row]?.id; if (id && id !== w.id) place(id, w.id); }
+          else run("space.select", { id: w.id });
+          cx.notify();
+        })
+        .on_mouse_up("middle", () => run("space.close", { id: w.id }))
+        .on_mouse_down("right", () => this.menu(w))
+        .child(this.agentIcon(lead, t));
+    };
+    return [
+      h_flex().flex_none().flex_wrap().gap(4).pt(2).children(rows.map(tile)),
+      div().flex_none().h(20).px(6).pt(3).truncate().text_size(11.5).text_color(t.dim).child(hovered?.name ?? "Pinned"),
+    ];
+  }
+
+  // The rows, under a header per machine once one isn't this computer.
+  groupedRows(rows, t, collapsed) {
     this.gd = this.dragGroup !== null ? this.groupDrop() : null;
-    const draw = (r, indented) => (collapsed ? this.compact(r, t) : this.row(r, t, indented));
+    const draw = (r, indented) => (this.visible.push(r.w.id), collapsed ? this.compact(r, t) : this.row(r, t, indented));
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name)])].sort();
     const loading = m => {
       const layout = machines().find(k => k.name === m)?.layout;
@@ -650,7 +745,7 @@ export default class Spaces extends View {
       .when(w.active, (el) => el.bg(t.raised))
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("space.select", { id: w.id }))
-      .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
+      .child(div().text_color(w.active ? t.foreground : t.muted).child(String(this.visible.indexOf(w.id) + 1)))
       .child(div().text_color(tone(t, w.status)).child(glyph(w.status)));
   }
 
@@ -685,7 +780,7 @@ export default class Spaces extends View {
         .when(!collapsed, el => el.child("Spaces"))
         .child(div().id("space-new").px(5).text_size(22).rounded(8).hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
-        .on_mouse_up("left", (_e, cx) => { this.pressed = null; this.dragGroup = null; cx.notify(); })
+        .on_mouse_up("left", (_e, cx) => { this.pressed = null; this.dragGroup = null; this.pinDrag = null; cx.notify(); })
         .children(this.grouped(t, collapsed)));
   }
 }
