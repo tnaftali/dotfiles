@@ -44,10 +44,9 @@ o.window("com.mitchellh.ghostty", { workspace = "2" })
 o.window("[Ss]potify", { workspace = "3" })
 o.window("DBeaver", { workspace = "4" })
 -- "silent": opens on workspace 4 without switching to it (autostarts at login).
-o.window("org.qbittorrent.qBittorrent", { workspace = "4 silent" })
 
 -- Floating apps
-o.window("(brave-web.whatsapp.com__-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default)", { float = true })
+o.window("(brave-web.whatsapp.com__-Default|brave-www.instagram.com__direct_inbox_?-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default)", { float = true })
 
 -- Quick notes (Raycast Notes style): ~/Projects/jot, a native GPUI text
 -- window, pinned to show on every workspace. SUPER+N opens it, or closes it if open. The app restores its own size
@@ -55,7 +54,8 @@ o.window("(brave-web.whatsapp.com__-Default|brave-web.telegram.org__-Default|Bit
 o.window("jot", { float = true, pin = true })
 o.bind("SUPER + N", "Notes", "/home/tobi/.local/bin/jot-toggle")
 
-o.bind("ALT + R", "WhatsApp", "omarchy-launch-or-focus-webapp WhatsApp https://web.whatsapp.com/")
+-- WhatsApp floats; ALT+R minimizes or restores it (special:minimized), so it keeps running and stays in the dock.
+o.bind("ALT + R", "WhatsApp", "/home/tobi/Projects/dotfiles/scripts/whatsapp-toggle")
 
 -- Floating windows reopen at the size they were last resized to.
 o.window(".*", { persistent_size = true })
@@ -104,7 +104,6 @@ end)
 -- apps that match on the physical key never see the bracket.
 local mouse_nav = {
   ["com.mitchellh.ghostty"] = { modifiers = { { "ALT", "Alt_L" } } },
-  ["so.pen.herdr-gpui"] = { modifiers = { { "ALT", "Alt_L" } } },
   ["herdr-app"] = { modifiers = { { "ALT", "Alt_L" } } },
   ["brave-web.whatsapp.com__-Default"] = {
     modifiers = { { "CTRL", "Control_L" }, { "ALT", "Alt_L" }, { "SHIFT", "Shift_L" } },
@@ -197,3 +196,7 @@ end
 
 mouse_nav_bind("mouse:275", "bracketleft")
 mouse_nav_bind("mouse:276", "bracketright")
+
+-- Things panel app (omarchy-things/bin/things-app): a Quickshell window, so its class is org.quickshell. Floats.
+o.window("org.quickshell", { float = true, center = true })
+o.bind("ALT + T", "Things", "/home/tobi/Projects/dotfiles/scripts/things-toggle")

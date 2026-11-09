@@ -1,0 +1,25 @@
+#!/bin/bash
+# Set the default window opacity preset: "<active> <inactive>" for windows tagged default-opacity.
+# Writes ~/.config/hypr/opacity.lua, which hyprland.lua loads after the Omarchy defaults.
+# Apps that opt out of default-opacity (browsers, video) keep their own values.
+set -euo pipefail
+
+file="$HOME/.config/hypr/opacity.lua"
+
+case "${1:-}" in
+  default) value="" ;;
+  opaque) value="1 1" ;;
+  medium) value="0.92 0.85" ;;
+  glass) value="0.8 0.7" ;;
+  status) sed -n 's/^-- preset: //p' "$file" 2>/dev/null | rg . || echo default; exit ;;
+  *) echo "usage: hypr-opacity default|opaque|medium|glass|status" >&2; exit 1 ;;
+esac
+
+{
+  echo "-- preset: $1"
+  if [[ -n $value ]]; then
+    echo "o.window({ tag = \"default-opacity\" }, { opacity = \"$value\" })"
+  fi
+} > "$file"
+
+hyprctl reload >/dev/null

@@ -1,0 +1,23 @@
+#!/bin/bash
+# Show or hide the Things panel app. Hiding moves it to special:minimized (the Omarchy
+# minimize workspace), so it keeps running and the dock lists it as minimized.
+# Launches it when it is not running. "things-toggle show" never hides: it restores or focuses.
+hide="special:minimized"
+dispatch() { hyprctl dispatch "$1" >/dev/null; }
+
+read -r addr ws < <(hyprctl clients -j | jq -r '[.[] | select(.class == "org.quickshell" and .title == "Things")][0] | "\(.address) \(.workspace.name)"')
+if [[ $addr == null ]]; then
+  # A leftover process without a window would block the new one (--no-duplicate).
+  pkill -f '[q]uickshell -p /run/user/[0-9]*/things-app' && sleep 1
+  setsid /home/tobi/Projects/omarchy-things/bin/things-app >/dev/null 2>&1 &
+  exit
+fi
+if [[ $ws == "$hide" ]]; then
+  active=$(hyprctl activeworkspace -j | jq -r .id)
+  dispatch "hl.dsp.window.move({ workspace = \"$active\", follow = false, window = \"address:$addr\" })"
+  dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+elif [[ ${1:-} == show ]]; then
+  dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+else
+  dispatch "hl.dsp.window.move({ workspace = \"$hide\", follow = false, window = \"address:$addr\" })"
+fi
