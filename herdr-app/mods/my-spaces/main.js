@@ -1,11 +1,11 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
 // grouped by machine when more than one is known. After a space's name, the repo
 // its first terminal is in now, its branch, ahead/behind. Agent state shows as a dot on the right, detail in the agents list. Click to
-// switch, right-click for its menu, drag to reorder.
+// switch, right-click for its menu. Sorted by when each agent last worked: Active (the last hour), Idle (1 to 3 hours), Inactive; Hidden is kept by hand.
 
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { nextCommand, notify, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals, agents } from "herdr";
+import { nextCommand, notify, readTextFile, writeTextFile, appHome, spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, focused, terminals, agents } from "herdr";
 
 // Where a space is now: its first terminal's live folder, else where it was made.
 // `ps`: panes(), read once by the caller (each read copies every pane).
@@ -17,7 +17,7 @@ const findNode = (node, id) => node?.id === id ? node : (node?.children ?? []).m
 // jq: the text the agent wrote since your last prompt. Its ASCII bar "[████░░] 4/8 ·" is how far it is.
 const SINCE_PROMPT = '. as $a | ([range(0; length)] | map(select($a[.].type=="user" and (($a[.].message.content|type)=="string" or ([$a[.].message.content[]?|.type]|index("tool_result")|not)))) | last // -1) as $u | [$a[($u+1):][] | select(.type=="assistant") | .message.content[]? | select(.type=="text") | .text] | join("\\n")';
 const RANK = { blocked: 4, done: 3, working: 2, idle: 1 };
-const rowHeight = ({ tree }, tail) => (tail ? 54 : tree ? 32 : 42);
+const HOUR = 3600000;
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 // Changes made outside Herdr (an editor's save, a commit in another app): looked
@@ -34,6 +34,8 @@ const PR_TTL = 120000;
 // that draws space avatars): one strong color per hue, light and dark alike.
 // Catppuccin Macchiato: teal, peach, blue, mauve, green, pink. The keys are what group.colors stores.
 const MARK = { ansi6: "#8bd5ca", ansi3: "#f5a97f", ansi4: "#8aadf4", ansi5: "#c6a0f6", ansi2: "#a6da95", ansi1: "#f5bde6" };
+// The laptop icon of another computer takes one of these (Catppuccin Macchiato). my-icons has the same list.
+const LAPTOP = { blue: "#8aadf4", peach: "#f5a97f", green: "#a6da95", mauve: "#c6a0f6", teal: "#8bd5ca", pink: "#f5bde6", yellow: "#eed49f", red: "#ed8796", sky: "#91d7e3", lavender: "#b7bdf8", flamingo: "#f0c6c6", maroon: "#ee99a0", sapphire: "#7dc4e4" };
 
 // A space speaks up only when something in it needs you.
 export function glyph(status) {
@@ -59,58 +61,62 @@ export default class Spaces extends View {
     // worktree appears under its repo instead of jumping there.
     this.shown = new Set(spaces().map((s) => s.id));
     this.born = {};
-    this.pressed = null;
     this.tip = null; // { row, text }: the status icon under the pointer
     this.prog = {}; // terminal address -> how far its agent says it is, 0 to 1
-    this.over = null; // the row index, or "g:<name>" for a group header, under a drag
-    this.dragGroup = null; // the group whose header is being dragged
-    this.gd = null; // where that group would land: { name, block, after }
     this.machines = [];
     this.folded = new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]"));
-    this.visible = []; // space ids in the order drawn: pinned tiles, then the list. Folded and minimized ones are not drawn, so not here.
-    this.pinDrag = null; // a pinned tile being dragged
-    this.pinOver = null;
-    this.minOpen = localStorage.getItem("minimized.open") === "1"; // the Minimized section, folded by default
-    this.groupFolded = new Set(JSON.parse(localStorage.getItem("groups.folded") ?? "[]"));
+    this.visible = []; // space ids in the order drawn. Spaces in a folded section are not drawn, so not here.
     this.refreshMachines(cx);
     // Commands from the CLI, the prompts and the menu (the name carries the data):
-    //   group:<space>=<name>       the space's group; empty removes it
-    //   group-ask:<space>          the prompt for that
-    //   minimize:<space>, restore:<space>   hide a space under "Minimized", or bring it back
+    //   rename-ask:<space>       the prompt for a space's name (it takes Shift+Insert, so an emoji can be pasted); rename:<space>=<name> sets it
+    //   hide:<space>, unhide:<space>   a hidden space is only in the Hidden section; it comes back when its agent starts working
+    //   unread:<space>, read:<space>   show a space as done again (while its agent is idle) until it is opened
+    //   grid                     the shown area becomes a grid of every Active and Idle space whose computer is connected (again: back)
+    //   zoom                     ctrl-s z: the focused cell fills the grid, or Herdr's pane.zoom outside it
+    //   sidebar                  narrow or widen the left sidebar
+    //   mcolor-ask:<machine>     ask for the color of another computer's laptop icon; mcolor:<machine>|<name> sets it
+    //   zoom:<space>             the same for that space's cell (its header button)
+    //   go:<left|right|up|down>  ctrl-s h/j/k/l: the next cell in grid mode, Herdr's pane.go outside it
+    //   gridmove:<from>|<to>     reorder the grid
     //   next, prev, select:<n>   go by what the sidebar shows, in the order it shows it
-    //   pin:<space>, unpin:<space>   a pinned space is a tile in a row at the top, not in the list
-    //   group-rename:<old>=<new>|<color>   a whole group's name and color; empty name ungroups it
-    //   group-rename-ask:<old>     the prompt for that
     cx.spawn(async (cx) => {
       for (;;) {
         const c = await nextCommand();
         let m;
-        if ((m = /^group:([^=]+)=(.*)$/s.exec(c))) {
-          this.setGroup(m[1], m[2]);
-        } else if ((m = /^group-ask:(.+)$/s.exec(c))) {
-          const cur = (shared("space.groups") ?? {})[m[1]] ?? "";
-          openOverlay({ mod: "my-prompt", kind: "dialog", width: 340, height: 190, props: { title: "Group", label: "Group name (empty removes)", value: cur, cmd: `my-spaces.group:${m[1]}=` } });
-        } else if ((m = /^group-rename:([^=]*)=(.*)$/s.exec(c))) {
-          const cut = m[2].lastIndexOf("|");
-          const name = (cut < 0 ? m[2] : m[2].slice(0, cut)).replace(/=/g, "-");
-          const color = cut < 0 ? "" : m[2].slice(cut + 1);
-          const all = Object.fromEntries(Object.entries(shared("space.groups") ?? {}).flatMap(([id, g]) => (g !== m[1] ? [[id, g]] : name ? [[id, name]] : [])));
-          setShared("space.groups", all);
-          const colors = { ...(shared("group.colors") ?? {}) };
-          delete colors[m[1]];
-          if (name) colors[name] = color || colors[name] || "none";
-          setShared("group.colors", colors);
-        } else if ((m = /^(minimize|restore):(.+)$/s.exec(c))) {
-          const rest = (shared("space.minimized") ?? []).filter((id) => id !== m[2]);
-          setShared("space.minimized", m[1] === "minimize" ? [...rest, m[2]] : rest);
+        if ((m = /^rename-ask:(.+)$/s.exec(c))) {
+          const cur = spaces().find((w) => w.id === m[1])?.name ?? "";
+          openOverlay({ mod: "my-prompt", kind: "dialog", width: 340, height: 190, props: { title: "Rename", label: "Space name", value: cur, cmd: `my-spaces.rename:${m[1]}=` } });
+        } else if ((m = /^rename:([^=]+)=(.*)$/s.exec(c))) {
+          if (m[2]) run("space.rename", { id: m[1], name: m[2] });
+        } else if ((m = /^(hide|unhide):(.+)$/s.exec(c))) {
+          const rest = (shared("space.hidden") ?? []).filter((id) => id !== m[2]);
+          setShared("space.hidden", m[1] === "hide" ? [...rest, m[2]] : rest);
+        } else if (c === "sidebar") {
+          this.sidebar();
+        } else if ((m = /^mcolor-ask:(.+)$/s.exec(c))) {
+          openOverlay({ mod: "my-icons", kind: "dialog", width: 340, height: 190, props: { machine: m[1] } });
+        } else if ((m = /^mcolor:([^|]+)\|(.*)$/s.exec(c))) {
+          const colors = { ...(shared("machine.colors") ?? {}) };
+          if (m[2]) colors[m[1]] = m[2]; else delete colors[m[1]];
+          setShared("machine.colors", colors);
+        } else if (c === "grid") {
+          this.toggleGrid(cx);
+        } else if (c === "zoom" || (m = /^zoom:(.+)$/s.exec(c))) {
+          this.zoom(cx, m?.[1]);
+        } else if ((m = /^go:(left|right|up|down)$/.exec(c))) {
+          this.go(m[1], cx);
+        } else if ((m = /^gridmove:(.+)\|(.+)$/s.exec(c))) {
+          this.gridMove(m[1], m[2], cx);
         } else if (c === "next" || c === "prev" || (m = /^select:(\d+)$/.exec(c))) {
           const ids = this.visible, at = ids.indexOf(spaces().find((w) => w.active)?.id);
           const to = m ? ids[Number(m[1]) - 1] : c === "next" ? ids[(at + 1) % ids.length] : ids[(at < 0 ? 0 : at - 1 + ids.length) % ids.length];
-          if (to) run("space.select", { id: to });
-        } else if ((m = /^(pin|unpin):(.+)$/s.exec(c))) {
-          const rest = (shared("space.pinned") ?? []).filter((id) => id !== m[2]);
-          setShared("space.pinned", m[1] === "pin" ? [...rest, m[2]] : rest);
-          if (m[1] === "pin") setShared("space.minimized", (shared("space.minimized") ?? []).filter((id) => id !== m[2]));
+          if (to) this.pick(to);
+        } else if ((m = /^(unread|read):(.+)$/s.exec(c))) {
+          const un = { ...(shared("space.unread") ?? {}) };
+          // Marked while open: it counts once the person leaves it.
+          if (m[1] === "unread") un[m[2]] = spaces().find((w) => w.id === m[2])?.active ? "pending" : "on";
+          else delete un[m[2]];
+          setShared("space.unread", un);
         } else if ((m = /^panel:(files|changes|prs)$/.exec(c))) {
           const body = findNode(layout(), "panel-body"), panel = findNode(layout(), "panel");
           if (panel && !panel.hidden && body?.active === m[1]) run("layout.hide", { id: "panel" });
@@ -125,9 +131,6 @@ export default class Spaces extends View {
           else run("terminal.open", { argv: ["sh", "-c", "sleep 0.5; exec nvim"], folder: f?.cwd ?? undefined, place: "right" });
         } else if (c === "lazygit" || c === "revdiff") {
           this.toggleFloat(cx, c);
-        } else if ((m = /^group-rename-ask:(.+)$/s.exec(c))) {
-          const sw = [["none", null], ...Object.entries(MARK)];
-          openOverlay({ mod: "my-prompt", kind: "dialog", width: 340, height: 250, props: { title: "Group", label: "Group name (empty ungroups)", value: m[1], color: (shared("group.colors") ?? {})[m[1]] ?? "none", swatches: sw, cmd: `my-spaces.group-rename:${m[1]}=` } });
         }
         cx.notify();
       }
@@ -135,7 +138,134 @@ export default class Spaces extends View {
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // `git status` walks the whole tree, on another machine a process there:
     // only when its answer could have changed (see `due`).
-    cx.timer.every(250, (cx) => this.checkNew(cx));
+    cx.timer.every(250, (cx) => { this.checkNew(cx); this.gridWatch(cx); this.track(cx); });
+  }
+
+  // Grid mode: the shown tab's area (the layout's `main`) becomes live terminals, one per Active or Idle space
+  // and whose computer is connected (an agent's terminal if the shown tab has one). The layout tree is edited in place
+  // by layout.set, so the original text is kept in shared("grid.saved") and put back on exit, or on the next start if
+  // Herdr quit in grid mode. shortcut: one terminal per space, cells share the area equally.
+  gridFile() { return `${appHome()}/layouts/${shared("layout") ?? "main"}.json`; }
+
+  // The cells in order: the dragged order (shared "grid.order"), then the rest as the spaces are.
+  gridCells() {
+    const saved = shared("grid.order") ?? [];
+    const up = new Set(machines().filter((m) => m.layout === "ready").map((m) => m.name));
+    const live = spaces().filter((w) => ["active", "idle"].includes(this.tier(w)) && (w.machine === null || up.has(w.machine)));
+    const order = [...saved.map((id) => live.find((w) => w.id === id)).filter(Boolean), ...live.filter((w) => !saved.includes(w.id))];
+    return order.map((w) => {
+      const tab = w.tabs.find((x) => x.active) ?? w.tabs[0];
+      const all = panes().filter((x) => x.tab === tab?.id && x.terminal);
+      // An idle shell with no agent is not worth a cell; keep one only when nothing else is left.
+      const idle = new Set(terminals().filter((t) => t.program?.shell).map((t) => t.address));
+      const ps = all.filter((x) => x.status || !idle.has(x.terminal));
+      const shown = ps.length ? ps : all.slice(0, 1);
+      const pane = shown.find((x) => x.status) ?? shown[0];
+      return pane && { id: w.id, terminal: pane.terminal, terminals: shown.map((x) => x.terminal) };
+    }).filter(Boolean);
+  }
+
+  // Puts the grid (or, zoomed, one cell) in place of `main` in the saved layout text.
+  gridDraw(cx, focus = focused()?.terminal) {
+    let cells = this.gridCells();
+    this.gridSig = cells.map((c) => `${c.id}:${c.terminals.join("+")}`).join();
+    const zoom = shared("grid.zoom");
+    if (zoom && cells.some((c) => c.id === zoom)) cells = cells.filter((c) => c.id === zoom);
+    else setShared("grid.zoom", null);
+    if (!cells.length) return;
+    // Columns side by side, each stacking its cells: a cell's height changes only its own column. Reading order
+    // stays left to right, top to bottom. shortcut: a width is shared by the cells of a column, a tiling cannot do both.
+    const cols = Math.ceil(Math.sqrt(cells.length));
+    // Sizes the user dragged, kept per space by my-grid (shared "grid.sizes") and used as weights again, on every redraw and toggle.
+    // shortcut: a cell weighs its terminal's height plus its header and border (28px), a column weighs its first cell's width.
+    const sz = shared("grid.sizes") ?? {};
+    const cell = (c, n, h = sz[c.id]?.h) => ({ id: `grid-c${n}`, type: "column", border: { width: 1, color: "border" }, radius: 12, resizable: false, ...(h && { size: { weight: h + 28 } }), children: [
+      { type: "block", size: { px: 26 }, content: { mod: "my-grid", props: { space: c.id, terminals: c.terminals } } },
+      // Not resizable: a divider next to the 1px probe would let it be dragged into a blank strip. shortcut: the panes of a cell split evenly; a nested row for them goes past Herdr's 16 levels.
+      { id: `grid-b${n}`, type: "row", gap: 4, resizable: false, children: [
+        ...c.terminals.map((t) => ({ type: "block", content: { terminal: t } })),
+        { type: "block", size: { px: 1 }, content: { mod: "my-grid", props: { probe: c.id } } } ] } ] });
+    const columns = Array.from({ length: cols }, (_, j) => {
+      const mine = cells.filter((_, i) => i % cols === j);
+      // A cell with no stored height (new here) weighs as much as the average of the others in its column; with none it would be squeezed to nothing.
+      const known = mine.map((c) => sz[c.id]?.h).filter(Boolean);
+      const avg = known.length ? known.reduce((a, b) => a + b, 0) / known.length : undefined;
+      return { id: `grid-col${j}`, type: "column", gap: 8, ...(sz[mine[0]?.id]?.w && { size: { weight: sz[mine[0].id].w } }), children: mine.map((c) => cell(c, cells.indexOf(c), sz[c.id]?.h ?? avg)) };
+    });
+    // The columns go in `main`'s place, beside its siblings when the parent is a row: Herdr refuses layouts nested deeper than 16.
+    const swap = (n) => (n.children ? { ...n, children: n.children.flatMap((c) => (c.id === "main" ? (n.type === "row" ? columns : [{ id: "main", type: "row", gap: 8, children: columns }]) : [swap(c)])) } : n);
+    run("layout.set", { layout: swap(JSON.parse(shared("grid.saved"))) });
+    // The drawn terminal blocks are new: give the keyboard back to the cell that had it.
+    if (cx && cells.some((c) => c.terminals.includes(focus))) cx.timer.after(400, () => run("pane.focus", { terminal: focus }));
+    return cells;
+  }
+
+  toggleGrid(cx) {
+    const file = this.gridFile(), saved = shared("grid.saved");
+    if (saved) {
+      setShared("grid.saved", null);
+      setShared("grid.zoom", null);
+      run("layout.set", { layout: JSON.parse(saved) });
+      // layout.set re-formats the file: write the original text back, so the dotfiles repo stays clean.
+      cx.timer.after(1000, (cx) => cx.spawn(async () => { const now = await readTextFile(file); if (now !== saved) await writeTextFile(file, saved, now).catch(() => {}); }));
+      return;
+    }
+    cx.spawn(async () => {
+      const text = await readTextFile(file);
+      if (!text) return notify({ title: "Grid did not open", body: `Cannot read ${file}.`, level: "warning" });
+      if (!findNode(JSON.parse(text), "main")) return notify({ title: "Grid did not open", body: "The layout has no `main` block.", level: "warning" });
+      if (!this.gridCells().length) return notify({ title: "Nothing to show", body: "Every space is inactive, hidden or offline.", level: "info" });
+      setShared("grid.saved", text);
+      setShared("grid.layout", shared("layout") ?? "main");
+      setShared("grid.zoom", null);
+      try { this.gridDraw(cx); } catch (e) { setShared("grid.saved", null); notify({ title: "Grid did not open", body: String(e?.message ?? e), level: "warning" }); }
+    });
+  }
+
+  // ctrl-s z: in grid mode the focused cell fills the area, again: back to the grid. Elsewhere the pane zoom of Herdr.
+  zoom(cx, id) {
+    if (!shared("grid.saved")) return run("pane.zoom");
+    const cells = this.gridCells(), t = focused()?.terminal, zid = shared("grid.zoom");
+    const cell = id ? cells.find((c) => c.id === id) : cells.find((c) => c.terminals.includes(t));
+    if (zid) setShared("grid.zoom", null);
+    else if (cell) setShared("grid.zoom", cell.id);
+    else return;
+    // Zoomed or not, the keyboard stays in the cell that was zoomed.
+    const to = cell ?? cells.find((c) => c.id === zid);
+    this.gridDraw(cx, to?.terminals.includes(t) ? t : to?.terminal ?? t);
+  }
+
+  // ctrl-s h/j/k/l: the cell next to the focused one. Columns are `i % cols`; across columns the nearest by vertical middle wins.
+  go(dir, cx) {
+    if (!shared("grid.saved")) return run("pane.go", { direction: dir });
+    const cells = this.gridCells(), t = focused()?.terminal, i = cells.findIndex((c) => c.terminals.includes(t));
+    if (shared("grid.zoom") || !cells.length) return;
+    if (i < 0) return run("pane.focus", { terminal: cells[0].terminal });
+    // A cell with several panes: left and right go through them first.
+    if (dir === "left" || dir === "right") {
+      const next = cells[i].terminals[cells[i].terminals.indexOf(t) + (dir === "right" ? 1 : -1)];
+      if (next) return run("pane.focus", { terminal: next });
+    }
+    const cols = Math.ceil(Math.sqrt(cells.length)), sz = shared("grid.sizes") ?? {};
+    const mid = (j) => {
+      const cs = cells.filter((_, k) => k % cols === j), known = cs.every((c) => sz[c.id]?.h), h = (c) => (known ? sz[c.id].h + 28 : 1);
+      const total = cs.reduce((n, c) => n + h(c), 0);
+      let y = 0;
+      return cs.map((c) => { y += h(c); return { c, y: (y - h(c) / 2) / total }; });
+    };
+    const j = i % cols, col = mid(j), me = col.find((x) => x.c === cells[i]);
+    const to = dir === "up" || dir === "down"
+      ? col[col.indexOf(me) + (dir === "down" ? 1 : -1)]?.c
+      : mid(j + (dir === "right" ? 1 : -1)).sort((a, b) => Math.abs(a.y - me.y) - Math.abs(b.y - me.y))[0]?.c;
+    if (to) run("pane.focus", { terminal: to.terminal });
+  }
+
+  // Dragging a cell header onto another: the first takes the second's place.
+  gridMove(from, to, cx) {
+    const all = this.gridCells().map((c) => c.id), ids = all.filter((id) => id !== from);
+    ids.splice(ids.indexOf(to) + (all.indexOf(from) < all.indexOf(to) ? 1 : 0), 0, from);
+    setShared("grid.order", ids);
+    this.gridDraw(cx);
   }
 
   // Floating tool in the focused folder (button in workspace-status). One per folder and tool:
@@ -218,11 +348,82 @@ export default class Spaces extends View {
     }
   }
 
+  // Go to a space. In grid mode its cell takes the keyboard too, so typing goes into it.
+  pick(id) {
+    run("space.select", { id });
+    const cell = shared("grid.saved") && this.gridCells().find((c) => c.id === id);
+    if (cell) run("pane.focus", { terminal: cell.terminal });
+  }
+
+  // The section of a space, from when its agent last worked, not from where it was put. Hidden is the only manual one.
+  // A space that waits for you (blocked, or done and unread) or works now is Active, however long ago it began.
+  tier(w) {
+    if ((shared("space.hidden") ?? []).includes(w.id)) return "hidden";
+    if (["blocked", "done", "working"].includes(this.status(w))) return "active";
+    const age = Date.now() - (this.seen?.[w.id] ?? 0);
+    return age <= HOUR ? "active" : age <= 3 * HOUR ? "idle" : "inactive";
+  }
+
+  // Every tick: notes when each agent last worked (kept across restarts), brings back a hidden space whose agent starts
+  // working (a message was sent; only opening it does not), and redraws when time moves a space to another section.
+  track(cx) {
+    const sp = spaces(), now = Date.now();
+    this.seen ??= { ...(shared("space.seen") ?? {}) };
+    if (!this.migrated && sp.length) {
+      // The hand-made Inactive list became Hidden. Spaces that were not in it start Active.
+      this.migrated = true;
+      if (shared("space.hidden") == null) setShared("space.hidden", shared("space.minimized") ?? []);
+      for (const w of sp) if (!(w.id in this.seen) && !(shared("space.hidden") ?? []).includes(w.id)) this.seen[w.id] = now;
+      this.dirty = true;
+    }
+    // A new space starts Active: without a stamp its age would be "since 1970", so it would land in Inactive.
+    const fresh = sp.filter((w) => !(w.id in this.seen) && !(shared("space.hidden") ?? []).includes(w.id));
+    for (const w of fresh) this.seen[w.id] = now;
+    if (fresh.length) this.dirty = true;
+    const prev = this.prevState, cur = Object.fromEntries(sp.map((w) => [w.id, w.status]));
+    this.prevState = cur;
+    for (const w of sp) if (w.status === "working" || w.status === "blocked") { this.seen[w.id] = now; this.dirty = true; }
+    // Saved when work stops, else at most every 30 s.
+    const stopped = prev && sp.some((w) => prev[w.id] === "working" && w.status !== "working");
+    if (this.dirty && (stopped || now - (this.savedAt ?? 0) > 30000)) { setShared("space.seen", this.seen); this.dirty = false; this.savedAt = now; }
+    const hid = shared("space.hidden") ?? [], woke = prev ? hid.filter((id) => cur[id] === "working" && prev[id] && prev[id] !== "working") : [];
+    if (woke.length) setShared("space.hidden", hid.filter((id) => !woke.includes(id)));
+    const sig = sp.map((w) => this.tier(w)).join();
+    if (sig !== this.tierSig) { this.tierSig = sig; cx.notify(); }
+  }
+
+  // The left sidebar: full width, or a narrow rail of icons (a header that stacks its buttons is taller).
+  sidebar() {
+    const node = findNode(layout(), "sidebar"), narrow = (node?.size?.px ?? Infinity) < 160;
+    if (!narrow) setShared("sidebar.width", node?.size?.px);
+    setShared("sidebar.collapsed", !narrow);
+    run("layout.resize", { id: "sidebar", px: narrow ? (shared("sidebar.width") ?? 268) : window()?.platform === "macos" ? 76 : 44 });
+    run("layout.resize", { id: "brand", px: narrow ? 46 : window()?.platform === "macos" ? 106 : 72 });
+  }
+
+  // Grid mode: a space that appears, goes, or changes section changes the cells, so draw them again.
+  gridWatch(cx) {
+    if (!shared("grid.saved") || (shared("grid.layout") ?? "main") !== (shared("layout") ?? "main")) return void (this.gridSig = undefined);
+    const sig = this.gridCells().map((c) => `${c.id}:${c.terminals.join("+")}`).join();
+    if (this.gridSig !== undefined && sig !== this.gridSig) { this.gridSig = sig; cx.timer.after(300, (cx) => this.gridDraw(cx)); }
+  }
+
   checkNew(cx) {
     // Started here, not in init(): a hot reload keeps the instance and does not run init() again.
     if (!this.claudeStarted) {
       // After a reboot the core's terminals come back as plain shells: resume the Claude sessions that were in them.
       this.claudeStarted = true;
+      // This mod started in grid mode (Herdr or the mod restarted): stay in it and draw the cells again with the live terminals.
+      // Another layout is shown now: put the grid's layout file back.
+      const saved = shared("grid.saved");
+      if (saved) {
+        if ((shared("grid.layout") ?? "main") === (shared("layout") ?? "main")) cx.timer.after(2000, (cx) => this.gridDraw(cx));
+        else {
+          setShared("grid.saved", null);
+          const file = `${appHome()}/layouts/${shared("grid.layout")}.json`;
+          cx.spawn(async () => { const now = await readTextFile(file).catch(() => null); if (now && now !== saved) await writeTextFile(file, saved, now).catch(() => {}); });
+        }
+      }
       // The right rail has Files and Changes: the tab bar's own buttons would repeat them.
       if (JSON.stringify(shared("workspace.panels")) !== "[]") setShared("workspace.panels", []);
       this.resumed = false;
@@ -231,6 +432,14 @@ export default class Spaces extends View {
     }
     const now = Date.now();
     const sp = spaces();
+    const act = sp.find((w) => w.active)?.id;
+    if (act !== this.lastActive) {
+      const un = { ...(shared("space.unread") ?? {}) };
+      if (un[this.lastActive] === "pending") un[this.lastActive] = "on";
+      delete un[act];
+      setShared("space.unread", un);
+      this.lastActive = act;
+    }
     for (const s of sp) if (!this.shown.has(s.id)) this.born[s.id] ??= now;
     const due = this.due(now, sp, panes());
     if (due.size) this.refreshGit(due, cx);
@@ -400,234 +609,65 @@ export default class Spaces extends View {
 
   menu(w) {
     // A popup is as tall as its items; height is only the most.
-    openOverlay({ mod: "my-menu", kind: "popup", width: 200, height: 324, props: { tab: "space", target: { id: w.id } } });
+    openOverlay({ mod: "my-menu", kind: "popup", width: 200, height: 300, props: { tab: "space", target: { id: w.id } } });
   }
 
-  setGroup(id, name) {
-    const all = { ...(shared("space.groups") ?? {}) };
-    const n = (name ?? "").trim().replace(/=/g, "-");
-    if (n) all[id] = n; else delete all[id];
-    setShared("space.groups", all);
-  }
-
-  // Where the dragged group would land: next to the row, or the whole group, under the pointer.
-  groupDrop() {
-    const list = spaces(), groups = shared("space.groups") ?? {};
-    const from = list.findIndex((w) => groups[w.id] === this.dragGroup);
-    const name = typeof this.over === "string" ? this.over.slice(2) : list[this.over] ? groups[list[this.over].id] ?? null : undefined;
-    if (from < 0 || name === undefined || name === this.dragGroup) return null;
-    const block = name ? list.filter((w) => groups[w.id] === name) : [list[this.over]];
-    return block.length ? { name, block, after: from < list.indexOf(block[0]) } : null;
-  }
-
-  // Drops the group: its spaces end up together, before or after what is under the pointer.
-  moveGroup() {
-    const gd = this.groupDrop();
-    if (!gd) return;
-    const groups = shared("space.groups") ?? {};
-    const list = spaces().map((w) => w.id);
-    const mine = list.filter((id) => groups[id] === this.dragGroup);
-    const rest = list.filter((id) => !mine.includes(id));
-    const edge = gd.block.map((w) => w.id)[gd.after ? gd.block.length - 1 : 0];
-    const at = rest.indexOf(edge) + (gd.after ? 1 : 0);
-    const next = [...rest.slice(0, at), ...mine, ...rest.slice(at)];
-    const cur = [...list];
-    next.forEach((id, k) => {
-      if (cur[k] === id) return;
-      run("space.move", { id, index: k + 1 });
-      cur.splice(cur.indexOf(id), 1);
-      cur.splice(k, 0, id);
-    });
-  }
-
-  // A group sits where its first space is; its other spaces are drawn right under it.
-  withGroups(rows, t, collapsed, draw) {
-    const groups = shared("space.groups") ?? {};
-    if (collapsed) return rows.map((r) => draw(r));
-    const out = [], seen = new Set();
-    for (const r of rows) {
-      const g = groups[r.w.id];
-      if (!g) { out.push(draw(r)); continue; }
-      if (seen.has(g)) continue;
-      seen.add(g);
-      const members = rows.filter((m) => groups[m.w.id] === g);
-      const folded = this.groupFolded.has(g);
-      out.push(this.groupHead(g, members, folded, t));
-      if (!folded) out.push(...members.map((m) => draw(m, true)));
-    }
-    return out;
-  }
-
-  // The group's color as a hex, null for none.
-  groupColor(g) {
-    return MARK[(shared("group.colors") ?? {})[g]] ?? null;
-  }
-
-  groupHead(g, members, folded, t) {
-    const gc = this.groupColor(g);
-    const first = members[0];
-    const alert = members.find((m) => m.w.status === "blocked") ?? members.find((m) => m.w.status === "done");
-    const target = this.pressed !== null && this.over === `g:${g}`;
-    const gd = this.gd;
-    const side = gd && gd.name === g ? (gd.after ? (folded ? "bottom" : null) : "top") : null;
-    const bar = (el, s) => el.child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(s === "top", (b) => b.top(-1)).when(s === "bottom", (b) => b.bottom(-1)));
-    return h_flex().id(`group-${g}`).relative().h(26).flex_none().px(8).mt(4).gap(6).items_center().rounded(10).text_size(12).text_color(gc ?? t.dim)
-      .when(Boolean(gc), (el) => el.bg(`${gc}1f`))
-      .cursor_pointer().hover((s) => s.bg(gc ? `${gc}33` : t.hover))
-      .when(target, (el) => el.bg(t.hover).border_1().border_color(t.accent))
-      .when(this.dragGroup === g && this.gd !== null, (el) => el.opacity(0.4))
-      .when(Boolean(side), (el) => bar(el, side))
-      .on_hover((h, cx) => { if (h && (this.pressed !== null || this.dragGroup !== null) && this.over !== `g:${g}`) { this.over = `g:${g}`; cx.notify(); } })
-      .on_mouse_down("left", () => { this.dragGroup = g; this.over = `g:${g}`; })
-      .on_mouse_up("left", (_e, cx) => {
-        const from = this.pressed, dragged = this.dragGroup;
-        this.pressed = null;
-        this.dragGroup = null;
-        if (dragged !== null && dragged !== g) {
-          this.dragGroup = dragged;
-          this.over = `g:${g}`;
-          this.moveGroup();
-          this.dragGroup = null;
-        } else if (from !== null) {
-          // Dropped on the header: joins the group, at its top.
-          const id = spaces()[from]?.id;
-          if (id && id !== first.w.id) { this.setGroup(id, g); run("space.move", { id, index: first.i + 1 }); }
-        } else {
-          folded ? this.groupFolded.delete(g) : this.groupFolded.add(g);
-          localStorage.setItem("groups.folded", JSON.stringify([...this.groupFolded]));
-        }
-        cx.notify();
-      })
-      .on_mouse_down("right", () => run(`my-spaces.group-rename-ask:${g}`))
-      .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none())
-      .child(div().flex_1().min_w(0).truncate().child(g))
-      .when(folded && Boolean(alert), (el) => el.child(div().flex_none().text_color(tone(t, alert.w.status)).child("\u25cf")))
-      .child(div().flex_none().text_size(11).child(String(members.length)));
-  }
-
-  // Spaces in order; worktrees are not nested under their repo.
+  // Spaces in Herdr's order; worktrees are not nested under their repo.
   ordered() {
     const sp = spaces(), ps = panes();
     const ready = (w) => this.shown.has(w.id) || where(w, ps) in this.git || Date.now() - (this.born[w.id] ??= Date.now()) > 1500;
     for (const w of sp) if (!this.shown.has(w.id) && ready(w)) this.shown.add(w.id);
-    const list = sp.map((w, i) => ({ w, i, g: this.git[where(w, ps)] ?? null })).filter((r) => this.shown.has(r.w.id));
-    const out = list.map((r) => ({ ...r, tree: null }));
+    return sp.map((w, i) => ({ w, i, g: this.git[where(w, ps)] ?? null })).filter((r) => this.shown.has(r.w.id));
+  }
+
+  // The sections: Active, Idle, Inactive, Hidden. Newest first inside each; a space that works now comes before any
+  // that worked before, and equal ones keep Herdr's order, so the list does not shuffle while two agents work.
+  // A folded section still shows the open space.
+  grouped(t, collapsed) {
+    this.visible = [];
+    this.open ??= { active: true, idle: true, inactive: false, hidden: false, ...JSON.parse(localStorage.getItem("sections.open") ?? "{}") };
+    const rows = this.ordered();
+    const loading = spaces().some((s) => !s.machine && !this.shown.has(s.id)) || machines().find((k) => k.name === null)?.layout === "loading";
+    if (loading && !rows.length) return [div().id("machine-loading-local").h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…")];
+    const key = (r) => (r.w.status === "working" ? Infinity : this.seen?.[r.w.id] ?? 0);
+    const out = [];
+    for (const [id, label, icon] of [["active", "Active", "sun"], ["idle", "Idle", "clock"], ["inactive", "Inactive", "moon"], ["hidden", "Hidden", "eye-off"]]) {
+      const list = rows.filter((r) => this.tier(r.w) === id).sort((a, b) => key(b) - key(a) || a.i - b.i);
+      if (!list.length) continue;
+      const alert = list.find((r) => r.w.status === "blocked") ?? list.find((r) => this.status(r.w) === "done");
+      const shown = this.open[id] ? list : list.filter((r) => r.w.active);
+      out.push(this.sectionHead(id, label, icon, list.length, this.open[id], alert, t, collapsed, !out.length));
+      for (const r of shown) { this.visible.push(r.w.id); out.push(collapsed ? this.compact(r, t) : this.row(r, t)); }
+    }
     return out;
   }
 
-  // The spaces you work in, then the Minimized section. The active space is never minimized.
-  grouped(t, collapsed) {
-    this.visible = [];
-    const mini = new Set(shared("space.minimized") ?? []);
-    const pinned = shared("space.pinned") ?? [];
-    const every = this.ordered();
-    const tiles = pinned.map((id) => every.find((r) => r.w.id === id)).filter(Boolean);
-    const all = every.filter((r) => !tiles.includes(r));
-    const away = all.filter((r) => mini.has(r.w.id) && !r.w.active);
-    const main = [...this.pinnedBar(tiles, t, collapsed), ...this.groupedRows(all.filter((r) => !away.includes(r)), t, collapsed)];
-    if (!away.length) return main;
-    const alert = away.find((r) => r.w.status === "blocked") ?? away.find((r) => r.w.status === "done");
-    const head = h_flex().id("minimized").h(26).flex_none().px(collapsed ? 2 : 8).mt(8).gap(7).items_center().rounded(10).text_size(12).text_color(t.dim)
+  sectionHead(id, label, icon, n, open, alert, t, collapsed, first) {
+    return h_flex().id(`section-${id}`).h(26).flex_none().px(collapsed ? 2 : 8).mt(first ? 2 : 8).gap(7).items_center().when(collapsed, (el) => el.justify_center()).rounded(10).text_size(12).text_color(t.dim)
       .cursor_pointer().hover((st) => st.bg(t.hover))
       .on_click((_e, cx) => {
-        this.minOpen = !this.minOpen;
-        localStorage.setItem("minimized.open", this.minOpen ? "1" : "0");
+        this.open[id] = !this.open[id];
+        localStorage.setItem("sections.open", JSON.stringify(this.open));
         cx.notify();
       })
-      .child(svg("mods/workspace-chrome/archive.svg").size(13).flex_none())
-      .when(!collapsed, (el) => el.child(div().flex_1().truncate().child("Minimized"))
-        .when(!this.minOpen && Boolean(alert), (e) => e.child(div().flex_none().text_color(tone(t, alert.w.status)).child("\u25cf")))
-        .child(div().flex_none().text_size(11).child(String(away.length)))
-        .child(svg(`mods/workspace-chrome/chevron-${this.minOpen ? "down" : "right"}.svg`).size(11).flex_none()));
-    if (this.minOpen) this.visible.push(...away.map((r) => r.w.id));
-    return [...main, head, ...(this.minOpen ? away.map((r) => (collapsed ? this.compact(r, t) : this.row(r, t, false))) : [])];
+      .child(svg(`mods/my-spaces/icons/${icon}.svg`).size(13).flex_none())
+      .when(!collapsed, (el) => el.child(div().flex_1().truncate().child(label))
+        .when(!open && Boolean(alert), (e) => e.child(div().flex_none().text_color(tone(t, this.status(alert.w))).child("\u25cf")))
+        .child(div().flex_none().text_size(11).child(String(n)))
+        .child(svg(`mods/workspace-chrome/chevron-${open ? "down" : "right"}.svg`).size(11).flex_none()));
   }
 
-  // Pinned spaces: one tile each (its agent in a ring), in a row that wraps. The line under it names the tile under the pointer.
-  pinnedBar(rows, t, collapsed) {
-    if (!rows.length) return [];
-    this.visible.push(...rows.map((r) => r.w.id));
-    if (collapsed) return rows.map((r) => this.compact(r, t));
-    const hovered = rows.find((r) => r.w.id === this.pinHover)?.w;
-    // Drag a tile onto another to take its place; drop a list row on a tile to pin it there.
-    const place = (id, before) => {
-      const ids = (shared("space.pinned") ?? []).filter((x) => x !== id);
-      ids.splice(Math.max(0, ids.indexOf(before)), 0, id);
-      setShared("space.pinned", ids);
-      setShared("space.minimized", (shared("space.minimized") ?? []).filter((x) => x !== id));
-    };
-    const tile = ({ w }) => {
-      const lead = agents().filter((a) => a.space === w.id && a.program?.key !== "lazygit")
-        .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0];
-      return div().id(`pin-${w.id}`).size(44).flex_none().flex().items_center().justify_center().rounded(12).cursor_pointer()
-        .relative()
-        .when(w.active, (el) => el.bg(`${t.accent}1a`).border_1().border_color(t.accent))
-        .when(!w.active, (el) => el.hover((s) => s.bg(t.hover)))
-        .when(this.pinDrag === w.id, (el) => el.opacity(0.4))
-        .when(this.pinDrag !== null && this.pinDrag !== w.id && this.pinOver === w.id, (el) => el.child(div().absolute().top(6).bottom(6).left(-3).w(2).rounded(1).bg(t.accent)))
-        .on_hover((h, cx) => {
-          const next = h ? w.id : this.pinHover === w.id ? null : this.pinHover;
-          if (next !== this.pinHover) { this.pinHover = next; cx.notify(); }
-          if (h && this.pinDrag !== null && this.pinOver !== w.id) { this.pinOver = w.id; cx.notify(); }
-        })
-        .on_mouse_down("left", () => { this.pinDrag = w.id; this.pinOver = w.id; })
-        .on_mouse_up("left", (_e, cx) => {
-          const dragged = this.pinDrag, row = this.pressed;
-          this.pinDrag = null;
-          this.pressed = null;
-          if (dragged !== null && dragged !== w.id) place(dragged, w.id);
-          else if (dragged === null && row !== null) { const id = spaces()[row]?.id; if (id && id !== w.id) place(id, w.id); }
-          else run("space.select", { id: w.id });
-          cx.notify();
-        })
-        .on_mouse_up("middle", () => run("space.close", { id: w.id }))
-        .on_mouse_down("right", () => this.menu(w))
-        .child(this.agentIcon(lead, t));
-    };
-    return [
-      h_flex().flex_none().flex_wrap().gap(4).pt(2).children(rows.map(tile)),
-      div().flex_none().h(20).px(6).pt(3).truncate().text_size(11.5).text_color(t.dim).child(hovered?.name ?? "Pinned"),
-    ];
+  // A space's name. An emoji needs its own font, or it shows blank.
+  title(name, t) {
+    const parts = name.split(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/u).filter(Boolean);
+    return h_flex().flex_1().min_w(0).overflow_hidden().whitespace_nowrap().text_color(t.foreground)
+      .children(parts.map((x) => (/^\p{Extended_Pictographic}/u.test(x) ? div().flex_none().font_family("Noto Color Emoji").child(x) : div().flex_none().child(x))));
   }
 
-  // The rows, under a header per machine once one isn't this computer.
-  groupedRows(rows, t, collapsed) {
-    this.gd = this.dragGroup !== null ? this.groupDrop() : null;
-    const draw = (r, indented) => (this.visible.push(r.w.id), collapsed ? this.compact(r, t) : this.row(r, t, indented));
-    const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name)])].sort();
-    const loading = m => {
-      const layout = machines().find(k => k.name === m)?.layout;
-      return layout === "loading" || (!layout && this.machines.some(k => k.name === m && k.state === "connected"))
-        || spaces().some(s => (s.machine ?? null) === m && !this.shown.has(s.id));
-    };
-    const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
-    if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : this.withGroups(rows, t, collapsed, draw);
-    const machineNames = [null, ...remote];
-    return machineNames.flatMap((m) => {
-      const mine = rows.filter((r) => (r.w.machine ?? null) === m);
-      const machine = this.machines.find(k => k.name === m);
-      const connected = !m || machine?.state === "connected";
-      const folded = this.folded.has(m);
-      const head = h_flex().id(`machine-${m ?? "local"}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
-        .cursor_pointer().hover(s => s.bg(t.hover))
-        .on_click((_e, cx) => {
-          folded ? this.folded.delete(m) : this.folded.add(m);
-          localStorage.setItem("machines.folded", JSON.stringify([...this.folded]));
-          cx.notify();
-        })
-        .child(svg(`mods/workspace-chrome/${m ? "server" : "monitor"}.svg`).size(13).flex_none())
-        .when(!collapsed, el => el.child(div().flex_1().truncate().child(m ?? "This computer"))
-          .when(!connected, el => el.child(div().flex_none().child((machine?.state ?? "asleep").replace(/_/g, " "))))
-          .when(connected, el => el.child(div().id(`machine-add-${m ?? "local"}`).flex_none().px(4).rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
-            .on_click((_e, cx) => { cx.stop_propagation(); run("space.new", m ? { machine: m } : {}); }).child("+")))
-          .child(div().size(6).rounded(3).flex_none().bg(connected ? t.ansi2 : t.dim))
-          .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
-      const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(28).flex_none().px(8).gap(7).items_center().rounded(10)
-        .text_size(12).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
-        .on_click(() => run("space.new", m ? { machine: m } : {}))
-        .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
-      return [head, ...(folded ? [] : mine.length ? this.withGroups(mine, t, collapsed, draw) : [loading(m) ? loadingRow(m) : empty])];
-    });
+  // The laptop icon of another computer, in its color (shared "machine.colors"); without a choice, one picked from its name.
+  laptop(m, t, size) {
+    const names = Object.keys(LAPTOP), hue = (shared("machine.colors") ?? {})[m] ?? names[[...m].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % 7];
+    return svg("mods/my-spaces/icons/laptop.svg").size(size).flex_none().text_color(LAPTOP[hue] ?? t.dim);
   }
 
   // After the name, always: "herdr \u00b7 spike \u21912 \u21931". Repo and branch show on
@@ -648,74 +688,49 @@ export default class Spaces extends View {
 
   // The Claude icon of a space's lead agent in a ring: yellow (working: filled as far as the agent says it is,
   // else turning), red (waiting for you), green (done), grey (idle). No agent: a faded icon with a z.
+  // A space marked unread shows as done while its agent is idle, until the person opens it.
+  // In grid mode the blue selection follows the focused cell, not the space Herdr calls active.
+  act(w) {
+    if (!shared("grid.saved")) return w.active;
+    const c = this.gridCells().find((x) => x.terminals.includes(focused()?.terminal));
+    return c ? c.id === w.id : w.active;
+  }
+
+  unread(id) { return shared("space.unread")?.[id] === "on"; }
+  status(w) { return w.status === "idle" && this.unread(w.id) ? "done" : w.status; }
+
   agentIcon(a, t) {
     const ring = (color) => div().relative().size(36).flex_none().flex().items_center().justify_center().rounded(18).border(3).border_color(color);
     if (!a) return ring(t.raised).opacity(0.5).child(image("icons/claude.svg").w(20).h(20).flex_none())
       .child(div().absolute().right(-3).bottom(-5).text_size(10).font_bold().text_color(t.dim).child("z"));
-    const p = a.program, st = a.status;
+    const p = a.program, st = a.status === "idle" && this.unread(a.space) ? "done" : a.status;
     const pic = p?.icon ? (p.tint ? svg(p.icon).size(20).flex_none().text_color(t.foreground) : image(p.icon).w(20).h(20).flex_none()) : div().size(10).rounded(5).bg(t.dim);
     const color = st === "blocked" ? t.blocked : st === "done" ? t.done ?? t.ansi2 : st === "working" ? t.raised : t.surface ?? t.raised;
     const f = this.prog[a.address];
     return ring(color).child(pic)
-      .when(st === "working" && f === undefined, (el) => el.child(svg("mods/workspace-chrome/spinner.svg").absolute().top(-3).left(-3).size(36).text_color(t.working).spin(900)))
+      .when(st === "working", (el) => el.child(svg("mods/workspace-chrome/spinner.svg").absolute().top(-3).left(-3).size(36).text_color(t.working).spin(900)))
       .when(st === "working" && f !== undefined, (el) => el.child(svg(`mods/my-spaces/icons/ring-${Math.round(f * 20) * 5}.svg`).absolute().top(-3).left(-3).size(36).text_color(t.working)));
   }
 
-  row({ w, i, g, tree }, t, indented) {
-    const on = w.active;
+  row({ w, g }, t) {
+    const on = this.act(w);
     const lead = agents().filter((a) => a.space === w.id && a.program?.key !== "lazygit")
       .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0];
-    const tail = g ? this.gitTail(g, tree, w.name, t, w.id) : null;
-    const dragging = this.pressed !== null && this.over !== this.pressed;
-    const gname = (shared("space.groups") ?? {})[w.id];
-    const gd = this.gd;
-    const gc = indented && gname ? this.groupColor(gname) : null;
-    // A dragged group lands next to this row, or after the group this row ends.
-    const side = !gd ? null : !gname && gd.block[0].id === w.id ? (gd.after ? "bottom" : "top")
-      : gname && gname === gd.name && gd.after && gd.block[gd.block.length - 1].id === w.id ? "bottom" : null;
+    const tail = g ? this.gitTail(g, null, w.name, t, w.id) : null;
     return v_flex()
       .relative()
       .id(`space-${w.id}`)
       .px(8)
-      .h(rowHeight({ tree }, tail))
+      .h(tail ? 54 : 42)
       .flex_none()
       .justify_center()
       .rounded(12)
-      .when(Boolean(indented), (el) => el.ml(14))
       .when(on, (el) => el.bg(`${t.accent}1a`).border_1().border_color(t.accent))
-      .when(!on && Boolean(gc), (el) => el.bg(`${gc}12`))
-      .when(Boolean(gc), (el) => el.child(div().absolute().left(0).top(9).bottom(9).w(2).rounded(1).bg(`${gc}aa`)))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
-      // While dragging: the row being moved fades, and a line shows where it will land.
-      .when((dragging && this.pressed === i) || (gd !== null && gname === this.dragGroup), (el) => el.opacity(0.4))
-      .when(Boolean(side), (el) => el.child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(side === "top", (b) => b.top(-1)).when(side === "bottom", (b) => b.bottom(-1))))
-      .when(dragging && this.over === i && this.pressed !== i, (el) => el.bg(t.hover).child(div().absolute().left(6).right(6).h(2).rounded(1).bg(t.accent).when(this.pressed < i, (b) => b.bottom(-1)).when(this.pressed > i, (b) => b.top(-1))))
-      .on_hover((h, cx) => {
-        if (h && (this.pressed !== null || this.dragGroup !== null) && this.over !== i) { this.over = i; cx.notify(); }
-      })
-      .on_mouse_down("left", () => {
-        this.pressed = i;
-        this.over = i;
-      })
       .on_mouse_up("middle", () => run("space.close", { id: w.id }))
       .on_mouse_up("left", (e, cx) => {
-        if (this.dragGroup !== null) {
-          this.over = i;
-          this.moveGroup();
-          this.dragGroup = null;
-          cx.notify();
-          return;
-        }
-        const from = this.pressed;
-        this.pressed = null;
-        if (e.click_count >= 2) { run("space.rename", { id: w.id }); cx.notify(); return; }
-        if (from !== null && from !== i) {
-          // Dropped on a row: takes its place, and its group (none: leaves its own).
-          const id = spaces()[from].id;
-          this.setGroup(id, (shared("space.groups") ?? {})[w.id]);
-          run("space.move", { id, index: i + 1 });
-        }
-        else run("space.select", { id: w.id });
+        if (e.click_count >= 2) run(`my-spaces.rename-ask:${w.id}`);
+        else this.pick(w.id);
         cx.notify();
       })
       .on_mouse_down("right", () => this.menu(w))
@@ -724,34 +739,32 @@ export default class Spaces extends View {
         h_flex()
           .gap(9)
           .items_center()
-          .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
           .child(this.agentIcon(lead, t))
           .child(v_flex().flex_1().min_w(0).gap(1)
             .child(h_flex().min_w(0).gap(6).items_center()
-              .child(div().flex_1().min_w(0).truncate().text_color(t.foreground).child(w.name))
+              .child(this.title(w.name, t))
+              .when(Boolean(w.machine), (el) => el.child(this.laptop(w.machine, t, 14)))
               .children(g ? this.marks(g, t, w.id) : [])
               .when(lead?.status === "blocked", (el) => el.child(div().flex_none().text_size(11).font_semibold().text_color(t.blocked).child("Needs you"))))
-            .when(Boolean(tail), el => el.child(tail))),
+            .when(Boolean(tail), (el) => el.child(tail))),
       );
   }
 
-  compact({ w, i }, t) {
-    return h_flex()
-      .id(`space-${w.id}`)
-      .h(26)
-      .flex_none()
-      .justify_center()
-      .gap(4)
-      .when(w.active, (el) => el.bg(t.raised))
-      .hover((s) => s.bg(t.hover))
-      .on_click(() => run("space.select", { id: w.id }))
-      .child(div().text_color(w.active ? t.foreground : t.muted).child(String(this.visible.indexOf(w.id) + 1)))
-      .child(div().text_color(tone(t, w.status)).child(glyph(w.status)));
+  // Collapsed sidebar: the number of the space in a pill; a dot in its corner when an agent works or waits.
+  compact({ w }, t) {
+    const status = this.status(w), on = this.act(w);
+    return h_flex().id(`space-${w.id}`).h(32).flex_none().items_center().justify_center().cursor_pointer()
+      .on_click(() => this.pick(w.id))
+      .child(div().relative().size(28).flex().items_center().justify_center().rounded(10).text_size(13)
+        .text_color(on ? t.foreground : t.muted).bg(on ? t.raised : t.chrome).hover((s) => s.bg(on ? t.raised : t.hover))
+        .child(String(this.visible.indexOf(w.id) + 1))
+        .when(["blocked", "working", "done"].includes(status), (el) => el.child(div().absolute().top(4).right(4).size(6).rounded(3).bg(tone(t, status)))));
   }
 
   render() {
     const t = theme();
-    const collapsed = shared("sidebar.collapsed") === true;
+    // By the sidebar's width, not a flag: a restart or a layout reload resets the width and the flag would lie.
+    const collapsed = (findNode(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
     const palette = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
     const sp = spaces();
     // The tab bar only shows with 2+ tabs; its Files/Changes buttons move to ctrl-s f / ctrl-s v.
@@ -768,19 +781,13 @@ export default class Spaces extends View {
       changed = true;
     }
     if (changed) setShared("space.colors", kept);
-    const groups = shared("space.groups") ?? {};
-    const live = new Set(Object.values(groups)), gcol = shared("group.colors") ?? {};
-    // Colors only for groups that exist; one without a choice has no color.
-    const kept2 = Object.fromEntries(Object.entries(gcol).filter(([g]) => live.has(g)));
-    for (const g of live) kept2[g] ||= "none";
-    if (JSON.stringify(kept2) !== JSON.stringify(gcol)) setShared("group.colors", kept2);
-    // Groups of spaces that are gone stay: pruning them here once wiped every group when spaces() was short at startup.
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(FONT ? 16 : 15).when(Boolean(FONT), (el) => el.font_family(FONT))
-      .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
+      .child(h_flex().h(collapsed ? 36 : 31).when(!collapsed, el => el.pl(16).pr(10)).items_center().justify_between().when(collapsed, el => el.justify_center()).text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
-        .child(div().id("space-new").px(5).text_size(22).rounded(8).hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
+        .child(div().id("space-new").flex().items_center().justify_center().rounded(collapsed ? 10 : 8).text_size(22)
+          .when(collapsed, el => el.size(28)).when(!collapsed, el => el.px(5))
+          .hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
-        .on_mouse_up("left", (_e, cx) => { this.pressed = null; this.dragGroup = null; this.pinDrag = null; cx.notify(); })
         .children(this.grouped(t, collapsed)));
   }
 }

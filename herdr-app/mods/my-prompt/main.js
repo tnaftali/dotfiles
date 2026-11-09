@@ -9,8 +9,8 @@ export default class Prompt extends View {
     this.text = props()?.value ?? "";
     this.color = props()?.color ?? "";
     this.input = InputState.new({ value: this.text });
-    // Input ranges use UTF-8 bytes, not JavaScript's UTF-16 length.
-    if (this.text) this.input.set_selected_range({ start: 0, end: encodeURIComponent(this.text).replace(/%[0-9A-F]{2}/g, "_").length });
+    // Select all. The range is in JavaScript's UTF-16 units: a byte count was outside the text with an emoji in it.
+    if (this.text) this.input.set_selected_range({ start: 0, end: this.text.length });
     this.input.on("change", (_e, cx) => { this.text = this.input.value(); cx.notify(); });
     this.input.on("submit", () => this.submit());
     this.inputFocused = true;
@@ -19,6 +19,8 @@ export default class Prompt extends View {
     this.input.focus();
     cx.timer.after(600, () => this.input.focus());
     this.handle = cx.focus_handle();
+    // Emoji pickers paste with Shift+Insert, which the input does not handle.
+    cx.bind_keys([{ keystroke: "shift-insert", action: "prompt.paste", context: "Prompt" }]);
   }
 
   submit() {
@@ -39,7 +41,9 @@ export default class Prompt extends View {
       .border_1().border_color(primary ? t.solid : t.input).bg(primary ? t.solid : t.raised)
       .text_color(primary ? t.solid_foreground : t.foreground).text_size(12.5).font_medium().cursor_pointer()
       .hover(s => s.opacity(0.88)).on_click(action).child(text);
-    return v_flex().id("prompt").track_focus(this.handle).on_key_down((e, cx) => this.key(e, cx))
+    return v_flex().id("prompt").track_focus(this.handle).key_context("Prompt")
+      .on_action("prompt.paste", (_e, cx) => { const text = cx.read_from_clipboard(); if (text) this.input.replace(text); })
+      .on_key_down((e, cx) => this.key(e, cx))
       .w_full().min_h(0).p(18).bg(t.popover).text_color(t.foreground)
       .child(h_flex().items_center().child(div().flex_1().text_size(15).font_semibold().child(p.title ?? ""))
         .child(div().text_size(11).text_color(t.dim).child("Esc")))

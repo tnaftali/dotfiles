@@ -205,8 +205,9 @@
         "mod": "my-rail"
       },
       "size": {
-        "px": 64
-      }
+        "px": 44
+      },
+      "background": "chrome"
     }
   ],
   "background": "canvas",

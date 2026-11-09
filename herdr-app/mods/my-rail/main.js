@@ -37,7 +37,10 @@ export default class Rail extends View {
 
   render() {
     const t = theme();
-    const collapsed = shared("rail.collapsed") === true;
+    const collapsed = shared("rail.collapsed") !== false;
+    // The layout file starts at the narrow width; a wide rail is set again after a restart.
+    const want = collapsed ? NARROW : WIDE;
+    if (findNode(layout(), "rail")?.size?.px !== want) run("layout.resize", { id: "rail", px: want });
     const panel = findNode(layout(), "panel"), body = findNode(layout(), "panel-body");
     const toggle = () => {
       setShared("rail.collapsed", !collapsed);
@@ -49,8 +52,8 @@ export default class Rail extends View {
       const block = b.block && findNode(layout(), b.block);
       const on = block ? !block.hidden : b.panel && panel && !panel.hidden && body?.active === b.id;
       const i = list.indexOf(b), from = list.findIndex((x) => x.id === this.pressed);
-      return v_flex().id(`rail-${b.id}`).relative().w(collapsed ? 36 : 52).py(collapsed ? 8 : 6).gap(3).flex_none().items_center().rounded(12).cursor_pointer()
-        .bg(on ? t.selected : t.chrome).text_color(t.muted).hover(s => s.bg(t.hover))
+      return v_flex().id(`rail-${b.id}`).relative().w(collapsed ? 28 : 52).when(collapsed, (el) => el.h(28).justify_center()).when(!collapsed, (el) => el.py(6)).gap(3).flex_none().items_center().rounded(collapsed ? 10 : 12).cursor_pointer()
+        .bg(on ? t.raised : t.chrome).text_color(on ? t.foreground : t.muted).hover(s => s.bg(on ? t.raised : t.hover))
         .when(dragging && this.pressed === b.id, (el) => el.opacity(0.4))
         .when(dragging && this.over === b.id, (el) => el.bg(t.hover).child(div().absolute().left(4).right(4).h(2).rounded(1).bg(t.accent).when(from < i, (l) => l.bottom(-1)).when(from > i, (l) => l.top(-1))))
         .on_hover((h, cx) => { if (h && this.pressed !== null && this.over !== b.id) { this.over = b.id; cx.notify(); } })
@@ -62,15 +65,15 @@ export default class Rail extends View {
           else run(b.cmd, b.args);
           cx.notify();
         })
-        .child(svg(`mods/my-rail/${b.icon}.svg`).size(20).text_color(t.accent))
+        .child(svg(`mods/my-rail/${b.icon}.svg`).size(collapsed ? 16 : 20))
         .when(!collapsed, (el) => el.child(div().text_size(9.5).child(b.text)));
     };
     const toggleButton = div().id("rail-toggle").size(26).flex_none().flex().items_center().justify_center().rounded(9).text_color(t.muted)
       .hover(s => s.bg(t.hover).text_color(t.foreground)).on_mouse_down("left", (_e, cx) => cx.stop_propagation()).on_click(toggle)
       .child(svg("mods/my-rail/sidebar-right.svg").size(15));
-    return v_flex().size_full().bg(t.chrome).border_l(1).border_color(t.border)
+    return v_flex().size_full().bg(t.chrome)
       .on_mouse_up("left", (_e, cx) => { this.pressed = this.over = null; cx.notify(); })
-      .child(h_flex().h(46).flex_none().items_center().justify_center().child(toggleButton))
+      .child(h_flex().h(collapsed ? 44 : 46).flex_none().items_start().justify_center().pt(10).child(toggleButton))
       .child(v_flex().items_center().gap(4).children(list.map(button)));
   }
 }

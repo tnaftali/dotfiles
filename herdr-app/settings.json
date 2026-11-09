@@ -1,11 +1,13 @@
 {
-  "zoom": 1,
+  "zoom": 1.0,
   "sounds": {
     "enabled": true
   },
   "font": "JetBrainsMono Nerd Font",
-  "font_size": 16,
+  "font_size": 16.0,
+  "font_ligatures": false,
   "telemetry": false,
+  "minimum_contrast": 1.0,
   "theme": "catppuccin",
   "colors": {
     "accent": "#8aadf4"

@@ -55,13 +55,12 @@ function items(p, git) {
       ];
     case "space":
       return [
-        ["Rename", "space.rename", { id: tg.id }],
-        ((shared("space.pinned") ?? []).includes(tg.id) ? ["Unpin", `my-spaces.unpin:${tg.id}`, {}] : ["Pin", `my-spaces.pin:${tg.id}`, {}]),
-        ["Group\u2026", `my-spaces.group-ask:${tg.id}`, {}],
-        ...((shared("space.groups") ?? {})[tg.id] ? [["Remove from group", `my-spaces.group:${tg.id}=`, {}]] : []),
-        ...(git ? [["New worktree", "worktree", { space: tg.id, action: "new" }], ["Open worktree", "worktree", { space: tg.id, action: "open" }]] : []),
-        ...(git === "linked" ? [["Remove worktree", "worktree", { space: tg.id, action: "remove" }]] : []),
-        ((shared("space.minimized") ?? []).includes(tg.id) ? ["Restore", `my-spaces.restore:${tg.id}`, {}] : ["Minimize", `my-spaces.minimize:${tg.id}`, {}]),
+        ["Rename", `my-spaces.rename-ask:${tg.id}`, {}, "chrome:square-pen"],
+        ((shared("space.unread") ?? {})[tg.id] ? ["Mark as read", `my-spaces.read:${tg.id}`, {}, "mail-open"] : ["Mark as unread", `my-spaces.unread:${tg.id}`, {}, "mail"]),
+        ...(spaces().find((s) => s.id === tg.id)?.machine ? [["Computer color…", `my-spaces.mcolor-ask:${spaces().find((s) => s.id === tg.id).machine}`, {}, "spaces:laptop"]] : []),
+        ...(git ? [["New worktree", "worktree", { space: tg.id, action: "new" }, "git-branch-plus"], ["Open worktree", "worktree", { space: tg.id, action: "open" }, "folder-open"]] : []),
+        ...(git === "linked" ? [["Remove worktree", "worktree", { space: tg.id, action: "remove" }, "trash"]] : []),
+        ((shared("space.hidden") ?? []).includes(tg.id) ? ["Show", `my-spaces.unhide:${tg.id}`, {}, "spaces:eye"] : ["Hide", `my-spaces.hide:${tg.id}`, {}, "spaces:eye-off"]),
         ["Close", "space.close", { id: tg.id }],
       ];
     default:
@@ -76,7 +75,8 @@ function items(p, git) {
   }
 }
 
-function menuIcon(command) {
+function menuIcon(command, own) {
+  if (own) return own.startsWith("chrome:") ? `mods/workspace-chrome/${own.slice(7)}.svg` : own.startsWith("spaces:") ? `mods/my-spaces/icons/${own.slice(7)}.svg` : `mods/my-menu/icons/${own}.svg`;
   const name = command.endsWith(".close") ? "x" : command.endsWith(".rename") ? "square-pen" : command.endsWith(".new") ? "plus" : command === "worktree" ? "git-branch" : command === "app.help" ? "terminal" : command === "app.theme" ? "settings" : command === "pane.split" ? "panel-right" : command === "pane.zoom" ? "square" : "terminal";
   return `mods/workspace-chrome/${name}.svg`;
 }
@@ -148,7 +148,7 @@ export default class Menu extends View {
             .when(i === this.at, (el) => el.bg(t.selected))
             .hover((s) => s.bg(t.hover))
             .on_click((_e, cx) => this.choose(i, cx))
-            .child(svg(menuIcon(it[1])).size(14).flex_none().text_color(t.muted))
+            .child(svg(menuIcon(it[1], it[3])).size(14).flex_none().text_color(t.muted))
             .child(div().flex_1().child(it[0]))
             .child(div().text_size(11).text_color(t.dim).child(shortcut(it[1], it[2])))),
         ),
