@@ -32,7 +32,7 @@ git -C "$DOTFILES" config core.hooksPath githooks   # pre-commit blocks secrets 
 
 ## 3. Herdr config (hardlink, not symlink)
 
-`herdr-gpui` refuses a symlinked config. The `~/.config/herdr/` directory holds live sockets and logs, so link only the file.
+The `~/.config/herdr/` directory holds live sockets and logs, so link only the file.
 
 ```bash
 mkdir -p ~/.config/herdr

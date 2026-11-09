@@ -86,9 +86,11 @@ format aids understanding — the whole point of the output.
   tool to a `.html` file in the project (or a path I give), then open it with
   `open <file>`. Do not use the `Artifact` tool / claude.ai publishing unless I
   explicitly ask.
-- **Where files go.** Inside a repo or project folder: that folder. Anywhere
-  else (e.g. working from `~`): `~/Documents/claude/`. Never loose in `~`.
-  Applies to plans, reports, research, and explanations.
+- **Where files go.** `~/Documents/claude/<topic>/`, one folder per piece of
+  related work (e.g. `nintendo-handheld/`, `rodeo/`). Reuse a matching folder;
+  create one if none fits. Never loose in `~/Documents/claude/`, `~` or a repo.
+  Applies to reports, research and explanations. Exception: an implementation
+  plan a tool runs inside the repo (e.g. `PLAN.html` with `.ralph-done`) stays there.
 - **Lead with a diagram** when structure, flow, or architecture is involved —
   inline SVG, or mermaid via a `mermaid` CDN `<script>` in the file so it renders
   in the browser. The terminal does not render diagrams, so they belong in the
@@ -113,10 +115,14 @@ These apply to every document I ask for — plans, reports, explanations, resear
 - **Fact Verification.** Check every factual claim in the document against a real source from this session. Mark each unverifiable claim `[UNVERIFIED]` in the document. End the document with one `Verified: N/N claims checked against <sources>` line.
 - **Progress Bars.** Building a document in several steps → show the progress bar in chat, as for any multi-step work.
 
-## Document Theme — Catppuccin Macchiato, Sans Titles
+## Document Theme — Claude Cream is the default
 
 Every document I build — implementation plans, reports, explanations, any HTML
-output — uses the **Catppuccin Macchiato** palette. Dark theme. Apply it unasked.
+output — uses **Claude Cream** (see "Default Theme — Claude Cream" below). Apply it unasked.
+
+## Alternate Theme — Catppuccin Macchiato, Sans Titles (opt-in)
+
+Use only when I ask for "Macchiato" / "Catppuccin" / a dark Catppuccin look.
 
 Define these as CSS variables and build everything off them:
 
@@ -145,13 +151,13 @@ Role mapping:
 - Load Inter with this tag in `<head>`; offline, `--title` falls back to the system font:
   `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">`
 - Lead with a row of stat tiles for the headline numbers (label 12px uppercase `--subtext0`, value 28px weight 650, tabular-nums). The deciding number (price, cost, total) goes first and biggest.
-- Reference look: `~/Documents/claude/pc-electricity-cost.html` (tiles, cards, quiet tables, pill badges).
+- Reference look: `~/Documents/claude/pc-power-and-hardware/pc-electricity-cost.html` (tiles, cards, quiet tables, pill badges).
 
-## Alternate Theme — Claude Cream (opt-in)
+## Default Theme — Claude Cream
 
-Use only when I ask for "cream" / "Claude Cream" / a light warm look. Macchiato stays the default.
+The default for every document. Macchiato only when I ask for it.
 
-Minimal, warm, light by default, with a dark toggle. Copy the `:root` block, the dark block and the component styles from the reference page: `~/dotfiles/.claude/themes/claude-cream.html`.
+Minimal, warm, light by default, with a dark toggle. Copy the `:root` block, the dark block and the component styles from the reference page: `~/Projects/dotfiles/.claude/themes/claude-cream.html`.
 
 ```css
 :root {
