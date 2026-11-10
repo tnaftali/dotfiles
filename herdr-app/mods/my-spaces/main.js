@@ -38,6 +38,9 @@ const MARK = { ansi6: "#8bd5ca", ansi3: "#f5a97f", ansi4: "#8aadf4", ansi5: "#c6
 const LAPTOP = { blue: "#8aadf4", peach: "#f5a97f", green: "#a6da95", mauve: "#c6a0f6", teal: "#8bd5ca", pink: "#f5bde6", yellow: "#eed49f", red: "#ed8796", sky: "#91d7e3", lavender: "#b7bdf8", flamingo: "#f0c6c6", maroon: "#ee99a0", sapphire: "#7dc4e4" };
 
 // A space speaks up only when something in it needs you.
+// Terminals with `claude attach` in front: "address first-word-of-title".
+const ATTACHED = String.raw`hc ls | jq -r '.terminals[]|select(.agent=="zsh" or .agent==null)|.address' | while read -r a; do hc get "$a" | jq -r --arg a "$a" 'select(.foreground.argv[0:2]==["claude","attach"])|"\($a) \(.title)"'; done`;
+
 export function glyph(status) {
   return status === "blocked" || status === "done" ? "●" : "·";
 }
@@ -138,7 +141,7 @@ export default class Spaces extends View {
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // `git status` walks the whole tree, on another machine a process there:
     // only when its answer could have changed (see `due`).
-    cx.timer.every(250, (cx) => { this.checkNew(cx); this.gridWatch(cx); this.track(cx); });
+    cx.timer.every(250, (cx) => { this.checkNew(cx); this.gridWatch(cx); this.track(cx); this.pollAttached(cx); });
   }
 
   // Grid mode: the shown tab's area (the layout's `main`) becomes live terminals, one per Active or Idle space
@@ -380,11 +383,11 @@ export default class Spaces extends View {
     const fresh = sp.filter((w) => !(w.id in this.seen) && !(shared("space.hidden") ?? []).includes(w.id));
     for (const w of fresh) this.seen[w.id] = now;
     if (fresh.length) this.dirty = true;
-    const prev = this.prevState, cur = Object.fromEntries(sp.map((w) => [w.id, w.status]));
+    const prev = this.prevState, cur = Object.fromEntries(sp.map((w) => [w.id, this.ws(w)]));
     this.prevState = cur;
-    for (const w of sp) if (w.status === "working" || w.status === "blocked") { this.seen[w.id] = now; this.dirty = true; }
+    for (const w of sp) if (this.ws(w) === "working" || this.ws(w) === "blocked") { this.seen[w.id] = now; this.dirty = true; }
     // Saved when work stops, else at most every 30 s.
-    const stopped = prev && sp.some((w) => prev[w.id] === "working" && w.status !== "working");
+    const stopped = prev && sp.some((w) => prev[w.id] === "working" && this.ws(w) !== "working");
     if (this.dirty && (stopped || now - (this.savedAt ?? 0) > 30000)) { setShared("space.seen", this.seen); this.dirty = false; this.savedAt = now; }
     const hid = shared("space.hidden") ?? [], woke = prev ? hid.filter((id) => cur[id] === "working" && prev[id] && prev[id] !== "working") : [];
     if (woke.length) setShared("space.hidden", hid.filter((id) => !woke.includes(id)));
@@ -629,12 +632,12 @@ export default class Spaces extends View {
     const rows = this.ordered();
     const loading = spaces().some((s) => !s.machine && !this.shown.has(s.id)) || machines().find((k) => k.name === null)?.layout === "loading";
     if (loading && !rows.length) return [div().id("machine-loading-local").h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…")];
-    const key = (r) => (r.w.status === "working" ? Infinity : this.seen?.[r.w.id] ?? 0);
+    const key = (r) => (this.ws(r.w) === "working" ? Infinity : this.seen?.[r.w.id] ?? 0);
     const out = [];
     for (const [id, label, icon] of [["active", "Active", "sun"], ["idle", "Idle", "clock"], ["inactive", "Inactive", "moon"], ["hidden", "Hidden", "eye-off"]]) {
       const list = rows.filter((r) => this.tier(r.w) === id).sort((a, b) => key(b) - key(a) || a.i - b.i);
       if (!list.length) continue;
-      const alert = list.find((r) => r.w.status === "blocked") ?? list.find((r) => this.status(r.w) === "done");
+      const alert = list.find((r) => this.ws(r.w) === "blocked") ?? list.find((r) => this.status(r.w) === "done");
       const shown = this.open[id] ? list : list.filter((r) => r.w.active);
       out.push(this.sectionHead(id, label, icon, list.length, this.open[id], alert, t, collapsed, !out.length));
       for (const r of shown) { this.visible.push(r.w.id); out.push(collapsed ? this.compact(r, t) : this.row(r, t)); }
@@ -697,7 +700,32 @@ export default class Spaces extends View {
   }
 
   unread(id) { return shared("space.unread")?.[id] === "on"; }
-  status(w) { return w.status === "idle" && this.unread(w.id) ? "done" : w.status; }
+  // A space's status: Herdr's, else an attached background session's, read from how lately its transcript changed.
+  ws(w) { const s = w.status; return !s || s === "unknown" ? (this.attached?.[w.id] ?? s) : s; }
+  status(w) { const s = this.ws(w); return s === "idle" && this.unread(w.id) ? "done" : s; }
+
+  // `claude attach` shows a background session in a terminal. Its hooks run elsewhere, so Herdr hears no status.
+  // `hc get` names the program in front, and Claude marks the terminal title: ✳ while it waits, a braille spinner while it works.
+  // Herdr's own title drops the mark, so ask the core. Every 4 s, off the UI thread.
+  pollAttached(cx) {
+    const now = Date.now();
+    if (this.attachedBusy || now - (this.attachedAt ?? 0) < 4000) return;
+    this.attachedAt = now;
+    this.attachedBusy = true;
+    cx.spawn(async (cx) => {
+      try {
+        const r = await exec("sh", ["-c", ATTACHED]).catch(() => null);
+        const next = {};
+        for (const line of (r?.stdout ?? "").split("\n")) {
+          const [addr, mark] = [line.split(" ")[0], line.split(" ")[1] ?? ""];
+          const tab = addr && panes().find((p) => p.terminal === addr)?.tab;
+          const sp = tab && spaces().find((w) => w.tabs.some((t) => t.id === tab));
+          if (sp && next[sp.id] !== "working") next[sp.id] = mark === "✳" ? "idle" : "working";
+        }
+        if (JSON.stringify(next) !== JSON.stringify(this.attached ?? {})) { this.attached = next; cx.notify(); }
+      } finally { this.attachedBusy = false; }
+    });
+  }
 
   agentIcon(a, t) {
     const ring = (color) => div().relative().size(36).flex_none().flex().items_center().justify_center().rounded(18).border(3).border_color(color);
@@ -715,7 +743,8 @@ export default class Spaces extends View {
   row({ w, g }, t) {
     const on = this.act(w);
     const lead = agents().filter((a) => a.space === w.id && a.program?.key !== "lazygit")
-      .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0];
+      .sort((a, b) => (RANK[b.status] ?? 0) - (RANK[a.status] ?? 0) || b.seq - a.seq)[0]
+      ?? (this.attached?.[w.id] ? { status: this.attached[w.id], space: w.id, address: `attach:${w.id}`, program: agents().find((a) => a.app === "claude-code")?.program } : undefined);
     const tail = g ? this.gitTail(g, null, w.name, t, w.id) : null;
     return v_flex()
       .relative()
