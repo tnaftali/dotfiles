@@ -327,6 +327,8 @@ export default class Spaces extends View {
         if (this.resumed && local.length) {
           for (const addr of Object.keys(next)) {
             const t = local.find((x) => x.address === addr);
+            // A terminal still waiting for its resume (or just sent one) is a shell for a while: keep its session.
+            if (this.pending?.has(addr) || Date.now() - (this.sentAt?.[addr] ?? 0) < 90000) continue;
             if (!t || (!found[addr] && t.program?.key !== "claude")) delete next[addr];
           }
         }
@@ -337,18 +339,31 @@ export default class Spaces extends View {
     });
   }
 
+  // Resume each saved session in its terminal. A terminal that is not a live shell yet is tried again every 3 s, for 2 min.
   resumeClaude(cx) {
-    const saved = shared("claude.sessions") ?? {};
     const local = terminals().filter((t) => !t.address.includes("/"));
     // No terminals listed yet: the window is not ready, so try again soon.
     if (!local.length) return void cx.timer.after(5000, (cx) => this.resumeClaude(cx));
-    this.resumed = true;
-    const q = (v) => `'${String(v).replace(/'/g, `'\\''`)}'`;
-    for (const [addr, { id, cwd }] of Object.entries(saved)) {
-      const t = local.find((x) => x.address === addr);
-      if (!t || !t.program?.shell || t.state !== "live" || !/^[0-9a-f-]{36}$/.test(id)) continue;
-      cx.spawn(async () => { try { await hc(["send", addr, `cd ${q(cwd)} && claude --resume ${id}`]); } catch {} });
+    if (!this.pending) {
+      this.pending = new Set(Object.keys(shared("claude.sessions") ?? {}));
+      this.sentAt = {};
+      this.resumeStart = Date.now();
     }
+    this.resumed = true;
+    const saved = shared("claude.sessions") ?? {};
+    const q = (v) => `'${String(v).replace(/'/g, `'\\''`)}'`;
+    for (const addr of [...this.pending]) {
+      const t = local.find((x) => x.address === addr);
+      const { id, cwd } = saved[addr] ?? {};
+      if (!t || !id || t.program?.key === "claude") this.pending.delete(addr);
+      else if (t.program?.shell && t.state === "live" && /^[0-9a-f-]{36}$/.test(id)) {
+        this.pending.delete(addr);
+        this.sentAt[addr] = Date.now();
+        cx.spawn(async () => { try { await hc(["send", addr, `cd ${q(cwd)} && claude --resume ${id}`]); } catch {} });
+      }
+    }
+    if (this.pending.size && Date.now() - this.resumeStart < 120000) cx.timer.after(3000, (cx) => this.resumeClaude(cx));
+    else this.pending.clear();
   }
 
   // Go to a space. In grid mode its cell takes the keyboard too, so typing goes into it.
@@ -430,6 +445,7 @@ export default class Spaces extends View {
       // The right rail has Files and Changes: the tab bar's own buttons would repeat them.
       if (JSON.stringify(shared("workspace.panels")) !== "[]") setShared("workspace.panels", []);
       this.resumed = false;
+      this.pending = null;
       cx.timer.every(5000, (cx) => this.trackClaude(cx));
       cx.timer.after(10000, (cx) => this.resumeClaude(cx));
     }

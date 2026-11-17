@@ -278,6 +278,9 @@ export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Fly.io CLI
+[[ -d "$HOME/.fly/bin" ]] && export PATH="$HOME/.fly/bin:$PATH"
+
 # ── Linux ───────────────────────────────────────────────────────────────────────
 if [[ $OSTYPE == linux* ]]; then
   # Omarchy installs node, gh, claude, etc. through mise

@@ -16,8 +16,10 @@ if [[ $ws == "$hide" ]]; then
   active=$(hyprctl activeworkspace -j | jq -r .id)
   dispatch "hl.dsp.window.move({ workspace = \"$active\", follow = false, window = \"address:$addr\" })"
   dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+  dispatch "hl.dsp.window.alter_zorder({ mode = \"top\", window = \"address:$addr\" })"
 elif [[ ${1:-} == show ]]; then
   dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+  dispatch "hl.dsp.window.alter_zorder({ mode = \"top\", window = \"address:$addr\" })"
 else
   dispatch "hl.dsp.window.move({ workspace = \"$hide\", follow = false, window = \"address:$addr\" })"
 fi

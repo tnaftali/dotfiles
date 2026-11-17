@@ -26,8 +26,6 @@ o.bind("ALT + code:20", "Shrink window", hl.dsp.window.resize({ x = -50, y = 0, 
 o.bind("ALT + code:21", "Grow window", hl.dsp.window.resize({ x = 50, y = 0, relative = true }))
 
 -- Split direction for the next window
-o.bind("ALT + C", "Split horizontal", hl.dsp.layout("preselect r"))
-o.bind("ALT + V", "Split vertical", hl.dsp.layout("preselect d"))
 
 o.bind("ALT + SHIFT + RETURN", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 -- Omarchy's SUPER+T does the same; ALT+SHIFT+SPACE is the one in use.
@@ -46,13 +44,13 @@ o.window("DBeaver", { workspace = "4" })
 -- "silent": opens on workspace 4 without switching to it (autostarts at login).
 
 -- Floating apps
-o.window("(brave-web.whatsapp.com__-Default|brave-www.instagram.com__direct_inbox_?-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default)", { float = true })
+o.window("(brave-web.whatsapp.com__-Default|brave-www.instagram.com__direct_inbox_?-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default|brave-tnaftali.github.io__tasks_-Default)", { float = true })
 
 -- Quick notes (Raycast Notes style): ~/Projects/jot, a native GPUI text
--- window, pinned to show on every workspace. SUPER+N opens it, or closes it if open. The app restores its own size
+-- window, pinned to show on every workspace. ALT+V opens it, or closes it if open. The app restores its own size
 -- and position, so no size or center rule here.
 o.window("jot", { float = true, pin = true })
-o.bind("SUPER + N", "Notes", "/home/tobi/.local/bin/jot-toggle")
+o.bind("ALT + V", "Notes", "/home/tobi/.local/bin/jot-toggle")
 
 -- WhatsApp floats; ALT+R minimizes or restores it (special:minimized), so it keeps running and stays in the dock.
 o.bind("ALT + R", "WhatsApp", "/home/tobi/Projects/dotfiles/scripts/whatsapp-toggle")
@@ -159,15 +157,35 @@ end
 dead_key("acute", "E", "Acute accent (then a/e/i/o/u)", { "A", "E", "I", "O", "U" })
 dead_key("tilde", "N", "Tilde (then n)", { "N" })
 
+-- Apps that keep running in the background (webapps, UpNote, Files): closing hides them
+-- to special:minimized, the same place the *-toggle scripts use.
+local function hides_on_close(class)
+  return class:find("^brave%-.+__.*%-Default$") or class == "upnote" or class == "org.gnome.Nautilus"
+end
+
+local function close_or_hide(window)
+  if window and hides_on_close(window.class or "") then
+    hl.dispatch(hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
+  else
+    hl.dispatch(hl.dsp.window.close())
+  end
+end
+
+hl.unbind("SUPER + W")
+o.bind("SUPER + W", "Close or hide window", function() close_or_hide(hl.get_active_window()) end)
+
 -- MX Master gesture-button click, called by Solaar (~/.config/solaar/rules.yaml)
 -- with `hyprctl eval 'mx_gesture_click()'`:
+--   Background apps: hide the window
 --   Brave:    close the tab (ctrl+w)
 --   Ghostty:  close the herdr workspace (prefix ctrl+s, then shift+d)
 --   elsewhere: close the window
 function mx_gesture_click()
   local window = hl.get_active_window()
   local class = window and window.class or ""
-  if class:find("^brave%-") then
+  if hides_on_close(class) then
+    close_or_hide(window)
+  elseif class:find("^brave%-") then
     run_steps(chord_steps({ { "CTRL", "Control_L" } }, "W"), 1, 1)
   elseif class == "com.mitchellh.ghostty" then
     -- No separate modifier key presses: Ghostty reports the synthetic Shift_L
@@ -199,4 +217,6 @@ mouse_nav_bind("mouse:276", "bracketright")
 
 -- Things panel app (omarchy-things/bin/things-app): a Quickshell window, so its class is org.quickshell. Floats.
 o.window("org.quickshell", { float = true, center = true })
-o.bind("ALT + T", "Things", "/home/tobi/Projects/dotfiles/scripts/things-toggle")
+o.bind("ALT + T", "Tasks", "/home/tobi/Projects/dotfiles/scripts/tasks-toggle")
+o.bind("ALT + GRAVE", "Files", "/home/tobi/Projects/dotfiles/scripts/files-toggle")
+o.bind("ALT + C", "Calendar", "/home/tobi/Projects/dotfiles/scripts/calendar-toggle")

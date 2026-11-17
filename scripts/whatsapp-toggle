@@ -16,6 +16,11 @@ if [[ $ws == "$hide" ]]; then
   active=$(hyprctl activeworkspace -j | jq -r .id)
   dispatch "hl.dsp.window.move({ workspace = \"$active\", follow = false, window = \"address:$addr\" })"
   dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+  dispatch "hl.dsp.window.alter_zorder({ mode = \"top\", window = \"address:$addr\" })"
+elif [[ $(hyprctl activewindow -j | jq -r .address) != "$addr" ]]; then
+  # Visible but behind or unfocused: bring it forward instead of hiding it.
+  dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+  dispatch "hl.dsp.window.alter_zorder({ mode = \"top\", window = \"address:$addr\" })"
 else
   dispatch "hl.dsp.window.move({ workspace = \"$hide\", follow = false, window = \"address:$addr\" })"
 fi

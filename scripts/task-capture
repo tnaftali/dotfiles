@@ -1,0 +1,5 @@
+#!/bin/bash
+# Toggle the quick capture bar (resident Quickshell daemon in quickshell/task-capture; started from hypr/autostart.lua).
+# The capture URL (Tasks → Settings → Quick capture → Show capture URL) lives in ~/.config/task-capture/url.
+dir=/home/tobi/Projects/dotfiles/quickshell/task-capture
+qs -p "$dir" ipc call capture toggle 2>/dev/null || { setsid qs -p "$dir" >/dev/null 2>&1 & sleep 1; qs -p "$dir" ipc call capture toggle; }
