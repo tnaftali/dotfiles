@@ -74,6 +74,7 @@ export default class Spaces extends View {
     //   rename-ask:<space>       the prompt for a space's name (it takes Shift+Insert, so an emoji can be pasted); rename:<space>=<name> sets it
     //   hide:<space>, unhide:<space>   a hidden space is only in the Hidden section; it comes back when its agent starts working
     //   unread:<space>, read:<space>   show a space as done again (while its agent is idle) until it is opened
+    //   find                     Ctrl-F and the search button: the fuzzy finder (my-finder); it runs pick:<space> to jump
     //   grid                     the shown area becomes a grid of every Active and Idle space whose computer is connected (again: back)
     //   zoom                     ctrl-s z: the focused cell fills the grid, or Herdr's pane.zoom outside it
     //   sidebar                  narrow or widen the left sidebar
@@ -102,6 +103,10 @@ export default class Spaces extends View {
           const colors = { ...(shared("machine.colors") ?? {}) };
           if (m[2]) colors[m[1]] = m[2]; else delete colors[m[1]];
           setShared("machine.colors", colors);
+        } else if (c === "find") {
+          openOverlay({ mod: "my-finder", kind: "dialog", width: 560, height: 440 });
+        } else if ((m = /^pick:(.+)$/s.exec(c))) {
+          this.pick(m[1]);
         } else if (c === "grid") {
           this.toggleGrid(cx);
         } else if (c === "zoom" || (m = /^zoom:(.+)$/s.exec(c))) {
@@ -829,9 +834,12 @@ export default class Spaces extends View {
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(FONT ? 16 : 15).when(Boolean(FONT), (el) => el.font_family(FONT))
       .child(h_flex().h(collapsed ? 36 : 31).when(!collapsed, el => el.pl(16).pr(10)).items_center().justify_between().when(collapsed, el => el.justify_center()).text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
+        .child(h_flex().items_center().gap(2)
+        .when(!collapsed, el => el.child(div().id("space-find").flex().items_center().justify_center().rounded(8).size(26)
+          .hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("my-spaces.find")).child(svg("mods/my-spaces/icons/search.svg").size(15))))
         .child(div().id("space-new").flex().items_center().justify_center().rounded(collapsed ? 10 : 8).text_size(22)
           .when(collapsed, el => el.size(28)).when(!collapsed, el => el.px(5))
-          .hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+")))
+          .hover(s => s.bg(t.hover).text_color(t.foreground)).on_click(() => run("space.new")).child("+"))))
       .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
         .children(this.grouped(t, collapsed)));
   }

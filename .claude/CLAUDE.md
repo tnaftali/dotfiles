@@ -5,9 +5,9 @@
 - Be concise. No preamble, no summaries, no restating what I said.
 - I'm a senior engineer. Skip basic explanations unless I ask for them.
 
-## Nightly Power-Off (Linux home PC)
+## Nightly Hibernate (Linux home PC)
 
-- A root timer powers this PC off at 02:00: `nightly-poweroff.timer` runs `/usr/local/bin/nightly-poweroff` at 01:55.
+- A root timer hibernates this PC at 02:00 (not a full power-off): `nightly-poweroff.timer` runs `/usr/local/bin/nightly-poweroff` at 01:55. Nothing wakes it; it stays off until started.
 - It skips the night if `~/.skip-poweroff` exists, or if a `claude` process runs and a transcript changed in the last 15 min.
 - "Skip poweroff", "keep the PC on tonight" → run `touch ~/.skip-poweroff`. One night only: the script deletes the flag. Works until 02:00.
 - Undo a skip: `rm ~/.skip-poweroff`. Status: `systemctl list-timers nightly-poweroff.timer`. Log: `journalctl -u nightly-poweroff`.

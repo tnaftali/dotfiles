@@ -1,0 +1,8 @@
+[Unit]
+Description=Two-way sync of Google Drive with ~/Google Drive
+After=network-online.target
+OnFailure=gdrive-sync-failed.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/rclone bisync gdrive: "%h/Google Drive" --drive-skip-gdocs --drive-skip-shortcuts --create-empty-src-dirs --log-level NOTICE

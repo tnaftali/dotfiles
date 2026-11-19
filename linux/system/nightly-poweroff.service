@@ -1,0 +1,8 @@
+[Unit]
+Description=Nightly power-off at 02:00, unless skipped or Claude is busy
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/nightly-poweroff
+# The script waits 5 minutes before the power-off.
+TimeoutStartSec=10min

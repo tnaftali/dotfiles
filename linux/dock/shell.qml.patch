@@ -1,0 +1,13 @@
+--- /tmp/claude-1000/shell.qml.bak3	2026-11-16 13:21:29.309962439 +0100
++++ /home/tobi/.local/share/dock/qml/shell.qml	2026-11-16 13:25:43.903543094 +0100
+@@ -134,7 +134,9 @@
+         if (!item.windows.length) { launch(item.key); return }
+         var ws = backend ? backend.activeWorkspace : -1
+         var index = DockModel.pickWindow(item.windows, ws)
+-        focusWindow(item.windows[index])
++        // A click on the focused app hides it; the next click restores it.
++        if (item.windows[index].activated) hideApp(item)
++        else focusWindow(item.windows[index])
+     }
+ 
+     FileView {

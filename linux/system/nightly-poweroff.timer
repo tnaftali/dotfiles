@@ -1,0 +1,9 @@
+[Unit]
+Description=Start the nightly power-off check at 01:55
+
+[Timer]
+OnCalendar=*-*-* 01:55:00
+# No Persistent=: a missed run must not power off the PC at the next boot.
+
+[Install]
+WantedBy=timers.target

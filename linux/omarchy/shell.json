@@ -1,0 +1,136 @@
+{
+  "bar": {
+    "centerAnchor": "omarchy.clock",
+    "layout": {
+      "center": [
+        {
+          "format": "ddd d MMM HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "tobi.weather"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "tobi.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "hidden": [
+            "UpNote_status_icon_1"
+          ],
+          "id": "omarchy.tray",
+          "pinned": []
+        },
+        {
+          "id": "omarchy.media"
+        },
+        {
+          "id": "leomoon-studios.omarchy-world-clock"
+        },
+        {
+          "id": "io.github.andy-spike.screen-temperature"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "exec": "systemctl is-active -q jellyfin && echo ",
+          "fontSize": 16,
+          "id": "jellyfin",
+          "interval": 10,
+          "onClick": "xdg-open http://localhost:8096",
+          "tooltip": "Jellyfin server running",
+          "type": "command"
+        },
+        {
+          "id": "paulie420.runcat",
+          "display": "cat"
+        },
+        {
+          "id": "omarchy.indicators",
+          "items": [
+            "StayAwake"
+          ]
+        },
+        {
+          "id": "omarchy.system-update"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.power"
+        },
+        {
+          "id": "jankeesvw.notification-center"
+        },
+        {
+          "id": "io.github.twiking.omacontrol",
+          "showActiveSwitchCount": false,
+          "showBatteryWarnings": false
+        },
+        {
+          "id": "hibernate",
+          "type": "command",
+          "exec": "printf \"\\U000f0906\"",
+          "fontSize": 16,
+          "interval": 3600,
+          "tooltip": "Hibernate",
+          "onClick": "/home/tobi/Projects/dotfiles/scripts/hibernate-confirm"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": true
+  },
+  "cloneSourceRestores": [
+    "io.github.sirjul1337.lock-explorer",
+    "tobi.emojis"
+  ],
+  "disabledPlugins": [
+    "omarchy.lock",
+    "omarchy.nightlight",
+    "omarchy.emojis"
+  ],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "boot": "theme",
+      "design": "card",
+      "id": "io.github.sirjul1337.lock-explorer"
+    },
+    {
+      "id": "io.github.twiking.omacontrol"
+    },
+    {
+      "id": "marcho78.titlebars"
+    },
+    {
+      "id": "io.github.smoothpixels.cursor-accent"
+    },
+    {
+      "id": "tobi.emojis"
+    }
+  ],
+  "version": 1
+}

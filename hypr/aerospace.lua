@@ -44,13 +44,13 @@ o.window("DBeaver", { workspace = "4" })
 -- "silent": opens on workspace 4 without switching to it (autostarts at login).
 
 -- Floating apps
-o.window("(brave-web.whatsapp.com__-Default|brave-www.instagram.com__direct_inbox_?-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|brave-calendar.google.com__calendar_u_0_r_week-Default|brave-tnaftali.github.io__tasks_-Default)", { float = true })
+o.window("(brave-web.whatsapp.com__-Default|brave-www.instagram.com__direct_inbox_?-Default|brave-web.telegram.org__-Default|Bitwarden|1[Pp]assword|org.telegram.desktop|zapfast|brave-calendar.google.com__calendar_u_0_r_week-Default|brave-tnaftali.github.io__tasks_-Default)", { float = true })
 
 -- Quick notes (Raycast Notes style): ~/Projects/jot, a native GPUI text
 -- window, pinned to show on every workspace. ALT+V opens it, or closes it if open. The app restores its own size
 -- and position, so no size or center rule here.
-o.window("jot", { float = true, pin = true })
-o.bind("ALT + V", "Notes", "/home/tobi/.local/bin/jot-toggle")
+o.window("scratchpad", { float = true, pin = true })
+o.bind("ALT + V", "Notes", "/home/tobi/.local/bin/scratchpad-toggle")
 
 -- WhatsApp floats; ALT+R minimizes or restores it (special:minimized), so it keeps running and stays in the dock.
 o.bind("ALT + R", "WhatsApp", "/home/tobi/Projects/dotfiles/scripts/whatsapp-toggle")

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Toggle the scratchpad window: close it if open (position and size are saved), else start it.
+if hyprctl clients -j | jq -e '.[] | select(.class == "scratchpad")' >/dev/null; then
+  hyprctl dispatch 'hl.dsp.window.close({ window = "class:scratchpad" })' >/dev/null
+else
+  setsid -f ~/.local/bin/scratchpad >/dev/null 2>&1
+fi

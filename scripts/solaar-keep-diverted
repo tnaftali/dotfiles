@@ -1,0 +1,7 @@
+#!/bin/bash
+# Solaar can lose the gesture-button diversion (the mouse resets it after sleep or a
+# reconnect), and the button then does nothing. Re-apply it every 2 minutes; the write is
+# idempotent, and it fails quietly while the mouse is away.
+while sleep 120; do
+  solaar config 'MX Master 3' divert-keys 'Mouse Gesture Button' 'Mouse Gestures' >/dev/null 2>&1
+done

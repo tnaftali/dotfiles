@@ -1,0 +1,38 @@
+#!/bin/sh
+# Nightly hibernate (name kept for the timer). nightly-poweroff.timer runs this as root at 01:55.
+# Skips the night if ~/.skip-poweroff exists or a Claude session is busy.
+flag=/home/tobi/.skip-poweroff
+
+# shortcut: "busy" = a claude process runs and a transcript has a message
+# timestamped in the last 15 min. A single tool call longer than 15 min looks idle.
+# Idle sessions append untimestamped entries (cost-state, atis-latch), so file
+# mtime alone is not proof of activity.
+busy() {
+  pgrep -x claude >/dev/null || return 1
+  since=$(date -u -d '15 min ago' +%Y-%m-%dT%H:%M:%S)
+  find /home/tobi/.claude/projects -name '*.jsonl' -mmin -15 -exec tail -n 200 {} + 2>/dev/null |
+    grep -o '"timestamp":"[^"]*"' | cut -d'"' -f4 |
+    awk -v s="$since" '$0 > s { f = 1 } END { exit !f }'
+}
+
+skip() { echo "skipped: $1"; rm -f "$flag"; exit 0; }
+
+# A timer missed during suspend fires late on resume. Never hibernate then.
+# Keep the flag: it is for tonight's real run.
+in_window() {
+  now=$(date +%H%M)
+  [ "$now" -ge 150 ] && [ "$now" -le 230 ]
+}
+
+check() {
+  in_window || { echo "skipped: outside 01:50-02:30 (late timer after suspend?)"; exit 0; }
+  [ -e "$flag" ] && skip "$flag exists"
+  busy && skip "a Claude session is busy"
+}
+
+check
+wall "Hibernate at 02:00. To skip tonight: touch $flag"
+sleep 300
+check
+echo "hibernating"
+systemctl hibernate

@@ -37,6 +37,7 @@
     "ctrl-tab": "tab.next",
     "ctrl-shift-tab": "tab.prev",
     "alt-g": "my-spaces.grid",
+    "ctrl-f": "my-spaces.find",
     "alt-]": "my-spaces.next",
     "alt-[": "my-spaces.prev",
     "ctrl-shift-pagedown": "my-spaces.next",

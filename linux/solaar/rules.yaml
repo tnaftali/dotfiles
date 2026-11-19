@@ -1,0 +1,26 @@
+%YAML 1.3
+---
+# Gesture button, hold + swipe right: previous workspace (as macOS "desktop on the left")
+- MouseGesture: Mouse Right
+- Execute: [hyprctl, eval, 'hl.dispatch(hl.dsp.focus({ workspace = "e-1" }))']
+...
+---
+# Gesture button, hold + swipe left: next workspace
+- MouseGesture: Mouse Left
+- Execute: [hyprctl, eval, 'hl.dispatch(hl.dsp.focus({ workspace = "e+1" }))']
+...
+---
+# Gesture button, plain click: Ctrl+W in Brave, close the window elsewhere
+# (mx_gesture_click is defined in ~/.config/hypr/aerospace.lua)
+- MouseGesture: []
+- Execute: [hyprctl, eval, 'mx_gesture_click()']
+...
+---
+# Thumb wheel: next / previous tab in Brave (one step per 20 units of rotation)
+- Test: [thumb_wheel_up, 20]
+- Execute: [/home/tobi/.local/bin/mx-thumb-tab, next]
+...
+---
+- Test: [thumb_wheel_down, 20]
+- Execute: [/home/tobi/.local/bin/mx-thumb-tab, prev]
+...

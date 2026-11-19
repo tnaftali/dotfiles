@@ -26,6 +26,9 @@ function find(node, id) {
   return null;
 }
 
+// Grid mode is off for now: its button is hidden, but Alt-G (my-spaces.grid) still works. Set to true to show it again.
+const SHOW_GRID = false;
+
 // The sidebar's rail goes by its width, not a flag: dragging its edge narrows it too.
 const narrow = () => (find(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
 
@@ -48,12 +51,12 @@ export default class Brand extends View {
     const toggle = this.button("sidebar-toggle", svg("mods/workspace-chrome/sidebar.svg").size(15), () => run("my-spaces.sidebar"));
     // Collapsed: the buttons stack, centered, as in the right rail; on macOS below the window buttons.
     if (collapsed) {
-      return v_flex().size_full().bg(t.chrome).items_center().gap(4).pt(window()?.platform === "macos" ? 40 : 10).child(toggle).child(grid);
+      return v_flex().size_full().bg(t.chrome).items_center().gap(4).pt(window()?.platform === "macos" ? 40 : 10).child(toggle).when(SHOW_GRID, el => el.child(grid));
     }
     return h_flex().size_full().bg(t.chrome).pl(14).pr(10).gap(4).items_center().text_size(13.5)
       .when(window()?.platform === "macos", el => el.pl(76))
       .child(h_flex().flex_1().gap(8).items_center().child(ram))
-      .child(grid)
+      .when(SHOW_GRID, el => el.child(grid))
       .child(toggle);
   }
 }

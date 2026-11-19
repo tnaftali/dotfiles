@@ -1,0 +1,20 @@
+{
+  "dockEnabled": true,
+  "visibilityMode": "hover",
+  "preferredVisibilityMode": "hover",
+  "autohide": true,
+  "overlayMode": true,
+  "visibleWorkspace": "all",
+  "autohideEdgeDepth": 1,
+  "showFolderTitles": true,
+  "showBadges": true,
+  "glassmorphism": false,
+  "blurOpacity": 0.68,
+  "widgetsEnabled": true,
+  "appMenuPosition": "left",
+  "widgetPosition": "right",
+  "dockWidgets": [
+    "omarchy.apps"
+  ],
+  "widgetSavedPositions": {}
+}

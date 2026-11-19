@@ -1,0 +1,34 @@
+{
+  "dock": {
+    "position": "bottom",
+    "pinned": [
+      "brave-origin",
+      "herdr-app",
+      "spotify",
+      "brave-tnaftali.github.io__tasks_-Default",
+      "brave-calendar.google.com__calendar_u_0_r_week-Default",
+      "upnote",
+      "brave-web.whatsapp.com__-Default",
+      "brave-www.instagram.com__direct_inbox_-Default",
+      "org.gnome.Nautilus",
+      "org.qbittorrent.qBittorrent",
+      "scratchpad",
+      "org.telegram"
+    ],
+    "autohide": false,
+    "intellihide": true,
+    "size": 48,
+    "magnification": 100,
+    "style": {
+      "theme": "desktop",
+      "opacity": 80,
+      "backgroundColor": "",
+      "indicator": "dots",
+      "ambient": false,
+      "spotlight": false,
+      "activeLabel": false,
+      "raised": false,
+      "shadow": true
+    }
+  }
+}

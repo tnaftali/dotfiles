@@ -1,0 +1,6 @@
+[Unit]
+Description=Download missing subtitles with subliminal
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/subliminal-venv/bin/subliminal download -l en -p podnapisi -p gestdown -p tvsubtitles -p subtitulamos -m 60 "%h/TV Shows" "%h/Movies"

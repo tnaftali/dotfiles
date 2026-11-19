@@ -1,0 +1,10 @@
+# Must match Hyprland (~/.config/hypr/input.lua), or accents like "ú" type wrong.
+keyboard_layout:
+  layout: us
+  variant: altgr-intl
+
+# No "espanso is running" popup at start.
+show_notifications: false
+
+# Default ALT+SPACE opens the search bar; off.
+search_shortcut: OFF

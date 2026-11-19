@@ -1,0 +1,49 @@
+#!/bin/bash
+# Copy the live Linux/Omarchy config into linux/ in this repo (one way: machine -> repo).
+# Run it after changing a config, then review with `git diff`. No secrets belong in these files.
+# Apps rewrite some of them (shell.json, rules.yaml), so they are copied, not symlinked.
+set -u
+repo="$(cd "$(dirname "$0")/.." && pwd)/linux"
+c=~/.config
+
+copy() { # copy SRC DEST (relative to linux/); skips missing sources
+  [ -e "$1" ] || { echo "skip (missing): $1"; return; }
+  mkdir -p "$repo/$(dirname "$2")"
+  cp -rL "$1" "$repo/$2"
+}
+
+# Hyprland. aerospace.lua is a symlink into hypr/ (see SETUP.md), so it is not copied here.
+for f in bindings autostart looknfeel opacity monitors input; do copy $c/hypr/$f.lua hypr/$f.lua; done
+copy $c/hypr/hyprsunset.conf hypr/hyprsunset.conf
+
+# Logitech (Solaar gesture-button rules)
+copy $c/solaar/rules.yaml solaar/rules.yaml
+
+# User systemd units and their helper scripts
+for u in gdrive-sync.service gdrive-sync.timer subliminal.service subliminal.timer; do
+  copy $c/systemd/user/$u systemd-user/$u
+done
+for b in gdrive-tray mx-thumb-tab scratchpad-toggle; do copy ~/.local/bin/$b bin/$b; done
+
+# Omarchy shell: bar layout, menu, dock, custom plugins
+copy $c/omarchy/shell.json omarchy/shell.json
+copy $c/omarchy/extensions/omarchy-menu.jsonc omarchy/extensions/omarchy-menu.jsonc
+copy $c/omarchy/dock-settings.json omarchy/dock-settings.json
+copy $c/omarchy/dock-pinned.json omarchy/dock-pinned.json
+for p in tobi.emojis tobi.weather tobi.workspaces; do copy $c/omarchy/plugins/$p omarchy/plugins/$p; done
+
+# Dock: the app is third party, so keep only the settings and our patch to shell.qml
+copy $c/dock/settings.json dock/settings.json
+
+# Espanso, audio
+copy $c/espanso/config/default.yml espanso/default.yml
+for f in $c/wireplumber/wireplumber.conf.d/*; do [ -e "$f" ] && copy "$f" "wireplumber/$(basename "$f")"; done
+
+# System files (root-owned; install with sudo, see SETUP.md)
+copy /usr/local/bin/nightly-poweroff system/nightly-poweroff
+for u in nightly-poweroff.service nightly-poweroff.timer; do copy /etc/systemd/system/$u system/$u; done
+for f in /etc/modprobe.d/audio-nopowersave.conf /etc/systemd/logind.conf.d/10-ignore-power-button.conf /etc/systemd/logind.conf.d/20-inhibit-delay.conf; do
+  copy $f system/$(basename $f)
+done
+
+echo "synced to $repo"

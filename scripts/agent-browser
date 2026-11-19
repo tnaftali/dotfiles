@@ -1,0 +1,74 @@
+#!/usr/bin/env node
+// Live view of the agent's browser, for a Herdr pane (Herdr terminals draw Kitty graphics).
+// Starts headless Chromium with CDP on :9222 and shows its active tab once a second.
+// Point the Playwright MCP at it: --cdp-endpoint http://localhost:9222
+const { spawn } = require("node:child_process");
+const os = require("node:os");
+const path = require("node:path");
+
+const PORT = 9222;
+const base = `http://127.0.0.1:${PORT}`;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const chrome = spawn(
+  "/usr/bin/chromium",
+  [
+    "--headless=new",
+    `--remote-debugging-port=${PORT}`,
+    `--user-data-dir=${path.join(os.homedir(), ".cache/agent-browser")}`,
+    "--window-size=1280,800",
+    "about:blank",
+  ],
+  { stdio: "ignore" },
+);
+const quit = () => {
+  chrome.kill();
+  process.stdout.write("\x1b[?25h");
+  process.exit(0);
+};
+process.on("SIGINT", quit);
+process.on("SIGTERM", quit);
+chrome.on("exit", quit);
+
+// Last page target = newest tab; the MCP opens tabs as it works.
+async function pageWs() {
+  const tabs = await (await fetch(`${base}/json`)).json();
+  return tabs.filter((t) => t.type === "page").at(-1)?.webSocketDebuggerUrl;
+}
+
+function shot(url) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(url);
+    ws.onerror = reject;
+    ws.onopen = () => ws.send(JSON.stringify({ id: 1, method: "Page.captureScreenshot", params: { format: "png" } }));
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.id !== 1) return;
+      ws.close();
+      m.result ? resolve(m.result.data) : reject(new Error(m.error?.message));
+    };
+  });
+}
+
+// Kitty graphics: id 1 is replaced in place each frame, scaled to the pane width.
+function draw(b64) {
+  const cols = process.stdout.columns || 80;
+  let out = "\x1b[H";
+  for (let i = 0; i < b64.length; i += 4096) {
+    const more = i + 4096 < b64.length ? 1 : 0;
+    const ctl = i === 0 ? `a=T,f=100,i=1,q=2,c=${cols},` : "";
+    out += `\x1b_G${ctl}m=${more};${b64.slice(i, i + 4096)}\x1b\\`;
+  }
+  process.stdout.write(out);
+}
+
+(async () => {
+  process.stdout.write("\x1b[2J\x1b[?25l");
+  for (;;) {
+    try {
+      const url = await pageWs();
+      if (url) draw(await shot(url));
+    } catch {} // Chromium still starting, or the tab closed mid-shot
+    await sleep(1000);
+  }
+})();

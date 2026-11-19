@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Tray icon for the gdrive-sync systemd user timer: syncing / ok / failed."""
+import subprocess
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("AyatanaAppIndicator3", "0.1")
+from gi.repository import AyatanaAppIndicator3 as AI, GLib, Gtk
+
+UNIT = "gdrive-sync.service"
+ICONS = {"syncing": "emblem-synchronizing-symbolic", "ok": "gdrive-drive-2026", "failed": "dialog-warning-symbolic"}
+
+
+def sh(*args):
+    return subprocess.run(args, capture_output=True, text=True).stdout.strip()
+
+
+def state():
+    props = dict(l.split("=", 1) for l in sh("systemctl", "--user", "show", UNIT, "-p", "ActiveState,Result,ExecMainExitTimestamp").splitlines())
+    if props["ActiveState"] in ("activating", "active"):
+        return "syncing", "Syncing now"
+    if props["Result"] != "success":
+        return "failed", "Last sync failed"
+    return "ok", "Last sync: " + (props["ExecMainExitTimestamp"] or "never")
+
+
+ind = AI.Indicator.new("gdrive-sync", ICONS["ok"], AI.IndicatorCategory.APPLICATION_STATUS)
+ind.set_status(AI.IndicatorStatus.ACTIVE)
+menu = Gtk.Menu()
+status_item = Gtk.MenuItem(label="…")
+status_item.set_sensitive(False)
+menu.append(status_item)
+for label, cmd in (("Sync now", ["systemctl", "--user", "start", "--no-block", UNIT]),
+                   ("Open folder", ["xdg-open", GLib.get_home_dir() + "/Google Drive"]),
+                   ("Show log", ["omarchy-launch-tui", "journalctl", "--user", "-u", "gdrive-sync", "-n", "40", "--no-pager"])):
+    item = Gtk.MenuItem(label=label)
+    item.connect("activate", lambda _w, c=cmd: subprocess.Popen(c))
+    menu.append(item)
+quit_item = Gtk.MenuItem(label="Quit tray icon")
+quit_item.connect("activate", lambda _w: Gtk.main_quit())
+menu.append(quit_item)
+menu.show_all()
+ind.set_menu(menu)
+
+
+def refresh():
+    key, text = state()
+    ind.set_icon_full(ICONS[key], text)
+    status_item.set_label(text)
+    return True
+
+
+refresh()
+GLib.timeout_add_seconds(5, refresh)
+Gtk.main()

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bar button: confirm, then hibernate. Same prompt as the `poweroff` shell function.
+zenity --question --title="Hibernate" --text="Hibernate $(hostname)?" --ok-label="Hibernate" --cancel-label="Cancel" --width=280 2>/dev/null || exit 0
+systemctl hibernate

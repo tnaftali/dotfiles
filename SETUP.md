@@ -75,6 +75,17 @@ Append this to `~/.config/hypr/bindings.lua` if `require("hypr.aerospace")` is n
 require("hypr.aerospace")
 ```
 
+## 4b. Linux machine config (`linux/`, `Linux` only)
+
+`linux/` is a snapshot of the live Omarchy config: Hyprland files, Solaar rules, user systemd units, the bar and menu, custom shell plugins, Espanso, WirePlumber and the root-owned system files. Apps rewrite many of these files, so they are copies, not links.
+
+- Machine → repo: run `scripts/sync-config`, then check `git diff`.
+- Repo → machine: copy each file back to its live path. Names match the live paths (`hypr/` → `~/.config/hypr/`, `systemd-user/` → `~/.config/systemd/user/`, `bin/` → `~/.local/bin/`, `omarchy/` → `~/.config/omarchy/`). Run `systemctl --user daemon-reload` after.
+- `system/` needs root. Install `nightly-poweroff` with `sudo install -m 755` to `/usr/local/bin/`. Put the `.service` and `.timer` files in `/etc/systemd/system/`, then `sudo systemctl enable --now nightly-poweroff.timer`. The `.conf` files go to `/etc/modprobe.d/` and `/etc/systemd/logind.conf.d/`.
+- `dock/shell.qml.patch` applies to `~/.local/share/dock/qml/shell.qml`: a click on the focused app hides it.
+- `hypr/aerospace.lua` is the exception: it is linked (section 4), not copied.
+- `scripts/solaar-keep-diverted` (started from `~/.config/hypr/autostart.lua`) re-applies the MX Master gesture-button diversion every 2 minutes.
+
 ## 5. Plugin managers (clone only if the target is absent)
 
 | Repo | Target |
@@ -101,6 +112,10 @@ Use `git clone --depth 1`. For vim-plug, if `${XDG_DATA_HOME:-~/.local/share}/nv
 - `$DOTFILES/.claude/hooks/*` (files only) → `~/.claude/hooks/<name>`
 - `$DOTFILES/.agents/skills/*/` → `~/.claude/skills/<name>`
 - **Copy, do not link**, only if absent: `$DOTFILES/.claude/settings.json` → `~/.claude/settings.json`. Claude Code rewrites it at runtime with internal host names, and this repo is public.
+
+**Agent browser** (`Linux` only). `~/.claude.json` is not in this repo, so register the MCP by hand:
+- `claude mcp add -s user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`
+- Run `$DOTFILES/scripts/agent-browser` in a Herdr pane first. It starts headless Chromium on port 9222 and shows the active tab with Kitty graphics. Without it, the MCP cannot connect.
 
 **Codex** — copy only if absent. Codex rewrites `config.toml`, and the two configs are meant to diverge.
 - `$DOTFILES/.codex/AGENTS.md` → `~/.codex/AGENTS.md`

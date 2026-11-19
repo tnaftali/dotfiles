@@ -1,0 +1,10 @@
+#!/bin/bash
+# Called by Solaar for MX Master thumb-wheel steps: switch tabs in Brave.
+# Usage: mx-thumb-tab next|prev
+class=$(hyprctl activewindow -j | jq -r '.class // ""')
+[[ $class == brave-* ]] || exit 0
+if [[ $1 == prev ]]; then
+  wtype -M ctrl -M shift -k Tab -m shift -m ctrl
+else
+  wtype -M ctrl -k Tab -m ctrl
+fi
