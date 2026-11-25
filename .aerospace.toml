@@ -63,12 +63,13 @@ on-window-detected = [
     { if = { app-id = 'com.apple.finder' },            run = 'layout floating' },
     { if = { app-id = 'com.apple.systempreferences' }, run = 'layout floating' },
     { if = { app-id = 'net.whatsapp.WhatsApp' },       run = 'layout floating' },
-    { if = { app-id = 'com.culturedcode.ThingsMac' },  run = 'layout floating' },
     { if = { app-id = 'cc.ffitch.shottr' },            run = 'layout floating' },
     { if = { app-id = 'ru.keepcoder.Telegram' },       run = 'layout floating' },
     { if = { app-id = 'com.apple.iCal' },              run = 'layout floating' },
     # Google Calendar Brave PWA
     { if = { app-id = 'com.brave.Browser.origin.app.kjbdgfilnfhdoflbpgamdcdgpehopbep' }, run = 'layout floating' },
+    # Tasks Brave PWA (tnaftali.github.io/tasks)
+    { if = { app-id = 'com.brave.Browser.origin.app.mbgacilholnahmaaiffcjcdgdndegnbo' }, run = 'layout floating' },
     { if = { app-id = 'com.amazon.Lassen' },           run = 'layout floating' },
     { if = { app-id = 'com.granola.app' },             run = 'layout floating' },
     { if = { app-id = 'com.apple.ActivityMonitor' },   run = 'layout floating' },
@@ -119,7 +120,6 @@ on-window-detected = [
     # Manual Split Orientation (Commented out, preserving original state)
     # Consider using 'join-with' command as a 'split' replacement if you want to enable
     # normalizations
-    alt-c = 'split horizontal'
     alt-v = 'split vertical'
 
     # Layout toggles
@@ -172,6 +172,13 @@ on-window-detected = [
     # App launchers (new window)
     alt-shift-t = 'exec-and-forget open -n -a Ghostty'
     alt-shift-b = 'exec-and-forget open -n -a "Brave Browser"'
+
+    # Show/hide Brave PWAs (same as calendar-toggle / tasks-toggle on Hyprland)
+    alt-c = 'exec-and-forget ~/dotfiles/scripts/mac-app-toggle com.brave.Browser.origin.app.kjbdgfilnfhdoflbpgamdcdgpehopbep' # Google Calendar
+    alt-t = 'exec-and-forget ~/dotfiles/scripts/mac-app-toggle com.brave.Browser.origin.app.mbgacilholnahmaaiffcjcdgdndegnbo' # Tasks
+    alt-b = 'exec-and-forget ~/dotfiles/scripts/mac-app-toggle com.getupnote.desktop' # UpNote
+    alt-r = 'exec-and-forget ~/dotfiles/scripts/mac-app-toggle net.whatsapp.WhatsApp' # WhatsApp
+    alt-backtick = 'exec-and-forget ~/dotfiles/scripts/mac-app-toggle com.apple.finder' # Finder
 
     cmd-h = [] # Disable "hide application"
     cmd-alt-h = [] # Disable "hide others"

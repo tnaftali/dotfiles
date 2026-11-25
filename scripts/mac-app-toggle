@@ -1,0 +1,21 @@
+#!/bin/bash
+# macOS (AeroSpace) twin of calendar-toggle / tasks-toggle: show or hide an app by bundle id.
+# App hotkeys live in .aerospace.toml (alt-c/t/b/r/backtick), not in Tinycast.
+# Frontmost: hide it. Running but behind or hidden: bring it forward. Not running: launch it.
+# Usage: mac-app-toggle <bundle-id>
+bid=${1:?usage: mac-app-toggle <bundle-id>}
+
+# NSRunningApplication.hide, not System Events "visible": Finder ignores the latter.
+hidden=$(osascript -l JavaScript - "$bid" <<'EOF'
+ObjC.import("AppKit");
+function run(argv) {
+  var front = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+  if (front.bundleIdentifier.js !== argv[0]) return "no";
+  front.hide;
+  return "yes";
+}
+EOF
+)
+# reopen + activate, not `open -b`: open sometimes leaves Finder behind. reopen also launches
+# an app that is not running and gives Finder a window when it has none.
+[[ $hidden == yes ]] || osascript -e "tell application id \"$bid\"" -e reopen -e activate -e "end tell"
