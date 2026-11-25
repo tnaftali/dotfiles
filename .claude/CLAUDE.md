@@ -115,10 +115,14 @@ These apply to every document I ask for — plans, reports, explanations, resear
 - **Fact Verification.** Check every factual claim in the document against a real source from this session. Mark each unverifiable claim `[UNVERIFIED]` in the document. End the document with one `Verified: N/N claims checked against <sources>` line.
 - **Progress Bars.** Building a document in several steps → show the progress bar in chat, as for any multi-step work.
 
-## Document Theme — Claude Cream is the default
+## Document Design — no fixed house theme
 
-Every document I build — implementation plans, reports, explanations, any HTML
-output — uses **Claude Cream** (see "Default Theme — Claude Cream" below). Apply it unasked.
+Make documents look good, not bland. Pick the look from the subject: its own colours, fonts, and one bold element that shows the data (e.g. a treemap for disk use, a timeline for history).
+
+- Avoid the generic AI look: cream page + serif title + clay accent, identical rounded cards, stat tiles by reflex, uppercase labels, meta lines joined with middle dots.
+- Content rules stay: bottom line first, short fragments and tables, `<details>` folds, Copy as prompt, favicon, Verified line.
+- Claude Cream and Macchiato (below) stay available when I ask for them by name.
+- Reference: `~/Documents/claude/home-cleanup/unused-apps-tools-2026-11-25-v2.html`.
 
 ## Alternate Theme — Catppuccin Macchiato, Sans Titles (opt-in)
 
@@ -153,9 +157,9 @@ Role mapping:
 - Lead with a row of stat tiles for the headline numbers (label 12px uppercase `--subtext0`, value 28px weight 650, tabular-nums). The deciding number (price, cost, total) goes first and biggest.
 - Reference look: `~/Documents/claude/pc-power-and-hardware/pc-electricity-cost.html` (tiles, cards, quiet tables, pill badges).
 
-## Default Theme — Claude Cream
+## Opt-in Theme — Claude Cream
 
-The default for every document. Macchiato only when I ask for it.
+Use only when I ask for "Claude Cream" or "cream".
 
 Minimal, warm, light by default, with a dark toggle. Copy the `:root` block, the dark block and the component styles from the reference page: `~/Projects/dotfiles/.claude/themes/claude-cream.html`.
 
